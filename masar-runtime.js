@@ -10,7 +10,7 @@
   var page = (location.pathname.split('/').pop() || '').replace(/\.html$/, '');
   var base = location.href.split('#')[0].split('?')[0].replace(/[^\/]*$/, '');
   function p(k) { return q.has(k) ? q.get(k) : ''; }
-  function lang() { try { return (L && L.getItem('masar_lang')) || 'ar'; } catch (e) { return 'ar'; } }
+  function lang() { try { return (L && L.getItem('masar_lang_' + String(CFG.env || 'PROD'))) || 'ar'; } catch (e) { return 'ar'; } }
 
   var pageParams = {}; ['basis', 'scope', 'date', 'shipment', 'k'].forEach(function (k) { if (p(k)) pageParams[k] = String(p(k)).slice(0, 40); });
   window.MASAR_TPL = {
@@ -41,7 +41,9 @@
   // ----- "تذكّرني على هذا الجهاز" (رمز استعادة، لا كلمة مرور ولا مفتاح جلسة) -----
   // يحفظ الجهاز {userId, rememberToken} فقط إن اختار المستخدم ذلك عند الدخول. عند فتح التطبيق بلا جلسة يستدعي resumeSession فيتحقق الخادم من الرمز (لا يكفي المعرّف) وينشئ جلسة عادية
   // جديدة ويدوّر الرمز. بلا الخيار لا يبقى شيء بعد إغلاق التطبيق (مفتاح الجلسة في رابط الصفحة فقط). الخروج يمسح الرمز محليًا ويُنسي الجهاز في الخادم.
-  var RT_KEY = 'masar_rt';
+  // المفاتيح تحمل اسم البيئة: موقع DIV وPROD على نطاق واحد (github.io) فيتشاركان التخزين المحلي، ولا يجوز أن يمسح أحدهما رمز الآخر
+  var NS = String(CFG.env || 'PROD');
+  var RT_KEY = 'masar_rt_' + NS;
   function readRt() { try { var j = JSON.parse((L && L.getItem(RT_KEY)) || 'null'); return j && j.u && j.t ? j : null; } catch (e) { return null; } }
   function saveRt(u, t) { try { if (L) L.setItem(RT_KEY, JSON.stringify({ u: String(u), t: String(t) })); } catch (e) { /* تجاهل */ } }
   function clearRt() { try { if (L) L.removeItem(RT_KEY); } catch (e) { /* تجاهل */ } }
@@ -64,8 +66,8 @@
           if (r.success && r.data && r.data.rememberToken) saveRt(r.data.userId, r.data.rememberToken);
           else if (r.error && r.error.code === 'REMEMBER_INVALID') clearRt();
         }
-        if ((action === 'login' || action === 'resumeSession') && r && r.success && r.data) { try { if (r.data.language && L) L.setItem('masar_lang', String(r.data.language).toLowerCase() === 'en' ? 'en' : 'ar'); } catch (e) { /* تجاهل */ } }
-        if (action === 'setUserLanguage' && args[1] && L) { try { L.setItem('masar_lang', String(args[1]).toLowerCase() === 'en' ? 'en' : 'ar'); } catch (e) { /* تجاهل */ } }
+        if ((action === 'login' || action === 'resumeSession') && r && r.success && r.data) { try { if (r.data.language && L) L.setItem('masar_lang_' + NS, String(r.data.language).toLowerCase() === 'en' ? 'en' : 'ar'); } catch (e) { /* تجاهل */ } }
+        if (action === 'setUserLanguage' && args[1] && L) { try { L.setItem('masar_lang_' + NS, String(args[1]).toLowerCase() === 'en' ? 'en' : 'ar'); } catch (e) { /* تجاهل */ } }
         if (r && r.success === false && r.error && r.error.code === 'SESSION_EXPIRED' && action !== 'login' && action !== 'logout' && page !== 'login' && !expiring) {
           expiring = true; setTimeout(toLogin, 50);
         }
