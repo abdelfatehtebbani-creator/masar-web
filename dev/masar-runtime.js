@@ -94,7 +94,7 @@
       });
     });
   }
-  // ----- نقل النداءات: دُفعات القراءة (٢٠٢٦-١٠-١٠) -----
+  // ----- نقل النداءات: دُفعات القراءة في التحديث الخلفي (٢٠٢٦-١٠-١٠) -----
   // كل نداء إلى Apps Script يدفع كلفة ثابتة (~٣ث: بدء تنفيذ + تحويل Google). القراءات الصرفة (قائمة pureReads المولَّدة من الخادم عند البناء) التي تُصدرها الصفحة في اللحظة نفسها
   // (مثل ٨ عدّادات للشاشة الرئيسية) تُجمَع في نداء واحد `batch` (حتى ١٢)، فيُنفَّذ في تنفيذ واحد يتشارك قراءة الجداول داخله. كل عنصر يمرّ بالتحقق نفسه على الخادم وتصل نتيجته لصاحبه
   // بنفس الشكل؛ الحفظ لا يُجمَع أبدًا. إن لم يعرف الخادم `batch` (نشر أقدم) يُعطَّل التجميع ويُعاد النداء فرديًا بلا خسارة.
@@ -119,7 +119,9 @@
   function flushQueue() { timer = null; var items = queue; queue = []; while (items.length) sendChunk(items.splice(0, BATCH_MAX)); }
   function transport(action, args, body) {
     if (action === 'logout') return doFetch(action, body, true);
-    if (batchOff || !PURE[action]) return doFetch(action, body);
+    // الدُفعات للتحديث الخلفي فقط (masarRunSilently يرفع __masarBg): قياس DIV أظهر أن تجميع ٨ قراءات في تنفيذ واحد لا يقلّل زمن الاستجابة (تُنفَّذ تتابعًا داخله) بل قد يزيده قليلًا،
+    // لكنه يخفض عدد التنفيذات المتزامنة على الخادم ثمانية أضعاف -- ما يهمّ في استطلاع الخلفية لا في نداءات المستخدم المباشرة.
+    if (batchOff || !PURE[action] || window.__masarBg !== true) return doFetch(action, body);
     return new Promise(function (res, rej) { queue.push({ action: action, args: args, body: body, res: res, rej: rej }); if (!timer) timer = setTimeout(flushQueue, BATCH_WINDOW_MS); });
   }
   function rawCall(action, args) {

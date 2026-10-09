@@ -8,8 +8,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="مسار">
 <link rel="apple-touch-icon" href="icon-180.png">
-<script src="masar-config.js?v=74b9351c"></script>
-<script src="masar-runtime.js?v=74b9351c"></script>
+<script src="masar-config.js?v=8d72c8ed"></script>
+<script src="masar-runtime.js?v=8d72c8ed"></script>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -294,8 +294,9 @@
         setTimeout(keep, 9000);
       }
     } catch (e) { keep = null; }
-    try { fn(); }
+    try { if (typeof window !== 'undefined') window.__masarBg = true; fn(); }
     finally {
+      if (typeof window !== 'undefined') window.__masarBg = false;
       if (desc) { try { Object.defineProperty(google.script, 'run', desc); } catch (e) { /* تجاهل */ } }
       if (proto && area) { try { delete area.innerHTML; } catch (e) { /* تجاهل */ } }
     }
