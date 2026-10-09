@@ -18,8 +18,8 @@
   window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); window.__masarInstall.prompt = e; if (window.__masarInstallUpdate) window.__masarInstallUpdate(); });
   window.addEventListener('appinstalled', function () { window.__masarInstall.installed = true; window.__masarInstall.prompt = null; if (window.__masarInstallUpdate) window.__masarInstallUpdate('installed-event'); });
 </script>
-<script src="masar-config.js"></script>
-<script src="masar-runtime.js"></script>
+<script src="masar-config.js?v=9dd0a8dc"></script>
+<script src="masar-runtime.js?v=9dd0a8dc"></script>
 <style>
   :root {
     --bg: #FAF6F1; --card: #ffffff; --ink: #3D2B1E; --ink-soft: #7a6757; --line: #eadfd3;
