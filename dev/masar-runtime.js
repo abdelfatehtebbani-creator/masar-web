@@ -94,13 +94,39 @@
       });
     });
   }
+  // ----- نقل النداءات: دُفعات القراءة (٢٠٢٦-١٠-١٠) -----
+  // كل نداء إلى Apps Script يدفع كلفة ثابتة (~٣ث: بدء تنفيذ + تحويل Google). القراءات الصرفة (قائمة pureReads المولَّدة من الخادم عند البناء) التي تُصدرها الصفحة في اللحظة نفسها
+  // (مثل ٨ عدّادات للشاشة الرئيسية) تُجمَع في نداء واحد `batch` (حتى ١٢)، فيُنفَّذ في تنفيذ واحد يتشارك قراءة الجداول داخله. كل عنصر يمرّ بالتحقق نفسه على الخادم وتصل نتيجته لصاحبه
+  // بنفس الشكل؛ الحفظ لا يُجمَع أبدًا. إن لم يعرف الخادم `batch` (نشر أقدم) يُعطَّل التجميع ويُعاد النداء فرديًا بلا خسارة.
+  var PURE = {}; (CFG.pureReads || []).forEach(function (n) { PURE[n] = 1; }); delete PURE.getChangeTokens; delete PURE.getTestLoginAccounts;
+  var BATCH_KEY = 'masar_nobatch_' + NS, BATCH_WINDOW_MS = 30, BATCH_MAX = 12;
+  var batchOff = false; try { batchOff = !!(S && S.getItem(BATCH_KEY)); } catch (e) { batchOff = false; }
+  var queue = [], timer = null;
+  function doFetch(action, body, keepalive) {
+    return fetch(CFG.apiUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: body, redirect: 'follow', keepalive: !!keepalive })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP_' + r.status); return r.text(); })
+      .then(function (t) { var j; try { j = JSON.parse(t); } catch (e) { throw new Error('BAD_RESPONSE'); } return j; });
+  }
+  function sendChunk(chunk) {
+    if (chunk.length === 1) { doFetch(chunk[0].action, chunk[0].body).then(chunk[0].res, chunk[0].rej); return; }
+    var payload = JSON.stringify({ action: 'batch', args: [chunk.map(function (c) { return { action: c.action, args: c.args }; })] });
+    doFetch('batch', payload).then(function (r) {
+      if (r && r.success && r.data && Array.isArray(r.data.results) && r.data.results.length === chunk.length) { chunk.forEach(function (c, i) { c.res(r.data.results[i]); }); return; }
+      if (r && r.success === false && r.error && r.error.code === 'UNKNOWN_ACTION') { batchOff = true; try { if (S) S.setItem(BATCH_KEY, '1'); } catch (e) { /* تجاهل */ } }
+      chunk.forEach(function (c) { doFetch(c.action, c.body).then(c.res, c.rej); }); // رجوع آمن: فرديًا
+    }, function (err) { chunk.forEach(function (c) { c.rej(err); }); });
+  }
+  function flushQueue() { timer = null; var items = queue; queue = []; while (items.length) sendChunk(items.splice(0, BATCH_MAX)); }
+  function transport(action, args, body) {
+    if (action === 'logout') return doFetch(action, body, true);
+    if (batchOff || !PURE[action]) return doFetch(action, body);
+    return new Promise(function (res, rej) { queue.push({ action: action, args: args, body: body, res: res, rej: rej }); if (!timer) timer = setTimeout(flushQueue, BATCH_WINDOW_MS); });
+  }
   function rawCall(action, args) {
     // الخروج: يُرفَق رمز الجهاز ليُنسيه الخادم، ويُمسح محليًا فورًا (لا ننتظر الردّ؛ الصفحة قد تنتقل قبله) ويُرسَل بـkeepalive كي لا يُلغى الطلب عند الانتقال
     if (action === 'logout') { var rtOut = readRt(); if (rtOut) args = [args[0], rtOut.t]; clearRt(); }
     var body = JSON.stringify({ action: action, args: args.map(function (a) { return a === undefined ? null : a; }) });
-    return fetch(CFG.apiUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: body, redirect: 'follow', keepalive: action === 'logout' })
-      .then(function (r) { if (!r.ok) throw new Error('HTTP_' + r.status); return r.text(); })
-      .then(function (t) { var j; try { j = JSON.parse(t); } catch (e) { throw new Error('BAD_RESPONSE'); } return j; })
+    return transport(action, args, body)
       .then(function (r) {
         if (action === 'login' && r && r.success && r.data) {
           if (args[2] === true && r.data.rememberToken) saveRt(r.data.userId, r.data.rememberToken); else clearRt();
