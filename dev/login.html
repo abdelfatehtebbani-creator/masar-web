@@ -69,6 +69,12 @@
   }
   .error-banner.show { display: flex; }
 
+  /* "تذكّرني على هذا الجهاز": يظهر في الواجهة الثابتة (PWA) فقط -- في Apps Script لا مكان للتخزين المحلي الموثوق فيبقى مخفيًا ويبقى التصميم الأصلي كما هو */
+  .remember-row { display: none; align-items: center; gap: 8px; margin: 2px 0 10px; font-size: 13px; color: var(--ink); }
+  .remember-row input { width: 18px; height: 18px; accent-color: var(--primary); margin: 0; }
+  .remember-note { display: none; font-size: 11.5px; color: var(--ink-soft); margin: -4px 0 10px; line-height: 1.6; }
+  html.masar-web .remember-row { display: flex; }
+  html.masar-web .remember-note { display: block; }
   .login-btn {
     width: 100%; background: var(--secondary); color: #fff; border: none; font-family: inherit; font-size: 15px; font-weight: 600;
     padding: 13px; border-radius: var(--radius-md); cursor: pointer; margin-top: 4px;
@@ -149,6 +155,8 @@
         <label data-i18n="passwordLbl"></label>
         <input type="password" id="fPassword" autocomplete="current-password">
       </div>
+      <label class="remember-row"><input type="checkbox" id="fRemember"><span data-i18n="rememberLbl"></span></label>
+      <div class="remember-note" data-i18n="rememberNote"></div>
       <button class="login-btn" id="loginBtn" data-i18n="loginBtn"></button>
 
       <div class="demo-hint">
@@ -310,6 +318,7 @@
       loginTitle: 'تسجيل الدخول',
       usernameLbl: 'اسم المستخدم', passwordLbl: 'كلمة المرور',
       loginBtn: 'دخول', loggingInBtn: 'جارٍ التحقق...',
+      rememberLbl: 'تذكّرني على هذا الجهاز', rememberNote: 'لا تفعّل هذا الخيار على جهاز مشترك. تُنهي كلمة المرور الجديدة أو تعطيل الحساب أو تسجيل الخروج هذا التذكّر.',
       errorEmpty: 'الرجاء إدخال اسم المستخدم وكلمة المرور',
       errorGeneric: 'تعذّر الاتصال بالخادم — تحقّق من اتصالك وحاول مجددًا',
       roleNotConnected: 'تسجيل الدخول نجح، لكن شاشة هذا الدور لم تُربَط بعد — راجع لوحة الأدمن حاليًا',
@@ -330,6 +339,7 @@
       loginTitle: 'Log in',
       usernameLbl: 'Username', passwordLbl: 'Password',
       loginBtn: 'Log in', loggingInBtn: 'Checking...',
+      rememberLbl: 'Remember me on this device', rememberNote: 'Do not enable on a shared device. A new password, a disabled account, or logging out ends this.',
       errorEmpty: 'Please enter both username and password',
       errorGeneric: 'Could not reach the server — check your connection and try again',
       roleNotConnected: "Login succeeded, but this role's screen isn't connected yet — check the admin panel for now",
@@ -394,10 +404,11 @@
     hideError();
     setLoginBusy(true);
 
+    const remember = !!(window.MASAR_CONFIG && document.getElementById('fRemember') && document.getElementById('fRemember').checked);
     google.script.run
       .withSuccessHandler(onLoginResult)
       .withFailureHandler(onServerFailure)
-      .login(username, password);
+      .login(username, password, remember);
   }
 
   function onLoginResult(result) {
@@ -431,6 +442,8 @@
    * brand-new, valid user gesture instead.
    */
   function showContinuePanel(destinationUrl) {
+    // استعادة جلسة "تذكّرني" في الواجهة الثابتة: لا إطار معزول ولا قيد لمسة، فننتقل مباشرة بلا زر
+    if (state.resume) { window.top.location.href = destinationUrl + '&uid=' + encodeURIComponent(state.session.sessionKey); return; }
     document.getElementById('loginFormPanel').style.display = 'none';
     document.getElementById('successPanel').style.display = 'block';
     document.getElementById('successTitle').textContent = t('loginSuccessTitle');
@@ -442,6 +455,10 @@
     // instant a real page navigation happens.
     btn.onclick = () => { window.top.location.href = destinationUrl + '&uid=' + encodeURIComponent(state.session.sessionKey); };
   }
+
+  // يستدعيها masar-runtime بعد نجاح resumeSession بنفس شكل نتيجة login (الصفحة الرئيسية للدور، اختيار المحل للكاشير...)
+  window.masarResumeLogin = function (data) { state.resume = true; onLoginResult({ success: true, data: data }); };
+  if (window.MASAR_CONFIG) document.documentElement.classList.add('masar-web');
 
   function onServerFailure(error) {
     setLoginBusy(false);

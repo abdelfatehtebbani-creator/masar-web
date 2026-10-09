@@ -24,7 +24,7 @@
 
   // بوابة الدخول: أي صفحة غير الدخول بلا مفتاح جلسة => الدخول
   function toLogin() { try { location.replace(base + '?page=login'); } catch (e) { location.href = base + '?page=login'; } }
-  if (page && page !== 'login' && page !== 'index' && !window.MASAR_TPL.currentUserId) { toLogin(); return; }
+  if (page && page !== 'login' && page !== 'index' && page !== 'install' && !window.MASAR_TPL.currentUserId) { toLogin(); return; }
 
   // ----- iPhone / iPad -----
   var ua = navigator.userAgent || '';
@@ -38,36 +38,36 @@
     });
   }
 
-  // ----- استعادة الجلسة عند فتح التطبيق المثبَّت (لا تسجيل دخول جديد بعد كل إغلاق) -----
-  // نحفظ رابط آخر صفحة مصادَقة (فيه مفتاح الجلسة ومعاملات المحل)؛ عند فتح شاشة الدخول نتحقق من الجلسة بنداء خفيف، فإن صحّت نعود لتلك الصفحة. تسجيل الخروج أو انتهاء الجلسة يمسحانه.
-  var LAST_KEY = 'masar_last', RESUME_MAX_AGE = 12 * 3600 * 1000;
-  function resumeTarget(last, now) {
-    if (!last || !last.url || !last.ts) return '';
-    if (now - last.ts > RESUME_MAX_AGE) return '';
-    return String(last.url);
-  }
-  function readLast() { try { return JSON.parse((L && L.getItem(LAST_KEY)) || 'null'); } catch (e) { return null; } }
-  function clearLast() { try { if (L) L.removeItem(LAST_KEY); } catch (e) { /* تجاهل */ } }
-  window.MASAR_INTERNAL = { resumeTarget: resumeTarget };
-  if (page && page !== 'login' && page !== 'index' && window.MASAR_TPL.currentUserId && CFG.resume !== false) {
-    try { if (L) L.setItem(LAST_KEY, JSON.stringify({ url: location.href, ts: Date.now() })); } catch (e) { /* تجاهل */ }
-  }
+  // ----- "تذكّرني على هذا الجهاز" (رمز استعادة، لا كلمة مرور ولا مفتاح جلسة) -----
+  // يحفظ الجهاز {userId, rememberToken} فقط إن اختار المستخدم ذلك عند الدخول. عند فتح التطبيق بلا جلسة يستدعي resumeSession فيتحقق الخادم من الرمز (لا يكفي المعرّف) وينشئ جلسة عادية
+  // جديدة ويدوّر الرمز. بلا الخيار لا يبقى شيء بعد إغلاق التطبيق (مفتاح الجلسة في رابط الصفحة فقط). الخروج يمسح الرمز محليًا ويُنسي الجهاز في الخادم.
+  var RT_KEY = 'masar_rt';
+  function readRt() { try { var j = JSON.parse((L && L.getItem(RT_KEY)) || 'null'); return j && j.u && j.t ? j : null; } catch (e) { return null; } }
+  function saveRt(u, t) { try { if (L) L.setItem(RT_KEY, JSON.stringify({ u: String(u), t: String(t) })); } catch (e) { /* تجاهل */ } }
+  function clearRt() { try { if (L) L.removeItem(RT_KEY); } catch (e) { /* تجاهل */ } }
+  window.MASAR_INTERNAL = { readRt: readRt };
 
   // ----- google.script.run عبر fetch (كل مرجع غير قابل للتعديل: with* تُرجع مُشغِّلًا جديدًا فلا تتشارك النداءات المعالجات) -----
   var expiring = false;
   function callApi(action, args) {
+    // الخروج: يُرفَق رمز الجهاز ليُنسيه الخادم، ويُمسح محليًا فورًا (لا ننتظر الردّ؛ الصفحة قد تنتقل قبله) ويُرسَل بـkeepalive كي لا يُلغى الطلب عند الانتقال
+    if (action === 'logout') { var rtOut = readRt(); if (rtOut) args = [args[0], rtOut.t]; clearRt(); }
     var body = JSON.stringify({ action: action, args: args.map(function (a) { return a === undefined ? null : a; }) });
-    // الخروج: يُمسح المحفوظ فورًا (لا ننتظر الردّ؛ الصفحة قد تنتقل قبله) ويُرسَل بـkeepalive كي لا يُلغى الطلب عند الانتقال
-    if (action === 'logout') clearLast();
     return fetch(CFG.apiUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: body, redirect: 'follow', keepalive: action === 'logout' })
       .then(function (r) { if (!r.ok) throw new Error('HTTP_' + r.status); return r.text(); })
       .then(function (t) { var j; try { j = JSON.parse(t); } catch (e) { throw new Error('BAD_RESPONSE'); } return j; })
       .then(function (r) {
-        if (action === 'logout') clearLast();
-        if (action === 'login' && r && r.success && r.data) { try { if (r.data.language && L) L.setItem('masar_lang', String(r.data.language).toLowerCase() === 'en' ? 'en' : 'ar'); } catch (e) { /* تجاهل */ } }
+        if (action === 'login' && r && r.success && r.data) {
+          if (args[2] === true && r.data.rememberToken) saveRt(r.data.userId, r.data.rememberToken); else clearRt();
+        }
+        if (action === 'resumeSession' && r) {
+          if (r.success && r.data && r.data.rememberToken) saveRt(r.data.userId, r.data.rememberToken);
+          else if (r.error && r.error.code === 'REMEMBER_INVALID') clearRt();
+        }
+        if ((action === 'login' || action === 'resumeSession') && r && r.success && r.data) { try { if (r.data.language && L) L.setItem('masar_lang', String(r.data.language).toLowerCase() === 'en' ? 'en' : 'ar'); } catch (e) { /* تجاهل */ } }
         if (action === 'setUserLanguage' && args[1] && L) { try { L.setItem('masar_lang', String(args[1]).toLowerCase() === 'en' ? 'en' : 'ar'); } catch (e) { /* تجاهل */ } }
         if (r && r.success === false && r.error && r.error.code === 'SESSION_EXPIRED' && action !== 'login' && action !== 'logout' && page !== 'login' && !expiring) {
-          expiring = true; clearLast(); setTimeout(toLogin, 50);
+          expiring = true; setTimeout(toLogin, 50);
         }
         return r;
       });
@@ -92,24 +92,24 @@
   window.google.script = window.google.script || {};
   Object.defineProperty(window.google.script, 'run', { configurable: true, get: function () { return runner({ s: null, f: null, u: undefined }); } });
 
-  if (page === 'login' && CFG.resume !== false && !q.has('noresume')) {
-    var target = resumeTarget(readLast(), Date.now());
-    var tUid = ''; try { tUid = new URL(target).searchParams.get('uid') || ''; } catch (e) { tUid = ''; }
-    if (target && tUid) {
-      document.addEventListener('DOMContentLoaded', function () {
-        var ov = document.createElement('div');
-        ov.style.cssText = 'position:fixed;inset:0;z-index:2147483100;background:#3D2B1E;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font:700 17px sans-serif;text-align:center;padding:24px;';
-        var t = document.createElement('div'); t.textContent = lang() === 'en' ? 'Restoring your session…' : 'جارٍ استعادة جلستك…';
-        var b = document.createElement('button'); b.type = 'button';
-        b.textContent = lang() === 'en' ? 'Sign in as someone else' : 'تسجيل الدخول بحساب آخر';
-        b.style.cssText = 'border:1px solid rgba(255,255,255,.5);background:transparent;color:#fff;font:600 14px sans-serif;padding:10px 22px;border-radius:999px;cursor:pointer;';
-        b.addEventListener('click', function () { clearLast(); ov.remove(); });
-        ov.appendChild(t); ov.appendChild(b); document.body.appendChild(ov);
-        callApi('getChangeTokens', [tUid, []]).then(function (r) {
-          if (r && r.success) location.replace(target); else { clearLast(); ov.remove(); }
-        }, function () { ov.remove(); });
-      });
-    }
+  if (page === 'login' && CFG.resume !== false && !q.has('noresume') && readRt()) {
+    document.addEventListener('DOMContentLoaded', function () {
+      var rt = readRt(); if (!rt) return;
+      var ov = document.createElement('div');
+      ov.style.cssText = 'position:fixed;inset:0;z-index:2147483100;background:#3D2B1E;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font:700 17px sans-serif;text-align:center;padding:24px;';
+      var t = document.createElement('div'); t.textContent = lang() === 'en' ? 'Restoring your session…' : 'جارٍ استعادة جلستك…';
+      var b = document.createElement('button'); b.type = 'button';
+      b.textContent = lang() === 'en' ? 'Sign in as someone else' : 'تسجيل الدخول بحساب آخر';
+      b.style.cssText = 'border:1px solid rgba(255,255,255,.5);background:transparent;color:#fff;font:600 14px sans-serif;padding:10px 22px;border-radius:999px;cursor:pointer;';
+      var cancelled = false;
+      b.addEventListener('click', function () { cancelled = true; ov.remove(); });
+      ov.appendChild(t); ov.appendChild(b); document.body.appendChild(ov);
+      callApi('resumeSession', [rt.u, rt.t]).then(function (r) {
+        if (cancelled) return;
+        if (r && r.success && r.data && typeof window.masarResumeLogin === 'function') { ov.remove(); window.masarResumeLogin(r.data); }
+        else ov.remove();
+      }, function () { ov.remove(); });
+    });
   }
   if (page === 'login' && isIOS && !standalone) {
     document.addEventListener('DOMContentLoaded', function () {
