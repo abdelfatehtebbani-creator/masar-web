@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#3D2B1E">
+<link rel="apple-touch-icon" href="icon-192.png">
+<script src="masar-config.js"></script>
+<script src="masar-runtime.js"></script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALAKER SWEETS — المنتجات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Markazi+Text:wght@600;700&family=Fraunces:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+
+:root {
+  /* SPEC v1.4 -- إعادة تصميم بصري مقصودة، نفس لوحة الكاشير تمامًا لاتساق
+     الهوية بين الأدمن والكاشير (انظر split_cashier.py للتفصيل الكامل). */
+  --primary: #C1791F; --primary-dark: #9C5F15; --primary-tint: #F5E4CC;
+  --secondary: #35231A; --ink: #2A1F17; --ink-soft: #71594A;
+  --bg: #FBF6EC; --surface: #FFFFFF; --line: #E8DDC8;
+  --success: #6B8F5C; --success-tint: #E9EEE3;
+  --warn: #B23B2E; --warn-tint: #F7E6E2;
+  --pending: #A8842A; --pending-tint: #F2E9D3;
+  --locked: #8A7A6B; --locked-tint: #ECE7E0;
+  --accent-rose: #C97B85; --accent-rose-tint: #F5E4E6;
+  --radius-lg: 16px; --radius-md: 12px; --radius-sm: 8px;
+  --shadow-card: 0 1px 2px rgba(43,33,27,0.06), 0 4px 16px rgba(43,33,27,0.05);
+  --font-ar: 'IBM Plex Sans Arabic', sans-serif; --font-en: 'IBM Plex Sans', sans-serif;
+  --font-display-ar: 'Markazi Text', serif; --font-display-en: 'Fraunces', serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { overflow-x: hidden; max-width: 100vw; }
+html[lang="ar"] body { font-family: var(--font-ar); }
+html[lang="en"] body { font-family: var(--font-en); }
+html[lang="ar"] .display { font-family: var(--font-display-ar); }
+html[lang="en"] .display { font-family: var(--font-display-en); }
+body {
+  background-color: var(--bg);
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 38px, rgba(61,43,30,0.035) 38px, rgba(61,43,30,0.035) 39px);
+  color: var(--ink); min-height: 100vh; -webkit-font-smoothing: antialiased; padding-bottom: 30px;
+}
+header.topbar {
+  display: flex; align-items: center; gap: 16px; background: var(--secondary); color: #fff;
+  padding: 10px 20px; position: sticky; top: 0; z-index: 30; box-shadow: 0 2px 10px rgba(0,0,0,0.15); max-width: 100%;
+}
+.brand-logo { height: 40px; width: auto; display: block; flex-shrink: 0; }
+.brand-meta { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; overflow: hidden; }
+.brand-meta .system-name { font-family: var(--font-display-en); font-size: 12px; letter-spacing: 0.02em; color: rgba(255,255,255,0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.brand-meta .role-name { font-size: 16px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html[lang="ar"] .brand-meta .role-name { font-family: var(--font-display-ar); }
+html[lang="en"] .brand-meta .role-name { font-family: var(--font-display-en); }
+.topbar-spacer { flex: 1; min-width: 8px; }
+.icon-btn {
+  display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #fff; cursor: pointer;
+  font-size: 14px; font-weight: 600; transition: background 0.15s ease; position: relative; flex-shrink: 0;
+}
+.icon-btn:hover { background: rgba(255,255,255,0.16); }
+.user-menu { position: relative; flex-shrink: 0; }
+.user-dropdown {
+  position: absolute; top: calc(100% + 8px); inset-inline-end: 0; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line); border-radius: var(--radius-md); box-shadow: var(--shadow-card);
+  min-width: 200px; padding: 6px; display: none; z-index: 40;
+}
+.user-dropdown.open { display: block; }
+.user-dropdown button {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: start; background: none; border: none;
+  padding: 10px 12px; border-radius: var(--radius-sm); font-size: 14px; font-family: inherit; color: var(--ink); cursor: pointer;
+}
+.user-dropdown button:hover { background: var(--bg); }
+@media (max-width: 420px) {
+  header.topbar { flex-wrap: wrap; row-gap: 8px; padding: 10px 12px; gap: 8px; }
+  .topbar-spacer { flex: 0 0 100%; height: 0; }
+  .brand-meta .system-name { display: none; }
+}
+.subheader { display: flex; align-items: center; gap: 12px; max-width: 880px; margin: 0 auto; padding: 16px 20px 4px; }
+.back-btn {
+  display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--line); color: var(--secondary); cursor: pointer; font-size: 16px;
+  flex-shrink: 0; box-shadow: var(--shadow-card);
+}
+html[dir="rtl"] .back-btn .arrow { transform: scaleX(-1); display: inline-block; }
+.subheader h1 { font-size: 20px; font-weight: 600; color: var(--secondary); flex: 1; }
+html[lang="ar"] .subheader h1 { font-family: var(--font-display-ar); font-size: 22px; }
+html[lang="en"] .subheader h1 { font-family: var(--font-display-en); }
+main { max-width: 880px; margin: 0 auto; padding: 12px 20px 20px; }
+
+/* SPEC v1.4 -- حاجز حقيقي على مستوى الصفحة كاملة أثناء أي عملية غير متزامنة
+   (نفس تصحيح الكاشير -- انظر wrapGoogleScriptRunWithBusyOverlay() بالأسفل) */
+#globalBusyOverlay {
+  position: fixed; inset: 0; z-index: 999; cursor: wait; display: none;
+  background: rgba(0,0,0,0.02);
+}
+#globalBusyOverlay.show { display: block; }
+
+/* SPEC v1.4 -- shared header-account modal (change password / logout confirm),
+   common to every admin page since the header itself is shared */
+.header-modal-overlay { position: fixed; inset: 0; background: rgba(43,33,27,0.45); display: none; align-items: center; justify-content: center; z-index: 90; padding: 20px; }
+.header-modal-overlay.open { display: flex; }
+.header-modal-box { background: var(--surface); border-radius: var(--radius-lg); padding: 22px; max-width: 360px; width: 100%; box-shadow: var(--shadow-card); }
+.header-modal-box h3 { font-size: 15px; font-weight: 700; color: var(--secondary); margin-bottom: 14px; }
+.header-modal-box .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.header-modal-box .field label { font-size: 12px; font-weight: 600; color: var(--ink-soft); }
+.header-modal-box .field input { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 9px 11px; font-family: inherit; font-size: 13px; }
+.header-modal-box .error-banner { display: none; background: var(--warn-tint); color: var(--warn); border: 1px solid rgba(178,59,46,0.3); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 12px; margin-bottom: 10px; }
+.header-modal-box .error-banner.show { display: block; }
+.header-modal-actions { display: flex; gap: 8px; margin-top: 6px; }
+.header-modal-actions button { flex: 1; font-family: inherit; font-size: 13px; font-weight: 600; padding: 10px; border-radius: var(--radius-sm); cursor: pointer; border: none; }
+.header-modal-cancel { background: var(--bg); color: var(--ink); }
+.header-modal-save { background: var(--secondary); color: #fff; }
+.header-modal-save:disabled { background: #B7ADA2; cursor: not-allowed; }
+
+  .refresh-btn { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; border-radius: 999px; background: rgba(255,255,255,0.18); border: 1.5px solid rgba(255,255,255,0.9); color: #fff; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; flex-shrink: 0; white-space: nowrap; transition: background 0.15s ease; }
+  .refresh-btn:hover { background: rgba(255,255,255,0.32); }
+  .refresh-btn:active { transform: scale(0.97); }
+  .refresh-btn.armed { background: #fff; color: var(--secondary); }
+  .refresh-btn.spin .ico { animation: masar-spin 0.8s linear infinite; }
+  @keyframes masar-spin { to { transform: rotate(360deg); } }
+</style>
+<style>
+/* ===== products ===== */
+#view-products main { max-width: 880px; margin: 0 auto; padding: 12px 20px 20px; }#view-products .tabs { display: flex; gap: 8px; margin-bottom: 16px; }#view-products .tab {
+    flex: 1; text-align: center; font-size: 13px; font-weight: 600; color: var(--ink-soft); background: var(--surface);
+    border: 1px solid var(--line); padding: 10px 10px; border-radius: 999px; cursor: pointer; font-family: inherit;
+  }#view-products .tab.active { background: var(--secondary); color: #fff; border-color: var(--secondary); }#view-products .tab .count { margin-inline-start: 4px; font-size: 11px; opacity: 0.8; }#view-products .add-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+    background: var(--primary); color: #fff; border: none; font-family: inherit; font-size: 14px; font-weight: 600;
+    padding: 12px; border-radius: var(--radius-md); cursor: pointer; margin-bottom: 16px;
+  }#view-products .add-btn:hover { background: var(--primary-dark); }#view-products .filter-bar { margin-bottom: 14px; display: flex; flex-direction: column; gap: 8px; }#view-products .search-input { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-md); font-family: inherit; font-size: 13.5px; background: var(--surface); color: var(--ink); box-sizing: border-box; }#view-products .search-input:focus { outline: 2px solid var(--primary); outline-offset: 1px; }#view-products .type-filter-row { display: flex; gap: 6px; }#view-products .type-filter-btn { flex: 1; padding: 8px 6px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink-soft); font-family: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; }#view-products .type-filter-btn.active { background: var(--secondary); color: #fff; border-color: var(--secondary); }#view-products #pr-subFilterWrap select { width: 100%; padding: 9px 12px; border: 1px solid var(--line); border-radius: var(--radius-md); font-family: inherit; font-size: 13px; background: var(--surface); color: var(--ink); box-sizing: border-box; }#view-products .sort-toggle-row { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-soft); }#view-products .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); overflow: hidden; }#view-products .prod-row {
+    width: 100%; display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: none; border-bottom: 1px dashed var(--line);
+    background: var(--surface); cursor: pointer; text-align: start; font-family: inherit; color: inherit;
+  }#view-products .prod-row:last-child { border-bottom: none; }#view-products .prod-row:hover { background: rgba(193,121,31,0.05); }#view-products .prod-row.inactive { opacity: 0.55; }#view-products .prod-thumb {
+    width: 42px; height: 42px; border-radius: var(--radius-sm); flex-shrink: 0;
+    background: linear-gradient(135deg, #F3E9DC, #EDE1D0); display: flex; align-items: center; justify-content: center; font-size: 18px;
+  }#view-products .prod-main { flex: 1; min-width: 0; }#view-products .prod-name { font-size: 14px; font-weight: 600; color: var(--ink); }#view-products .prod-sub { font-size: 11.5px; color: var(--ink-soft); margin-top: 2px; }#view-products .type-badge { font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: 999px; white-space: nowrap; }#view-products .type-badge.finished { background: var(--primary-tint); color: var(--primary-dark); }#view-products .type-badge.raw { background: var(--success-tint); color: var(--success); }#view-products .inactive-tag { font-size: 10.5px; color: var(--warn); font-weight: 600; }#view-products .pending-card { padding: 14px 16px; border-bottom: 1px dashed var(--line); }#view-products .pending-card:last-child { border-bottom: none; }#view-products .pending-top { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }#view-products .pending-note {
+    font-size: 11.5px; color: var(--pending); background: var(--pending-tint); border-radius: var(--radius-sm);
+    padding: 6px 10px; margin-top: 8px; line-height: 1.5;
+  }#view-products .pending-actions { display: flex; gap: 8px; margin-top: 10px; }#view-products .pending-btn {
+    flex: 1; font-size: 12px; font-weight: 600; padding: 8px; border-radius: var(--radius-sm); cursor: pointer; font-family: inherit; border: 1.5px solid;
+  }#view-products .pending-edit-btn { background: var(--surface); border-color: var(--line); color: var(--ink); }#view-products .pending-activate-btn { background: var(--success-tint); border-color: var(--success); color: var(--success); }#view-products .empty-state { text-align: center; padding: 40px 20px; color: var(--ink-soft); font-size: 13.5px; }/* ---------- Modal ---------- */#view-products .modal-overlay { position: fixed; inset: 0; background: rgba(43,33,27,0.45); display: none; align-items: flex-start; justify-content: center; z-index: 80; padding: 20px; overflow-y: auto; }#view-products .modal-overlay.open { display: flex; }#view-products .modal-box { background: var(--surface); border-radius: var(--radius-lg); padding: 22px; max-width: 460px; width: 100%; box-shadow: var(--shadow-card); margin: 20px 0; }#view-products .modal-box h3 { font-size: 16px; font-weight: 700; color: var(--secondary); margin-bottom: 16px; }#view-products .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }#view-products .field label { font-size: 12.5px; font-weight: 600; color: var(--ink-soft); }#view-products .field input, #view-products .field select {
+    border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 10px 12px;
+    font-family: inherit; font-size: 13.5px; color: var(--ink); background: var(--surface);
+  }#view-products .field input:focus, #view-products .field select:focus { outline: 2px solid var(--primary); outline-offset: 1px; }#view-products .field input.needs-value { border-color: var(--warn); }#view-products .field-row { display: flex; gap: 10px; }#view-products .field-row .field { flex: 1; }#view-products .dept-field, #view-products .material-family-field { display: none; }#view-products .dept-field.show, #view-products .material-family-field.show { display: flex; }#view-products .check-row { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 10px; }#view-products .image-btn {
+    display: inline-flex; align-items: center; gap: 6px; background: var(--bg); border: 1px solid var(--line);
+    border-radius: var(--radius-sm); padding: 9px 12px; font-size: 12.5px; font-weight: 600; color: var(--ink);
+    cursor: pointer; font-family: inherit; margin-bottom: 14px;
+  }#view-products .image-btn.attached { border-color: var(--success); color: var(--success); background: var(--success-tint); }#view-products .image-btn.soft-disabled { opacity: 0.55; cursor: not-allowed; }#view-products .modal-actions { display: flex; gap: 10px; margin-top: 6px; }#view-products .modal-actions button {
+    flex: 1; font-family: inherit; font-size: 13.5px; font-weight: 600; padding: 11px; border-radius: var(--radius-sm); cursor: pointer;
+  }#view-products .modal-cancel-btn { background: var(--bg); border: 1px solid var(--line); color: var(--ink); }#view-products .modal-save-btn { background: var(--secondary); border: none; color: #fff; }#view-products .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(10px);
+    background: var(--secondary); color: #fff; font-size: 13.5px; padding: 11px 18px; border-radius: 999px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2); opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 90; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis;
+  }#view-products .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#view-products .confirm-armed { background: var(--warn) !important; animation: pulse-confirm 1s ease-in-out infinite; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  
+  <div class="brand-meta">
+    <span class="system-name">MASAR</span>
+    <span class="role-name" data-i18n="roleName"></span>
+  </div>
+  <div class="topbar-spacer"></div>
+  <button class="refresh-btn" id="refreshBtn" type="button" title="تحديث / Refresh"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span class="rf-label">تحديث</span></button>
+  <button class="icon-btn" id="langToggle" title="AR / EN">AR</button>
+  <div class="user-menu">
+    <button class="icon-btn" id="userMenuBtn">⋮</button>
+    <div class="user-dropdown" id="userDropdown">
+      <button data-i18n="changePassword" data-toast="notReady"></button>
+      <button data-i18n="logout" data-toast="notReady"></button>
+    </div>
+  </div>
+</header>
+
+<div class="header-modal-overlay" id="changePasswordOverlay">
+  <div class="header-modal-box">
+    <h3 id="cp-title"></h3>
+    <div class="error-banner" id="cp-errorBanner"></div>
+    <div class="field"><label id="cp-oldLabel"></label><input type="password" id="cp-fOldPassword"></div>
+    <div class="field"><label id="cp-newLabel"></label><input type="password" id="cp-fNewPassword"></div>
+    <div class="header-modal-actions">
+      <button class="header-modal-cancel" id="cp-cancelBtn"></button>
+      <button class="header-modal-save" id="cp-saveBtn"></button>
+    </div>
+  </div>
+</div>
+
+<div id="view-products">
+<div class="subheader">
+  <button class="back-btn" id="pr-backBtn"><span class="arrow">←</span></button>
+  <h1 data-i18n="screenTitle"></h1>
+</div>
+
+<main>
+  <div class="tabs">
+    <button class="tab active" data-tab="CATALOG" id="pr-tabCatalog"></button>
+    <button class="tab" data-tab="PENDING" id="pr-tabPending"></button>
+  </div>
+  <div id="pr-tabContent"></div>
+</main>
+
+<div class="modal-overlay" id="pr-prodModal">
+  <div class="modal-box">
+    <h3 id="pr-modalTitle"></h3>
+    <div class="field-row">
+      <div class="field" id="pr-codeField"><label data-i18n="productCode"></label><input type="text" id="pr-fCode" readonly></div>
+      <div class="field"><label data-i18n="productType"></label>
+        <select id="pr-fType">
+          <option value="FINISHED_GOODS" data-i18n="typeFinished"></option>
+          <option value="RAW_MATERIAL" data-i18n="typeRaw"></option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label data-i18n="nameAr"></label><input type="text" id="pr-fNameAr"></div>
+    <div class="field"><label data-i18n="nameEn"></label><input type="text" id="pr-fNameEn"></div>
+    <div class="field material-family-field" id="pr-materialFamilyField">
+      <label data-i18n="materialFamily"></label>
+      <select id="pr-fMaterialFamily"></select>
+    </div>
+    <div class="field-row">
+      <div class="field dept-field" id="pr-deptField"><label data-i18n="department"></label><select id="pr-fDept"></select></div>
+      <div class="field"><label data-i18n="unit"></label>
+        <select id="pr-fUnit"></select>
+      </div>
+    </div>
+    <input type="file" id="pr-imageFileInput" accept="image/*" style="display:none;">
+    <button class="image-btn" id="pr-imageBtn" type="button">📷 <span id="pr-imageBtnLabel"></span></button>
+    <img id="pr-imagePreview" style="display:none; max-width:100%; border-radius:8px; margin-top:8px;" alt="">
+    <div class="field" id="pr-priceField">
+      <label data-i18n="salePrice"></label>
+      <input type="number" id="pr-fPrice" min="0" step="0.25">
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel-btn" id="pr-modalCancelBtn" data-i18n="cancelBtn"></button>
+      <button class="modal-save-btn" id="pr-modalSaveBtn" data-i18n="saveBtn"></button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="globalBusyOverlay"></div>
+
+<script>
+  // ===== شبكة الاتصال (١٠ أكتوبر ٢٠٢٦) =====
+  // مولَّد من tools/net_snippet.js بواسطة tools/build_client_snippets.js -- لا تعدّله يدويًا داخل الصفحات.
+  // (١) يتتبّع نداءات الحفظ (أي نداء لا يبدأ بـ get/list) ليعرف التحديث التلقائي أن الصفحة حفظت بنفسها.
+  // (٢) بلاغ "تعذّر تنفيذ العملية" المتكرر: بطء بدء Google (أو انقطاع لحظي) كان يُسقط النداء. للقراءات الصرفة فقط (قائمة مولَّدة آليًا من الخادم: دوال لا تكتب هي
+  // ولا ما تستدعيه) تُعاد المحاولة مرة واحدة عند الفشل/الردّ الفارغ، ويُرسَل نداء ثانٍ موازٍ إن تأخّر الأول ٦ ثوانٍ؛ يُسلَّم أول ردّ صالح. الحفظ والإنشاء لا يُكرَّران أبدًا.
+  const MASAR_RAW_RUN_ = (typeof google !== 'undefined' && google.script) ? google.script.run : null;
+  const MASAR_AR_INSTANCES_ = [];
+  const MASAR_PURE_READS_ = { getActiveDriversList:1,getActiveShipments:1,getActiveStoresWithOccupancy:1,getAllDepartments:1,getAllLists:1,getAllProducts:1,getAllRoles:1,getAllSettings:1,getAllStores:1,getAllUsers:1,getChangeTokens:1,getDepartmentStoreOrders:1,getDisposalFormData:1,getDistributionComparisonDetail:1,getDistributionManagerCancelEditRequests:1,getDistributionsReadyToPrepare:1,getFinishedGoodsQuarantineHistory:1,getFinishedGoodsStockBoard:1,getIssueToDepartmentFormData:1,getManagementReports:1,getMyNotifications:1,getMyShipments:1,getMySupplyRequests:1,getOffCatalogPurchaseRequests:1,getOrderDetails:1,getOrderEditStage:1,getOrderProductionApprovalDetail:1,getOrdersAwaitingInvoice:1,getOrdersAwaitingProductionApproval:1,getOrdersReadyForShipment:1,getOrdersReadyToReceive:1,getPendingLoadDiscrepancies:1,getPendingReturnItems:1,getPendingSupplyRequestsForRMS:1,getProductionManagerApprovals:1,getProductionManagerOrderFullDetail:1,getProductionManagerOrdersOverview:1,getPurchasingRawMaterialReports:1,getRawMaterialCatalog:1,getRawMaterialCatalogForRequest:1,getRawMaterialExpiryReport:1,getRawMaterialMovementSummary:1,getRawMaterialProductHistory:1,getRawMaterialQuarantineHistory:1,getRawMaterialShortageNotices:1,getRawMaterialStockBoard:1,getReceiveSurplusFormData:1,getReceivingDetails:1,getReferenceLists:1,getReturnReasons:1,getRolePermissionsMatrix:1,getShipmentPrepareDetail:1,getShortageReasons:1,getStoreDirectRawMaterialOrders:1,getStoreOrderDetail:1,getSuppliers:1,getSuppliersList:1,getTasksCatalog:1,getUnitsAndFamiliesList:1,getVehicleCoordinatorDriverStatus:1,getVehicleCoordinatorSpecialOrders:1,listOrders:1 };
+  (function masarTrackOwnCalls() {
+    try {
+      if (!MASAR_RAW_RUN_) return;
+      Object.defineProperty(google.script, 'run', {
+        configurable: true,
+        get() {
+          const handlers = { onSuccess: null, onFailure: null };
+          let proxy;
+          const chain = {
+            withSuccessHandler(fn) { handlers.onSuccess = fn; return proxy; },
+            withFailureHandler(fn) { handlers.onFailure = fn; return proxy; }
+          };
+          proxy = new Proxy(chain, {
+            get(target, prop) {
+              if (prop === 'withSuccessHandler' || prop === 'withFailureHandler') return target[prop];
+              return (...args) => {
+                // لقطة المعالجات لحظة النداء: غلاف حاجز الانشغال في الصفحات يمسك مرجعًا واحدًا من run فتتشارك النداءات المتزامنة كائن handlers، فلو قُرئ
+                // وقت الرد لاستلم كل رد معالج آخر نداء (بلاغ: "تعذّر فتح إنشاء رحلة" -- نداءا السائقين والجاهزة كانا يتبادلان معالجيهما)
+                const onS = handlers.onSuccess, onF = handlers.onFailure;
+                const name = String(prop);
+                if (Object.prototype.hasOwnProperty.call(MASAR_PURE_READS_, name)) {
+                  let settled = false, attempts = 0, pending = 0, hedge = null;
+                  const finish = (ok, v) => { if (settled) return; settled = true; clearTimeout(hedge); if (ok) { if (onS) onS(v); } else if (onF) onF(v); else { try { console.error(v); } catch (e) { /* تجاهل */ } } };
+                  const launch = () => {
+                    attempts++; pending++;
+                    const bad = v => {
+                      pending--;
+                      if (settled) return;
+                      if (attempts < 2) { setTimeout(launch, 700); return; }   // محاولة ثانية واحدة فقط
+                      if (pending === 0) finish(false, v);                       // الأخيرة فشلت ولا نداء آخر في الطريق
+                    };
+                    MASAR_RAW_RUN_
+                      .withSuccessHandler(r => { if (r === null || r === undefined) { bad(r); } else { pending--; finish(true, r); } })
+                      .withFailureHandler(e => bad(e))
+                      [name](...args);
+                  };
+                  hedge = setTimeout(() => { if (!settled && attempts < 2) launch(); }, 6000);
+                  launch();
+                  return;
+                }
+                const done = () => { if (!/^(get|list)/.test(name)) MASAR_AR_INSTANCES_.forEach(i => { try { i.ownDone(); } catch (e) { /* لا يعطّل النداء */ } }); };
+                return MASAR_RAW_RUN_
+                  .withSuccessHandler((...r) => { done(); if (onS) onS(...r); })
+                  .withFailureHandler((...r) => { done(); if (onF) onF(...r); else { try { console.error(r[0]); } catch (e) { /* تجاهل */ } } })
+                  [prop](...args);
+              };
+            }
+          });
+          return proxy;
+        }
+      });
+    } catch (e) { /* لا تتبّع: يبقى السلوك القديم كما هو */ }
+  })();
+  // يستعمله التحديث التلقائي الصامت: نفس طبقة الاتصال (إعادة المحاولة) لكن بلا غلاف حاجز الانشغال الذي تُركّبه الصفحة لاحقًا فوقها
+  let MASAR_NET_GETTER_ = null;
+  try { MASAR_NET_GETTER_ = Object.getOwnPropertyDescriptor(google.script, 'run').get || null; } catch (e) { MASAR_NET_GETTER_ = null; }
+  // ===== نهاية شبكة الاتصال =====
+
+const Core = (() => {
+  // SPEC v1.4 -- Apps Script redirects the whole tab to a separate
+  // googleusercontent.com sandbox domain when serving content, so a
+  // relative '?page=xxx' resolves against THAT domain, not the real
+  // deployment URL. APP_BASE_URL is injected server-side (WebApp.gs
+  // doGet(), HtmlTemplate) so every cross-page link here is absolute.
+  const APP_BASE_URL = MASAR_TPL.appBaseUrl;
+  var TIMEOUT_SCALE = MASAR_TPL.timeoutScale; // مضاعِف مُهَل الانتظار: ١ في الإنتاج، أكبر في DIV (مشروع بارد/شبكة اختبار)
+  // تسجيل الخروج (٨ أكتوبر ٢٠٢٦، بلاغ مستخدم: "لا يأخذني دائمًا لشاشة الدخول حتى أضغط زرًا في الصفحة التي بقيت مفتوحة"): المتصفحات (خصوصًا
+  // الهاتف) تحجب التنقّل غير المرتبط بلمسة مباشرة، فكانت الصفحة تبقى ظاهرة بزر "اضغط للمتابعة" مخبّأ داخل قائمة مغلقة. الآن أول ما يُستدعى
+  // logout يُغطّى المحتوى بحاجز كامل الشاشة "تم تسجيل الخروج" بزر كبير ظاهر، مع محاولة تلقائية للانتقال حيث يسمح المتصفح.
+  function masarLogoutMarker() {
+    try {
+      if (document.getElementById('masarLoggedOutOverlay')) return null;
+      var ar = (document.documentElement.lang || 'ar') !== 'en';
+      var o = document.createElement('div');
+      o.id = 'masarLoggedOutOverlay';
+      o.dir = ar ? 'rtl' : 'ltr';
+      o.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:2147483646;background:#3D2B1E;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font:600 19px/1.6 sans-serif;text-align:center;padding:24px;';
+      o.innerHTML = '<div style="font-size:48px">\uD83D\uDD12</div><div>' + (ar ? 'تم تسجيل الخروج' : 'You have been logged out') + '</div>' +
+        '<button type="button" style="border:none;background:#EE7126;color:#fff;font:700 17px sans-serif;padding:15px 34px;border-radius:999px;cursor:pointer;">' + (ar ? 'العودة إلى شاشة الدخول' : 'Back to login') + '</button>';
+      document.body.appendChild(o);
+      var go = function () { try { window.top.location.href = APP_BASE_URL; } catch (e) { window.location.href = APP_BASE_URL; } };
+      o.getElementsByTagName('button')[0].addEventListener('click', go);
+      setTimeout(go, 700);
+    } catch (e) { /* عرض فقط */ }
+    return null;
+  }
+
+  // SPEC v1.4 -- every page load is a fresh doGet() call with no memory of
+  // who logged in; CURRENT_USER_ID is threaded in via the ?uid= URL
+  // parameter (see WebApp.gs doGet() for the full rationale and the
+  // honest security note about session validation). Every view module
+  // below reads this as Core.currentUserId for its google.script.run calls.
+  const CURRENT_USER_ID = MASAR_TPL.currentUserId;
+
+  const commonDict = {
+    ar: {
+      toastNotBuilt: 'هذه الميزة قيد الإنشاء', roleName: 'الأدمن',
+      changePassword: '🔑 تغيير كلمة المرور', logout: '↩ تسجيل الخروج',
+      changePasswordTitle: 'تغيير كلمة المرور', oldPasswordLbl: 'كلمة المرور الحالية', newPasswordLbl: 'كلمة المرور الجديدة',
+      cancelBtn: 'إلغاء', saveBtn: 'حفظ',
+      changePasswordMissing: 'الرجاء إدخال كلمتَي المرور معًا', changePasswordSuccess: 'تم تغيير كلمة المرور بنجاح',
+      loadErrorText: 'تعذّر تنفيذ العملية — أعد المحاولة'
+    },
+    en: {
+      toastNotBuilt: 'This feature is in progress', roleName: 'Admin',
+      changePassword: '🔑 Change password', logout: '↩ Log out',
+      changePasswordTitle: 'Change password', oldPasswordLbl: 'Current password', newPasswordLbl: 'New password',
+      cancelBtn: 'Cancel', saveBtn: 'Save',
+      changePasswordMissing: 'Please enter both passwords', changePasswordSuccess: 'Password changed successfully',
+      loadErrorText: 'Could not complete the operation — please try again'
+    }
+  };
+  const state = { lang: (MASAR_TPL.userLang === 'en' ? 'en' : 'ar') };
+  // لغة المستخدم المحفوظة على الخادم (Users.Language) -- طلب مباشر ٢٥ سبتمبر ٢٠٢٦: تُفتح بها كل الشاشات وتبقى عند التنقّل
+  (function () {
+    if (state.lang === 'en') { document.documentElement.lang = 'en'; document.documentElement.dir = 'ltr'; }
+    const langBtn = document.getElementById('langToggle');
+    if (!langBtn) return;
+    langBtn.textContent = state.lang === 'ar' ? 'EN' : 'AR';
+    langBtn.addEventListener('click', () => setTimeout(() => {
+      try { if (MASAR_TPL.currentUserId) google.script.run.withFailureHandler(() => {}).setUserLanguage(MASAR_TPL.currentUserId, state.lang); } catch (e) { /* لا يعطّل الشاشة */ }
+    }, 0));
+  })();
+  // ---- زر التحيين (طلب مباشر ٢٦ سبتمبر ٢٠٢٦): تحديث ناعم إن وُجد مُحمِّل للصفحة، وإلا إعادة تحميل الصفحة بنفس رابطها ----
+  (function () {
+    const btn = document.getElementById('refreshBtn');
+    if (!btn) return;
+    const CONFIRM = true;
+    const label = btn.querySelector('.rf-label');
+    const idleText = () => (state.lang === 'ar' ? 'تحديث' : 'Refresh');
+    const sureText = () => (state.lang === 'ar' ? 'اضغط للتأكيد' : 'Tap to confirm');
+    const setIdle = () => { btn.classList.remove('armed'); if (label) label.textContent = idleText(); };
+    setIdle();
+    const lt = document.getElementById('langToggle');
+    if (lt) lt.addEventListener('click', () => setTimeout(setIdle, 0));
+    let armed = false, timer = null;
+    const hardReload = () => {
+      try { window.top.location.href = APP_BASE_URL + '?' + MASAR_TPL.reloadQuery; } catch (e) { window.location.reload(); }
+    };
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      if (CONFIRM && !armed) {
+        armed = true; btn.classList.add('armed'); if (label) label.textContent = sureText();
+        clearTimeout(timer); timer = setTimeout(() => { armed = false; setIdle(); }, 2800);
+        return;
+      }
+      clearTimeout(timer); armed = false; setIdle();
+      const soft = null;
+      if (soft) {
+        btn.classList.add('spin');
+        try { soft(); setTimeout(() => btn.classList.remove('spin'), 1200); return; } catch (e) { btn.classList.remove('spin'); }
+      }
+      hardReload();
+    });
+  })();
+  const UID_SUFFIX = '&uid=' + encodeURIComponent(CURRENT_USER_ID);
+  const PAGE_MAP = {
+    dashboard: APP_BASE_URL + '?page=admin' + UID_SUFFIX, settings: APP_BASE_URL + '?page=admin_settings' + UID_SUFFIX,
+    'users-roles': APP_BASE_URL + '?page=admin_users' + UID_SUFFIX, 'stores-depts': APP_BASE_URL + '?page=admin_stores' + UID_SUFFIX,
+    products: APP_BASE_URL + '?page=admin_products' + UID_SUFFIX, 'lists-settings': APP_BASE_URL + '?page=admin_lists' + UID_SUFFIX
+  };
+
+  function t(key) { return (commonDict[state.lang] && commonDict[state.lang][key]) || key; }
+
+  function applyI18n(container, dict) {
+    if (!container) return;
+    container.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      const val = dict[state.lang] && dict[state.lang][key];
+      if (val !== undefined) el.textContent = val;
+    });
+  }
+
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => el.classList.remove('show'), 2400);
+  }
+
+  // SPEC v1.4 -- the one real behavioral difference from the merged SPA's
+  // Core: this is now a full page load (Apps Script serves each admin
+  // screen as its own doGet() route -- see WebApp.gs), not an in-page
+  // view swap. Any unsaved in-page state is intentionally lost on
+  // navigation here, same as any ordinary multi-page site.
+  //
+  // window.top (not window) is required: Apps Script wraps served content
+  // in several nested sandboxed iframes (sandboxFrame > userCodeAppPanel >
+  // userHtmlFrame). Setting window.location from inside the innermost
+  // frame only navigates that frame's own address space -- it never
+  // reaches doGet() again. window.top targets the actual browser tab.
+  //
+  // This is a DIRECT click handler (back buttons, list cards) with no
+  // async gap before it, so -- unlike login.html's post-google.script.run
+  // redirect -- it counts as a fresh user gesture and browsers allow it
+  // immediately; no "continue button" step needed here.
+  function showView(name) {
+    window.top.location.href = PAGE_MAP[name] || (APP_BASE_URL + '?page=admin' + UID_SUFFIX);
+  }
+
+  function wireHeader() {
+    document.getElementById('langToggle').addEventListener('click', () => {
+      state.lang = state.lang === 'ar' ? 'en' : 'ar';
+      document.documentElement.lang = state.lang;
+      document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+      document.getElementById('langToggle').textContent = state.lang === 'ar' ? 'EN' : 'AR';
+      applyI18n(document.querySelector('header.topbar'), commonDict);
+      applyI18n(document.getElementById('view-products'), ProductsView.dict);
+      ProductsView.render();
+    });
+    const userMenuBtn = document.getElementById('userMenuBtn');
+    const userDropdown = document.getElementById('userDropdown');
+    userMenuBtn.addEventListener('click', (e) => { e.stopPropagation(); userDropdown.classList.toggle('open'); });
+    document.addEventListener('click', () => userDropdown.classList.remove('open'));
+
+    // SPEC v1.4 -- these two buttons existed since the original demo but
+    // were never actually wired to anything (data-toast="notReady" was
+    // referenced nowhere in any Core.js version) -- found while reviewing
+    // direct user feedback on the connected screens. Both AuthService.gs
+    // functions were already fully implemented; only the wiring was missing.
+    const dropdownButtons = userDropdown.querySelectorAll('button');
+    dropdownButtons[0].addEventListener('click', () => {
+      userDropdown.classList.remove('open');
+      openChangePasswordModal();
+    });
+    dropdownButtons[1].addEventListener('click', () => {
+      userDropdown.classList.remove('open');
+      dropdownButtons[1].disabled = true;
+      // ملاحظة: الحاجز المرئي أثناء هذا النداء يأتي تلقائيًا الآن من
+      // wrapGoogleScriptRunWithBusyOverlay() -- لا حاجة لإدارة مؤشر يدويًا هنا.
+      google.script.run
+        .withSuccessHandler(() => { window.top.location.href = APP_BASE_URL; })
+        .withFailureHandler(() => { window.top.location.href = APP_BASE_URL; }) // فشل استدعاء logout لا يمنع الخروج فعليًا من الواجهة
+        .logout(CURRENT_USER_ID, masarLogoutMarker());
+    });
+
+    wireChangePasswordModal();
+  }
+
+  function openChangePasswordModal() {
+    document.getElementById('cp-title').textContent = t('changePasswordTitle');
+    document.getElementById('cp-oldLabel').textContent = t('oldPasswordLbl');
+    document.getElementById('cp-newLabel').textContent = t('newPasswordLbl');
+    document.getElementById('cp-cancelBtn').textContent = t('cancelBtn');
+    document.getElementById('cp-saveBtn').textContent = t('saveBtn');
+    document.getElementById('cp-fOldPassword').value = '';
+    document.getElementById('cp-fNewPassword').value = '';
+    document.getElementById('cp-errorBanner').classList.remove('show');
+    document.getElementById('changePasswordOverlay').classList.add('open');
+  }
+
+  function wireChangePasswordModal() {
+    document.getElementById('cp-cancelBtn').addEventListener('click', () => {
+      document.getElementById('changePasswordOverlay').classList.remove('open');
+    });
+    document.getElementById('cp-saveBtn').addEventListener('click', () => {
+      const oldPassword = document.getElementById('cp-fOldPassword').value;
+      const newPassword = document.getElementById('cp-fNewPassword').value;
+      const errBanner = document.getElementById('cp-errorBanner');
+      if (!oldPassword || !newPassword) {
+        errBanner.textContent = t('changePasswordMissing');
+        errBanner.classList.add('show');
+        return;
+      }
+      const btn = document.getElementById('cp-saveBtn');
+      btn.disabled = true;
+      google.script.run
+        .withSuccessHandler(result => {
+          btn.disabled = false;
+          if (!result || !result.success) {
+            errBanner.textContent = state.lang === 'ar' ? (result && result.error ? result.error.messageAR : t('loadErrorText')) : (result && result.error ? result.error.messageEN : t('loadErrorText'));
+            errBanner.classList.add('show');
+            return;
+          }
+          document.getElementById('changePasswordOverlay').classList.remove('open');
+          showToast(t('changePasswordSuccess'));
+        })
+        .withFailureHandler(() => {
+          btn.disabled = false;
+          errBanner.textContent = t('loadErrorText');
+          errBanner.classList.add('show');
+        })
+        .changePassword(CURRENT_USER_ID, oldPassword, newPassword);
+    });
+  }
+
+  function register() {} // no-op here -- single-view pages don't need a registry
+
+  /**
+   * wrapGoogleScriptRunWithBusyOverlay() -- SPEC v1.4 (نفس تصحيح الكاشير):
+   * يستبدل google.script.run بنسخة مُغلَّفة عبر Proxy تُظهر/تُخفي حاجزًا
+   * حقيقيًا على مستوى الصفحة كاملة تلقائيًا حول كل نداء -- بلا أي تعديل
+   * على نقاط الاستدعاء في أي شاشة أدمن. عدّاد (busyCount) يدعم نداءات
+   * متزامنة متعددة بشكل صحيح.
+   */
+  function wrapGoogleScriptRunWithBusyOverlay() {
+    if (typeof google === 'undefined' || !google.script || !google.script.run) return; // بيئة اختبار محلية بلا Apps Script حقيقي
+    const realRun = google.script.run;
+    const overlay = document.getElementById('globalBusyOverlay');
+    let busyCount = 0;
+    function showBusy() { busyCount++; overlay.classList.add('show'); }
+    function hideBusy() { busyCount = Math.max(0, busyCount - 1); if (busyCount === 0) overlay.classList.remove('show'); }
+    function makeChainable(chainObj) {
+      return new Proxy({}, {
+        get(_, prop) {
+          if (prop === 'withSuccessHandler') {
+            return (fn) => makeChainable(chainObj.withSuccessHandler((...args) => { hideBusy(); fn(...args); }));
+          }
+          if (prop === 'withFailureHandler') {
+            return (fn) => makeChainable(chainObj.withFailureHandler((...args) => { hideBusy(); fn(...args); }));
+          }
+          return (...args) => { showBusy(); return chainObj[prop](...args); };
+        }
+      });
+    }
+    google.script.run = makeChainable(realRun);
+  }
+
+  function start() {
+    wrapGoogleScriptRunWithBusyOverlay();
+    wireHeader();
+    applyI18n(document.querySelector('header.topbar'), commonDict);
+    applyI18n(document.getElementById('view-products'), ProductsView.dict);
+    ProductsView.render();
+  }
+
+  return { register, showView, showToast, state, t, start, applyI18n, currentUserId: CURRENT_USER_ID };
+})();
+
+</script>
+
+<script>
+const ProductsView = (function () {
+  const root = document.getElementById('view-products');
+  // SPEC v1.4 -- no more SharedData; both containers are filled by
+  // getAllDepartments()/getAllProducts() in render() below. PRODUCTS holds
+  // catalog items (status !== PENDING_APPROVAL); PENDING_PRODUCTS holds
+  // off-catalog items awaiting their first real supply (status ===
+  // PENDING_APPROVAL) -- both come from the SAME getAllProducts() call,
+  // split client-side by status.
+  let DEPARTMENTS = [];
+  let PRODUCTS = [];
+  let PENDING_PRODUCTS = [];
+  let UNITS = []; // SPEC v1.4 -- من Lists(ListCode=UNIT)، لتوحيد إدخال الوحدة بدل نص حر
+  let MATERIAL_FAMILIES = []; // SPEC v1.4 -- من Lists(ListCode=MATERIAL_FAMILY)، قابلة للإدارة من شاشة القوائم
+
+  const dict = {
+    ar: {
+      roleName: 'الأدمن',
+      changePassword: '🔑 تغيير كلمة المرور', logout: '↩ تسجيل الخروج',
+      screenTitle: 'المنتجات',
+      tabCatalog: 'الكتالوج', tabPending: 'بانتظار أول توريد',
+      addProduct: '+ منتج جديد',
+      searchPlaceholder: '🔍 ابحث بالاسم أو الرمز...', filterAll: 'الكل',
+      allDepartments: 'كل الأقسام', allMaterialFamilies: 'كل العائلات', sortAlpha: 'ترتيب أبجدي',
+      noResultsFound: 'لا نتائج مطابقة — جرِّب تعديل البحث أو الفلاتر',
+      productCode: 'رمز المنتج', productType: 'النوع', typeFinished: 'منتج نهائي', typeRaw: 'مادة أولية',
+      nameAr: 'الاسم (عربي)', nameEn: 'الاسم (إنجليزي)', department: 'القسم المنتج', unit: 'الوحدة',
+      materialFamily: 'تصنيف عائلة المادة',
+      matDurable: 'عتاد دائم', matPackaging: 'علب وتغليف', matCleaning: 'مواد تنظيف',
+      matDryFood: 'مواد غذائية جافة', matColdFood: 'مواد غذائية باردة', matFrozenFood: 'مواد غذائية مجمدة',
+      normalAllowed: 'يُطلَب في الطلبية العادية', specialAllowed: 'يُطلَب في الطلبية الخاصة',
+      salePrice: 'سعر البيع (لا يظهر للكاشير، للفاتورة فقط)',
+      imageAttach: 'إرفاق صورة', imageAttached: 'صورة مرفقة ✓',
+      saveFirstForImage: 'احفظ الصنف أولًا قبل إرفاق صورة', uploadingImage: 'جارٍ الرفع...',
+      toastImageUploaded: 'أُرفقت الصورة بنجاح',
+      cancelBtn: 'إلغاء', saveBtn: 'حفظ',
+      newProductTitle: 'منتج جديد', editProductTitle: 'تعديل منتج',
+      inactiveTag: 'غير نشط',
+      emptyPending: 'لا توجد أصناف بانتظار أول توريد حاليًا',
+      pendingHint: 'ناشئ من طلب خاص خارج الكتالوج',
+      pendingLinked: 'الطلبية المرتبطة',
+      pendingNote: 'غير ظاهر للكاشير حتى يُفعَّل بعد وصول أول توريد فعلي',
+      editBtn: 'تعديل البيانات', activateBtn: '✅ تفعيل (وصل أول توريد)',
+      toastCreated: 'أُنشئ المنتج بنجاح', toastUpdated: 'حُفظت التعديلات بنجاح',
+      toastCreatedNowAddPhoto: '✅ أُنشئ الصنف بنجاح — يمكنك الآن إرفاق صورة له',
+      toastActivated: 'فُعِّل المنتج — أصبح ظاهرًا للكاشير الآن',
+      toastMissingPrice: 'السعر إلزامي لكل صنف',
+      loadingText: 'جارٍ التحميل...', loadErrorText: 'تعذّر تحميل البيانات — أعد المحاولة',
+      legacyUnitNote: 'قيمة سابقة',
+      choosePlaceholder: '-- اختر --', toastMissingRequired: 'الرجاء اختيار الوحدة والقسم/التصنيف المناسبَين'
+    },
+    en: {
+      roleName: 'Admin',
+      changePassword: '🔑 Change password', logout: '↩ Log out',
+      screenTitle: 'Products',
+      tabCatalog: 'Catalog', tabPending: 'Awaiting first supply',
+      addProduct: '+ New product',
+      searchPlaceholder: '🔍 Search by name or code...', filterAll: 'All',
+      allDepartments: 'All departments', allMaterialFamilies: 'All families', sortAlpha: 'Sort alphabetically',
+      noResultsFound: 'No matching results — try adjusting search or filters',
+      productCode: 'Product code', productType: 'Type', typeFinished: 'Finished goods', typeRaw: 'Raw material',
+      nameAr: 'Name (Arabic)', nameEn: 'Name (English)', department: 'Producing department', unit: 'Unit',
+      materialFamily: 'Material family',
+      matDurable: 'Durable equipment', matPackaging: 'Packaging', matCleaning: 'Cleaning supplies',
+      matDryFood: 'Dry food', matColdFood: 'Cold food', matFrozenFood: 'Frozen food',
+      normalAllowed: 'Orderable in normal orders', specialAllowed: 'Orderable in special orders',
+      salePrice: "Sale price (not shown to cashier, invoice use only)",
+      imageAttach: 'Attach photo', imageAttached: 'Photo attached ✓',
+      saveFirstForImage: 'Save the item first before attaching a photo', uploadingImage: 'Uploading...',
+      toastImageUploaded: 'Photo uploaded successfully',
+      cancelBtn: 'Cancel', saveBtn: 'Save',
+      newProductTitle: 'New product', editProductTitle: 'Edit product',
+      inactiveTag: 'Inactive',
+      emptyPending: 'No items awaiting first supply right now',
+      pendingHint: 'Originated from a special off-catalog request',
+      pendingLinked: 'Linked order',
+      pendingNote: "Not visible to the cashier until activated after the first real supply arrives",
+      editBtn: 'Edit details', activateBtn: '✅ Activate (first supply arrived)',
+      toastCreated: 'Product created successfully', toastUpdated: 'Changes saved successfully',
+      toastCreatedNowAddPhoto: '✅ Item created successfully — you can now attach a photo',
+      toastActivated: 'Product activated — now visible to the cashier',
+      toastMissingPrice: 'Price is required for every item',
+      loadingText: 'Loading...', loadErrorText: 'Could not load data — please try again',
+      legacyUnitNote: 'previous value',
+      choosePlaceholder: '-- Choose --', toastMissingRequired: 'Please choose the appropriate unit and department/family'
+    }
+  };
+
+  const state = { activeTab: 'CATALOG', editingProductId: null, editingPendingId: null, editingProductImageId: null,
+    searchQuery: '', filterType: 'ALL', filterSub: '', sortAlpha: false };
+  function t(key) { const v = dict[Core.state.lang] && dict[Core.state.lang][key]; return v !== undefined ? v : Core.t(key); }
+
+  /**
+   * showApiError(result) -- SPEC v1.4 (إصلاح خطأ حقيقي، اكتُشف أثناء تشخيص
+   * بلاغ مستخدم مباشر: حفظ مادة أولية كان يفشل دومًا برسالة عامة "تعذّر
+   * تنفيذ العملية" لا تُفسِّر شيئًا -- السبب الفعلي (MATERIAL_FAMILY_REQUIRED)
+   * كان يصل من الخادم بدقة تامة، لكن الواجهة كانت تتجاهله وتعرض رسالة عامة
+   * دومًا مهما كان الخطأ الحقيقي. الآن: تعرض رسالة الخادم المحدَّدة إن
+   * وُجدت، ولا تلجأ للرسالة العامة إلا حين لا توجد أي تفاصيل من الخادم أصلًا.
+   */
+  function showApiError(result) {
+    const specific = result && result.error && (Core.state.lang === 'ar' ? result.error.messageAR : result.error.messageEN);
+    Core.showToast(specific || t('loadErrorText'));
+  }
+  function prodName(p) { return Core.state.lang === 'ar' ? p.nameAR : p.nameEN; }
+  function deptDisplayName(p) {
+    if (!p.departmentId) return t('typeRaw');
+    return (Core.state.lang === 'ar' ? p.departmentNameAR : p.departmentNameEN) || t('typeRaw');
+  }
+
+  function updateTabLabels() {
+    root.querySelector('#pr-tabCatalog').innerHTML = `${t('tabCatalog')} <span class="count">(${PRODUCTS.length})</span>`;
+    root.querySelector('#pr-tabPending').innerHTML = `${t('tabPending')} <span class="count">(${PENDING_PRODUCTS.length})</span>`;
+  }
+
+  /**
+   * getFilteredProducts() -- SPEC v1.4 (طلب مباشر: القائمة طويلة جدًّا،
+   * تحتاج بحثًا وفلترة). يُطبَّق بالترتيب: النوع ← الفئة الفرعية (قسم
+   * للمنتج النهائي / عائلة مادة للمادة الأولية) ← نص البحث ← الترتيب
+   * الأبجدي الاختياري. القائمة الأصلية PRODUCTS لا تُعدَّل أبدًا -- هذه
+   * الدالة تُرجع نسخة مُصفَّاة جديدة في كل استدعاء.
+   */
+  function getFilteredProducts() {
+    let list = PRODUCTS.slice();
+    if (state.filterType !== 'ALL') {
+      list = list.filter(p => p.productType === state.filterType);
+    }
+    if (state.filterSub) {
+      if (state.filterType === 'FINISHED_GOODS') list = list.filter(p => p.departmentId === state.filterSub);
+      else if (state.filterType === 'RAW_MATERIAL') list = list.filter(p => p.materialFamily === state.filterSub);
+    }
+    if (state.searchQuery.trim()) {
+      const q = state.searchQuery.trim().toLowerCase();
+      list = list.filter(p => (p.nameAR || '').toLowerCase().includes(q) || (p.nameEN || '').toLowerCase().includes(q) || (p.productCode || '').toLowerCase().includes(q));
+    }
+    if (state.sortAlpha) {
+      list.sort((a, b) => prodName(a).localeCompare(prodName(b), Core.state.lang === 'ar' ? 'ar' : 'en'));
+    }
+    return list;
+  }
+
+  function renderCatalogTab() {
+    const wrap = root.querySelector('#pr-tabContent');
+    wrap.innerHTML = `
+      <button class="add-btn" id="pr-addProdBtn">${t('addProduct')}</button>
+      <div class="filter-bar">
+        <input type="text" id="pr-searchInput" class="search-input" placeholder="${t('searchPlaceholder')}" value="${state.searchQuery}">
+        <div class="type-filter-row">
+          <button class="type-filter-btn ${state.filterType === 'ALL' ? 'active' : ''}" data-filter-type="ALL">${t('filterAll')}</button>
+          <button class="type-filter-btn ${state.filterType === 'FINISHED_GOODS' ? 'active' : ''}" data-filter-type="FINISHED_GOODS">${t('typeFinished')}</button>
+          <button class="type-filter-btn ${state.filterType === 'RAW_MATERIAL' ? 'active' : ''}" data-filter-type="RAW_MATERIAL">${t('typeRaw')}</button>
+        </div>
+        <div id="pr-subFilterWrap"></div>
+        <label class="sort-toggle-row"><input type="checkbox" id="pr-sortAlpha" ${state.sortAlpha ? 'checked' : ''}> <span>${t('sortAlpha')}</span></label>
+      </div>
+      <div class="card" id="pr-prodList"></div>`;
+    root.querySelector('#pr-addProdBtn').addEventListener('click', () => openProductModal(null));
+
+    root.querySelector('#pr-searchInput').addEventListener('input', (e) => {
+      state.searchQuery = e.target.value;
+      renderProductList(); // القائمة فقط -- لا يُعاد بناء شريط البحث نفسه، فلا يُفقَد التركيز أثناء الكتابة
+    });
+    root.querySelectorAll('[data-filter-type]').forEach(el => {
+      el.addEventListener('click', () => {
+        state.filterType = el.getAttribute('data-filter-type');
+        state.filterSub = ''; // النوع تغيَّر -- الفئة الفرعية السابقة لم تعد ذات معنى
+        renderCatalogTab(); // إعادة بناء كاملة هنا مقبولة (تغيير نوع لا يحدث أثناء كتابة متصلة)
+      });
+    });
+    root.querySelector('#pr-sortAlpha').addEventListener('change', (e) => {
+      state.sortAlpha = e.target.checked;
+      renderProductList();
+    });
+
+    renderSubFilter();
+    renderProductList();
+  }
+
+  /** renderSubFilter() -- فئة فرعية ديناميكية: أقسام للمنتج النهائي، عائلات مواد للمادة الأولية، غائبة كليًا لـ"الكل" */
+  function renderSubFilter() {
+    const wrap = root.querySelector('#pr-subFilterWrap');
+    if (state.filterType === 'FINISHED_GOODS') {
+      wrap.innerHTML = `<select id="pr-subFilterSelect"><option value="">${t('allDepartments')}</option>${DEPARTMENTS.filter(d => d.active).map(d => `<option value="${d.departmentId}" ${state.filterSub === d.departmentId ? 'selected' : ''}>${Core.state.lang === 'ar' ? d.nameAR : d.nameEN}</option>`).join('')}</select>`;
+    } else if (state.filterType === 'RAW_MATERIAL') {
+      wrap.innerHTML = `<select id="pr-subFilterSelect"><option value="">${t('allMaterialFamilies')}</option>${MATERIAL_FAMILIES.map(m => `<option value="${m.valueAR}" ${state.filterSub === m.valueAR ? 'selected' : ''}>${m.valueAR}</option>`).join('')}</select>`;
+    } else {
+      wrap.innerHTML = '';
+      return;
+    }
+    root.querySelector('#pr-subFilterSelect').addEventListener('change', (e) => {
+      state.filterSub = e.target.value;
+      renderProductList();
+    });
+  }
+
+  /** renderProductList() -- تُحدِّث قائمة النتائج فقط، بلا لمس شريط البحث/الفلاتر نفسه */
+  function renderProductList() {
+    const list = root.querySelector('#pr-prodList');
+    const filtered = getFilteredProducts();
+    if (!filtered.length) {
+      list.innerHTML = `<div class="empty-state">${t('noResultsFound')}</div>`;
+      return;
+    }
+    list.innerHTML = filtered.map(p => {
+      const inactive = p.status === 'INACTIVE';
+      const typeBadge = p.productType === 'FINISHED_GOODS'
+        ? `<span class="type-badge finished">${t('typeFinished')}</span>`
+        : `<span class="type-badge raw">${t('typeRaw')}</span>`;
+      return `
+        <button class="prod-row ${inactive ? 'inactive' : ''}" type="button" data-prod="${p.productId}">
+          <div class="prod-main">
+            <div class="prod-name">${prodName(p)} ${inactive ? '· <span class=\\"inactive-tag\\">' + t('inactiveTag') + '</span>' : ''}</div>
+            <div class="prod-sub">${p.productCode} · ${deptDisplayName(p)} · ${p.unitId}</div>
+          </div>
+          ${typeBadge}
+        </button>`;
+    }).join('');
+    list.querySelectorAll('[data-prod]').forEach(el => {
+      el.addEventListener('click', () => openProductModal(el.getAttribute('data-prod')));
+    });
+  }
+
+  function renderPendingTab() {
+    const wrap = root.querySelector('#pr-tabContent');
+    if (!PENDING_PRODUCTS.length) { wrap.innerHTML = `<div class="card"><div class="empty-state">${t('emptyPending')}</div></div>`; return; }
+    wrap.innerHTML = `<div class="card" id="pr-pendingList"></div>`;
+    const list = root.querySelector('#pr-pendingList');
+    list.innerHTML = PENDING_PRODUCTS.map(p => `
+      <div class="pending-card">
+        <div class="pending-top">
+          <div class="prod-main">
+            <div class="prod-name">${prodName(p)}</div>
+            <div class="prod-sub">${p.productType === 'FINISHED_GOODS' ? t('typeFinished') : t('typeRaw')} · ${p.unitId} · ${t('pendingLinked')}: ${p.createdFromOrderItemId || '—'}</div>
+          </div>
+        </div>
+        <div class="pending-note">🔔 ${t('pendingHint')} — ${t('pendingNote')}</div>
+        <div class="pending-actions">
+          <button class="pending-btn pending-edit-btn" data-pending-edit="${p.productId}">${t('editBtn')}</button>
+          <button class="pending-btn pending-activate-btn" data-pending-activate="${p.productId}">${t('activateBtn')}</button>
+        </div>
+      </div>`).join('');
+    list.querySelectorAll('[data-pending-edit]').forEach(el => {
+      el.addEventListener('click', () => openProductModal(null, el.getAttribute('data-pending-edit')));
+    });
+    list.querySelectorAll('[data-pending-activate]').forEach(el => {
+      el.addEventListener('click', (e) => activatePending(el.getAttribute('data-pending-activate'), e.target));
+    });
+  }
+
+  function activatePending(id, btn) {
+    const idx = PENDING_PRODUCTS.findIndex(p => p.productId === id);
+    if (idx === -1) return;
+    const p = PENDING_PRODUCTS[idx];
+    if (btn) btn.disabled = true;
+    google.script.run
+      .withSuccessHandler(result => {
+        if (btn) btn.disabled = false;
+        if (!result || !result.success) { showApiError(result); return; }
+        p.status = 'ACTIVE';
+        PRODUCTS.push(p);
+        PENDING_PRODUCTS.splice(idx, 1);
+        Core.showToast(t('toastActivated'));
+        updateTabLabels();
+        renderPendingTab();
+      })
+      .withFailureHandler(() => { if (btn) btn.disabled = false; Core.showToast(t('loadErrorText')); })
+      // ملاحظة: updateProduct (على خلاف createProduct) تمرر updates مباشرة —
+      // أسماء أعمدة الشيت الفعلية (PascalCase) هنا، لا camelCase.
+      .updateProduct(Core.currentUserId, id, { ProductStatus: 'ACTIVE' });
+  }
+
+  function renderTabs() {
+    root.querySelectorAll('.tab').forEach(el => el.classList.toggle('active', el.getAttribute('data-tab') === state.activeTab));
+    if (state.activeTab === 'CATALOG') renderCatalogTab(); else renderPendingTab();
+  }
+
+  root.querySelectorAll('.tab').forEach(el => {
+    el.addEventListener('click', () => { state.activeTab = el.getAttribute('data-tab'); renderTabs(); });
+  });
+
+  function populateDeptSelect() {
+    // SPEC v1.4 (إصلاح خطأ حقيقي، بلاغ مستخدم مباشر: القسم يحتفظ بقيمة
+    // افتراضية "قسم الكنافة" بعد تفريغ النموذج لمواصلة إضافة أصناف): خيار
+    // نائب فارغ الآن يمنع السقوط الصامت لأول قسم في القائمة حين لا صنف محدَّد.
+    root.querySelector('#pr-fDept').innerHTML = `<option value="">${t('choosePlaceholder')}</option>` +
+      DEPARTMENTS.filter(d => d.active).map(d => `<option value="${d.departmentId}">${Core.state.lang === 'ar' ? d.nameAR : d.nameEN}</option>`).join('');
+  }
+
+  /**
+   * populateUnitSelect() -- SPEC v1.4 (ملاحظة مستخدم مباشرة: الوحدة كانت
+   * نصًّا حرًّا، تحتاج قائمة منسدلة لتوحيد الإدخال). Products.UnitID رغم
+   * تسميته في DATABASE.md كـ"FK→Lists:UNIT"، البيانات الفعلية والاستخدام
+   * الفعلي عبر النظام كله (شارة الوحدة عند الكاشير، إلخ) يعامله كنص عرض
+   * مباشر (valueAR) لا معرِّف يحتاج ربطًا -- القيمة المخزَّنة هنا هي valueAR
+   * نفسها، حفاظًا على التوافق التام مع كل بيانات المنتجات الموجودة فعليًا.
+   * SPEC v1.4 (إصلاح لاحق): خيار نائب فارغ لنفس سبب القسم أعلاه بالضبط.
+   */
+  function populateUnitSelect() {
+    root.querySelector('#pr-fUnit').innerHTML = `<option value="">${t('choosePlaceholder')}</option>` +
+      UNITS.map(u => `<option value="${u.valueAR}">${u.valueAR}</option>`).join('');
+  }
+
+  /** populateMaterialFamilySelect() -- SPEC v1.4: تصنيف عائلة المادة أصبح
+   * قابلًا للإدارة من شاشة "القوائم وإعدادات النظام ← القوائم" مباشرة، لا
+   * قيمًا ثابتة في الكود -- نفس نمط الوحدة بالضبط، القيمة المخزَّنة valueAR.
+   * خيار نائب فارغ لنفس السبب أيضًا. */
+  function populateMaterialFamilySelect() {
+    root.querySelector('#pr-fMaterialFamily').innerHTML = `<option value="">${t('choosePlaceholder')}</option>` +
+      MATERIAL_FAMILIES.map(m => `<option value="${m.valueAR}">${m.valueAR}</option>`).join('');
+  }
+
+  function toggleConditionalFields() {
+    const type = root.querySelector('#pr-fType').value;
+    root.querySelector('#pr-deptField').classList.toggle('show', type === 'FINISHED_GOODS');
+    root.querySelector('#pr-materialFamilyField').classList.toggle('show', type === 'RAW_MATERIAL');
+  }
+
+  function openProductModal(productId, pendingId) {
+    state.editingProductId = productId;
+    state.editingPendingId = pendingId || null;
+    populateDeptSelect();
+    populateUnitSelect();
+    populateMaterialFamilySelect();
+    const p = productId ? PRODUCTS.find(x => x.productId === productId) : (pendingId ? PENDING_PRODUCTS.find(x => x.productId === pendingId) : null);
+    const saveBtn = root.querySelector('#pr-modalSaveBtn');
+    if (saveBtn._resetArmed) saveBtn._resetArmed();
+
+    root.querySelector('#pr-modalTitle').textContent = p ? t('editProductTitle') : t('newProductTitle');
+    root.querySelector('#pr-fCode').value = p && p.productCode ? p.productCode : '';
+    // SPEC v1.4 (ملاحظة مستخدم مباشرة) -- الرمز يُولَّد خادميًا دائمًا، لا يُعرَض
+    // حقل إدخاله إلا للعلم عند التعديل، ويُخفى كليًا عند الإنشاء (لا رمز بعد).
+    root.querySelector('#pr-codeField').style.display = p ? 'flex' : 'none';
+    root.querySelector('#pr-fType').value = p ? p.productType : 'FINISHED_GOODS';
+    root.querySelector('#pr-fNameAr').value = p ? p.nameAR : '';
+    root.querySelector('#pr-fNameEn').value = p ? (p.nameEN || '') : '';
+    // SPEC v1.4: إن كانت قيمة الوحدة الحالية للمنتج غير موجودة في قائمة UNIT
+    // المعتمدة (بيانات قديمة سابقة على توحيد القائمة)، تُضاف كخيار إضافي مؤقت
+    // كي تبقى ظاهرة وواضحة لا تُفقَد أو تُستبدَل صامتًا بأول خيار في القائمة.
+    // SPEC v1.4 (إصلاح خطأ حقيقي لاحق): كانت UNITS[0] تُستخدَم كافتراض صامت
+    // لصنف جديد -- بلاغ مباشر: "الوحدة تحتفظ بـ'قطعة' بعد تفريغ النموذج".
+    // الآن: نص فارغ فعليًا لصنف جديد، فيظهر خيار "اختر" النائب بدل أول وحدة.
+    const currentUnit = p ? p.unitId : '';
+    const unitSelect = root.querySelector('#pr-fUnit');
+    if (currentUnit && !UNITS.some(u => u.valueAR === currentUnit)) {
+      unitSelect.insertAdjacentHTML('afterbegin', `<option value="${currentUnit}">${currentUnit} (${t('legacyUnitNote')})</option>`);
+    }
+    unitSelect.value = currentUnit;
+    root.querySelector('#pr-fDept').value = p && p.departmentId ? p.departmentId : '';
+    root.querySelector('#pr-fMaterialFamily').value = p && p.materialFamily ? p.materialFamily : '';
+    root.querySelector('#pr-fPrice').value = p && p.salePrice !== null && p.salePrice !== undefined ? p.salePrice : '';
+    // SPEC v1.4 (تصحيح جوهري -- اعتراض محقّ من صاحب المشروع: القيد السابق
+    // "احفظ أولًا" كان تفصيل تنفيذ داخليًا تسرَّب كقيد على المستخدم بلا مبرر
+    // حقيقي). الزر نشط دائمًا الآن، لصنف جديد أو موجود على حدٍّ سواء. لصنف
+    // جديد: الرفع يحدث فورًا عند اختيار الملف (uploadProductImage بلا
+    // productId)، والمعرِّف الناتج يُحفَظ محليًا (pendingImageFileId) لحين
+    // الحفظ الفعلي حيث يُرفَق ضمن نداء createProduct نفسه -- خطوة مستخدم
+    // واحدة متصلة، لا حفظ ثم إعادة فتح.
+    state.editingProductImageId = p ? p.productId : null;
+    state.pendingImageFileId = null; // يُصفَّر مع كل فتح جديد للمِعرَض
+    root.querySelector('#pr-imageFileInput').value = '';
+    updateImageBtn(p ? p.imageFileId : '');
+    toggleConditionalFields();
+    root.querySelector('#pr-prodModal').classList.add('open');
+  }
+
+  function updateImageBtn(imageFileId) {
+    const btn = root.querySelector('#pr-imageBtn');
+    const preview = root.querySelector('#pr-imagePreview');
+    btn.classList.toggle('attached', !!imageFileId);
+    root.querySelector('#pr-imageBtnLabel').textContent = imageFileId ? t('imageAttached') : t('imageAttach');
+    if (imageFileId) {
+      // SPEC v1.4 (إصلاح خطأ جذري حقيقي، اكتُشف بفحص محتوى استجابة الخادم
+      // الخام حرفيًا): النمط النصي الحرفي «https ثم شرطتين مائلتين» (بادئة البروتوكول
+      // متبوعة مباشرة بشرطتين مائلتين ضمن سلسلة نصية JS مباشرة، لا عبر بديل
+      // Scriptlet خادمي) يُسبِّب اقتطاعًا صامتًا لجزء من الملف أثناء معالجة
+      // Google Apps Script الداخلية لصفحات Sandboxed iframe (يظهر هذا فقط في
+      // الاستجابة الفعلية المنشورة، لا في أي اختبار محلي -- السلسلة النصية
+      // كانت تُقطَع فعليًا عند "https:" بالضبط، تاركة سطر JS التالي بلا إغلاق
+      // علامة اقتباس، فينكسر تحليل الملف بأكمله من تلك النقطة فصاعدًا). الحل:
+      // بناء الرابط ببروتوكول نسبي (بروتوكول نسبي) بدل «https ثم شرطتين مائلتين» الحرفية -- يعمل
+      // تمامًا بنفس الطريقة في المتصفح (يرث بروتوكول الصفحة الحالية، https
+      // دائمًا هنا)، ويتجنّب النمط الحرفي المُسبِّب للمشكلة كليًا.
+      // SPEC v1.4 (الإصلاح الحقيقي أخيرًا، بعد فحص المحتوى الخام مرتين):
+      // اكتُشف أن السبب ليس «https ثم شرطتين مائلتين» تحديدًا، بل أي شرطتين مائلتين
+      // متتاليتين «شرطتين مائلتين» في الكود المصدري -- تُعامَل كبداية تعليق جافاسكريبت
+      // من طرف آلية غوغل الداخلية، حتى داخل نص بين علامتَي اقتباس، فتُحذَف
+      // كل ما بعدهما في نفس السطر. المحاولة السابقة (بروتوكول نسبي //...)
+      // نقلت المشكلة لا حلَّتها. الحل الفعلي: لا تلاقي شرطتين مائلتين في
+      // الكود المصدري إطلاقًا -- تُبنى كل شرطة كحرف منفصل ثم تُلحَق وقت
+      // التنفيذ، لا وقت كتابة الكود، فتُنتِج القيمة الصحيحة دون أن يظهر
+      // النمط الخطر «شرطتين مائلتين» في أي سطر مصدري على الإطلاق.
+      const slash = String.fromCharCode(47);
+      preview.src = 'https:' + slash + slash + 'drive.google.com' + slash + 'thumbnail?id=' + encodeURIComponent(imageFileId) + '&sz=w300';
+      preview.style.display = 'block';
+    } else {
+      preview.style.display = 'none';
+    }
+  }
+
+  root.querySelector('#pr-imageBtn').addEventListener('click', () => {
+    if (state.imageUploadInProgress) return; // منع نقر مزدوج أثناء الرفع فقط
+    root.querySelector('#pr-imageFileInput').click();
+  });
+
+  /**
+   * رفع حقيقي فوري لحظة اختيار الملف -- لصنف جديد لم يُحفَظ بعد أيضًا
+   * (uploadProductImage تقبل الآن productId فارغًا، ترفع للملف فقط وتُرجع
+   * imageFileId بلا لمس أي صف). لصنف موجود: يُحدَّث صفّه فورًا كما كان
+   * تمامًا. لصنف جديد: المعرِّف يُخزَّن في pendingImageFileId، يُرفَق لاحقًا
+   * ضمن createProduct عند الحفظ الفعلي.
+   */
+  root.querySelector('#pr-imageFileInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const productId = state.editingProductImageId; // null لصنف جديد -- مقصود
+    const btn = root.querySelector('#pr-imageBtn');
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64Data = reader.result.split(',')[1]; // إزالة رأس data:mime;base64,
+      state.imageUploadInProgress = true;
+      btn.classList.add('soft-disabled');
+      root.querySelector('#pr-imageBtnLabel').textContent = t('uploadingImage');
+      google.script.run
+        .withSuccessHandler(result => {
+          state.imageUploadInProgress = false;
+          btn.classList.remove('soft-disabled');
+          if (!result || !result.success) { Core.showToast(t('loadErrorText')); updateImageBtn(productId ? '' : ''); return; }
+          if (productId) {
+            const p = PRODUCTS.find(x => x.productId === productId);
+            if (p) p.imageFileId = result.data.imageFileId;
+          } else {
+            state.pendingImageFileId = result.data.imageFileId; // صنف جديد -- يُرفَق عند الحفظ
+          }
+          updateImageBtn(result.data.imageFileId);
+          Core.showToast(t('toastImageUploaded'));
+        })
+        .withFailureHandler(() => { state.imageUploadInProgress = false; btn.classList.remove('soft-disabled'); Core.showToast(t('loadErrorText')); updateImageBtn(''); })
+        .uploadProductImage(Core.currentUserId, productId, base64Data, file.type, file.name);
+    };
+    reader.readAsDataURL(file);
+  });
+
+  root.querySelector('#pr-fType').addEventListener('change', toggleConditionalFields);
+  root.querySelector('#pr-modalCancelBtn').addEventListener('click', () => root.querySelector('#pr-prodModal').classList.remove('open'));
+
+  (function () {
+    const btn = root.querySelector('#pr-modalSaveBtn');
+    let armed = false;
+    let timer = null;
+    btn._resetArmed = function () {
+      armed = false;
+      clearTimeout(timer);
+      btn.classList.remove('confirm-armed');
+      btn.textContent = t('saveBtn');
+    };
+    btn.addEventListener('click', () => {
+      // SPEC v1.4 (ملاحظة مستخدم مباشرة): كل الأصناف تُطلَب في الطلبية
+      // العادية والخاصة معًا دومًا في الواقع الفعلي -- لا حالة فعلية واحدة
+      // احتاجت الفصل بينهما. أُزيل الاختياران، وأصبحت القيمتان ثابتتين
+      // دومًا true بدل حقلين يتطلَّبان نقرًا لا فائدة حقيقية منه.
+      const normal = true;
+      const special = true;
+      const priceStr = root.querySelector('#pr-fPrice').value;
+      const priceInput = root.querySelector('#pr-fPrice');
+      if (!priceStr) {
+        priceInput.classList.add('needs-value');
+        Core.showToast(t('toastMissingPrice'));
+        return;
+      }
+      priceInput.classList.remove('needs-value');
+
+      // SPEC v1.4 (إصلاح خطأ حقيقي مرتبط): بعد إزالة الافتراض الصامت لأول
+      // خيار في قوائم الوحدة/القسم/التصنيف، أصبح ممكنًا فعليًا ترك أحدها
+      // فارغًا -- تحقّق صريح هنا (قبل مرحلة التأكيد بنقرتين، بنفس منطق
+      // التحقّق من السعر أعلاه تمامًا) بدل إرسال قيم فارغة للخادم صامتًا.
+      const typeForValidation = root.querySelector('#pr-fType').value;
+      const unitIdForValidation = root.querySelector('#pr-fUnit').value;
+      const deptForValidation = typeForValidation === 'FINISHED_GOODS' ? root.querySelector('#pr-fDept').value : '';
+      const familyForValidation = typeForValidation === 'RAW_MATERIAL' ? root.querySelector('#pr-fMaterialFamily').value : '';
+      if (!unitIdForValidation || (typeForValidation === 'FINISHED_GOODS' && !deptForValidation) || (typeForValidation === 'RAW_MATERIAL' && !familyForValidation)) {
+        Core.showToast(t('toastMissingRequired'));
+        return;
+      }
+
+      if (!armed) {
+        armed = true;
+        btn.classList.add('confirm-armed');
+        btn.textContent = Core.state.lang === 'ar' ? '👆 اضغط مرة أخرى للتأكيد' : '👆 Tap again to confirm';
+        timer = setTimeout(() => { armed = false; btn.classList.remove('confirm-armed'); btn.textContent = t('saveBtn'); }, 2800);
+        return;
+      }
+      clearTimeout(timer);
+      armed = false;
+      btn.classList.remove('confirm-armed');
+      btn.textContent = t('saveBtn');
+
+      const type = root.querySelector('#pr-fType').value;
+      const productCode = root.querySelector('#pr-fCode').value.trim();
+      const nameAR = root.querySelector('#pr-fNameAr').value.trim();
+      const nameEN = root.querySelector('#pr-fNameEn').value.trim();
+      const unitId = root.querySelector('#pr-fUnit').value;
+      const departmentId = type === 'FINISHED_GOODS' ? root.querySelector('#pr-fDept').value : '';
+      const materialFamily = type === 'RAW_MATERIAL' ? root.querySelector('#pr-fMaterialFamily').value : '';
+      const price = (normal || special) ? parseFloat(priceStr) : null;
+      btn.disabled = true;
+
+      if (state.editingProductId) {
+        google.script.run
+          .withSuccessHandler(result => {
+            btn.disabled = false;
+            if (!result || !result.success) { showApiError(result); return; }
+            const p = PRODUCTS.find(x => x.productId === state.editingProductId);
+            Object.assign(p, { productCode, productType: type, nameAR, nameEN, unitId, departmentId, materialFamily, normalOrderAllowed: normal, specialOrderAllowed: special, salePrice: price });
+            Core.showToast(t('toastUpdated'));
+            root.querySelector('#pr-prodModal').classList.remove('open');
+            updateTabLabels();
+            renderCatalogTab();
+          })
+          .withFailureHandler(() => { btn.disabled = false; Core.showToast(t('loadErrorText')); })
+          // ملاحظة: updateProduct (على خلاف createProduct) تمرر updates مباشرة —
+          // أسماء أعمدة الشيت الفعلية (PascalCase) هنا، لا camelCase.
+          .updateProduct(Core.currentUserId, state.editingProductId, {
+            ProductCode: productCode, ProductType: type, ProductNameAR: nameAR, ProductNameEN: nameEN,
+            UnitID: unitId, DepartmentID: departmentId, MaterialFamily: materialFamily, NormalOrderAllowed: normal, SpecialOrderAllowed: special, SalePrice: price
+          });
+      } else if (state.editingPendingId) {
+        google.script.run
+          .withSuccessHandler(result => {
+            btn.disabled = false;
+            if (!result || !result.success) { showApiError(result); return; }
+            const p = PENDING_PRODUCTS.find(x => x.productId === state.editingPendingId);
+            Object.assign(p, { nameAR, nameEN, productType: type, unitId });
+            Core.showToast(t('toastUpdated'));
+            root.querySelector('#pr-prodModal').classList.remove('open');
+            renderPendingTab();
+          })
+          .withFailureHandler(() => { btn.disabled = false; Core.showToast(t('loadErrorText')); })
+          .updateProduct(Core.currentUserId, state.editingPendingId, {
+            ProductNameAR: nameAR, ProductNameEN: nameEN, ProductType: type, UnitID: unitId
+          });
+      } else {
+        google.script.run
+          .withSuccessHandler(result => {
+            btn.disabled = false;
+            if (!result || !result.success) { showApiError(result); return; }
+            const dept = DEPARTMENTS.find(d => d.departmentId === departmentId);
+            const attachedImageId = state.pendingImageFileId || '';
+            const newProduct = {
+              productId: result.data.productId, productCode: result.data.productCode, productType: type, nameAR, nameEN, unitId,
+              departmentId, materialFamily, departmentNameAR: dept ? dept.nameAR : '', departmentNameEN: dept ? dept.nameEN : '',
+              normalOrderAllowed: normal, specialOrderAllowed: special, salePrice: price, status: 'ACTIVE', imageFileId: attachedImageId
+            };
+            PRODUCTS.push(newProduct);
+            updateTabLabels();
+            renderCatalogTab();
+            // SPEC v1.4 (تصحيح مباشر بطلب صاحب المشروع -- وضع "تعديل" بعد
+            // الحفظ أُلغي عمدًا): المِعرَض يبقى مفتوحًا لكن يُعاد ضبطه إلى
+            // نموذج "منتج جديد" فارغ تمامًا (لا بيانات الصنف الذي حُفظ للتو
+            // متبقية بأي شكل) -- يسمح بإضافة أصناف متتالية بسرعة بلا إغلاق
+            // وإعادة فتح المِعرَض في كل مرة. openProductModal(null) نفسها
+            // (لا نسخة مختصرة موازية) تضمن تفريغًا حقيقيًا كاملًا مطابقًا
+            // تمامًا لأول فتح للمِعرَض، لا حالة وسيطة قد تُبقي أثرًا خفيًّا.
+            Core.showToast(t('toastCreated'));
+            openProductModal(null);
+          })
+          .withFailureHandler(() => { btn.disabled = false; Core.showToast(t('loadErrorText')); })
+          .createProduct(Core.currentUserId, {
+            productType: type, productNameAR: nameAR, productNameEN: nameEN,
+            departmentId, unitId, materialFamily, normalOrderAllowed: normal, specialOrderAllowed: special, salePrice: price,
+            imageFileId: state.pendingImageFileId || '' // SPEC v1.4 -- صورة اختيرت أثناء الإنشاء نفسه، إن وُجدت
+          });
+      }
+    });
+  })();
+
+  root.querySelector('#pr-backBtn').addEventListener('click', () => Core.showView('settings'));
+
+  /**
+   * render() -- SPEC v1.4: fetches getAllProducts() + getAllDepartments()
+   * (in parallel) before showing anything real. Products are split
+   * client-side by status: PENDING_APPROVAL -> PENDING_PRODUCTS tab,
+   * everything else (ACTIVE/INACTIVE) -> PRODUCTS catalog tab.
+   */
+  function render() {
+    const wrap = root.querySelector('#pr-tabContent');
+    wrap.innerHTML = `<div class="card" style="padding:20px; text-align:center; color:var(--ink-soft);">${t('loadingText')}</div>`;
+
+    let productsDone = false, deptsDone = false, unitsDone = false, hadError = false;
+    function checkBothDone() {
+      if (!productsDone || !deptsDone || !unitsDone) return;
+      if (hadError) {
+        wrap.innerHTML = `<div class="card" style="padding:20px; text-align:center; color:var(--warn);">${t('loadErrorText')}</div>`;
+        return;
+      }
+      updateTabLabels();
+      renderTabs();
+    }
+
+    google.script.run
+      .withSuccessHandler(result => {
+        productsDone = true;
+        if (!result || !result.success) { hadError = true; checkBothDone(); return; }
+        PRODUCTS = result.data.products.filter(p => p.status !== 'PENDING_APPROVAL');
+        PENDING_PRODUCTS = result.data.products.filter(p => p.status === 'PENDING_APPROVAL');
+        checkBothDone();
+      })
+      .withFailureHandler(() => { productsDone = true; hadError = true; checkBothDone(); })
+      .getAllProducts(Core.currentUserId);
+
+    google.script.run
+      .withSuccessHandler(result => {
+        deptsDone = true;
+        if (!result || !result.success) { hadError = true; checkBothDone(); return; }
+        DEPARTMENTS = result.data.departments;
+        checkBothDone();
+      })
+      .withFailureHandler(() => { deptsDone = true; hadError = true; checkBothDone(); })
+      .getAllDepartments(Core.currentUserId);
+
+    google.script.run
+      .withSuccessHandler(result => {
+        unitsDone = true;
+        if (!result || !result.success) { hadError = true; checkBothDone(); return; }
+        UNITS = result.data.items.filter(it => it.listCode === 'UNIT' && it.active).sort((a, b) => a.displayOrder - b.displayOrder);
+        MATERIAL_FAMILIES = result.data.items.filter(it => it.listCode === 'MATERIAL_FAMILY' && it.active).sort((a, b) => a.displayOrder - b.displayOrder);
+        checkBothDone();
+      })
+      .withFailureHandler(() => { unitsDone = true; hadError = true; checkBothDone(); })
+      .getAllLists(Core.currentUserId);
+  }
+
+  return { dict, render };
+})();
+Core.register('products', ProductsView);
+
+</script>
+<script>
+  Core.start();
+</script>
+
+</body>
+</html>

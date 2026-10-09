@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="ar"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مسار</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#3D2B1E"><link rel="apple-touch-icon" href="icon-192.png">
+<script src="masar-config.js"></script><script src="masar-runtime.js"></script>
+</head><body style="font-family:sans-serif;background:#FAF6F1;color:#3D2B1E"><p style="padding:24px">…</p>
+<script>
+(function () {
+  var PAGES = {"login":"login","admin":"admin_dashboard","admin_settings":"admin_settings","admin_users":"admin_users_roles","admin_stores":"admin_stores_depts","admin_products":"admin_products_v2","admin_lists":"admin_lists_settings","cashier":"cashier_dashboard","cashier_new_order":"cashier_new_order","cashier_new_special":"cashier_new_special","cashier_tracking":"cashier_tracking","cashier_receive":"cashier_receive","cashier_return":"cashier_return","cashier_edit":"cashier_edit","driver":"driver_shipments","production_section":"production_section_dashboard","production_supply_request":"production_supply_request","production_section_order":"production_section_store_order","production_manager_quarantine":"pm_quarantine","production_manager":"pm_approvals","pm_orders_overview":"pm_orders_overview","distribution_shifts":"distribution_shifts","distribution_hub":"distribution_hub","distribution_cancel_edit_review":"distribution_cancel_edit_review","distribution_pending_orders":"distribution_pending_orders","distribution_approve_order":"distribution_approve_order","distribution_receive_compare":"distribution_receive_compare","distribution_prepare_shipment":"distribution_prepare_shipment","distribution_shipments":"distribution_shipments","distribution_loading_sheet":"distribution_loading_sheet","loading_sheet_view":"loading_sheet_view","distribution_invoice":"distribution_invoice","finished_goods":"fgs_dashboard","raw_material":"rms_dashboard","rms_store_orders":"rms_store_orders","rms_store_order_detail":"rms_store_order_detail","fgs_store_orders":"fgs_store_orders","fgs_store_order_detail":"fgs_store_order_detail","management":"mgmt_reports","vehicle_coordinator":"vc_dashboard","purchasing":"po_dashboard","distribution_tracking":"distribution_tracking","production_manager_overview":"pm_overview","view_attachment":"view_attachment","print_invoice":"print_invoice"};
+  var q = new URLSearchParams(location.search);
+  var name = q.get('page') || 'login';
+  var file = Object.prototype.hasOwnProperty.call(PAGES, name) ? PAGES[name] : 'login';
+  q.delete('page');
+  var rest = q.toString();
+  location.replace(file + '.html' + (rest ? '?' + rest : ''));
+})();
+</script></body></html>

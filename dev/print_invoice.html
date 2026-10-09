@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#3D2B1E">
+<link rel="apple-touch-icon" href="icon-192.png">
+<script src="masar-config.js"></script>
+<script src="masar-runtime.js"></script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALAKER SWEETS — فاتورة</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #FAF7F1; color: #2B211B; font-family: sans-serif; padding: 20px; min-height: 100vh; }
+  .toolbar { max-width: 620px; margin: 0 auto 12px; display: flex; justify-content: flex-end; }
+  .print-btn {
+    background: #3D2B1E; color: #fff; border: none; font-family: inherit; font-size: 14px; font-weight: 600;
+    padding: 10px 20px; border-radius: 10px; cursor: pointer;
+  }
+  .sheet { max-width: 620px; margin: 0 auto; background: #fff; border: 1px solid #E7DFD2; border-radius: 12px; padding: 28px; }
+  .head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #EE7126; padding-bottom: 14px; margin-bottom: 18px; }
+  .head h1 { font-size: 20px; color: #C85A18; }
+  .head .meta { text-align: left; font-size: 12.5px; color: #6B5D52; line-height: 1.7; }
+  .head .meta b { color: #2B211B; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+  th, td { padding: 8px 6px; font-size: 13px; text-align: start; border-bottom: 1px solid #E7DFD2; }
+  th { color: #6B5D52; font-weight: 600; font-size: 11.5px; }
+  td.num, th.num { text-align: end; font-family: monospace; }
+  .total-row td { border-top: 2px solid #3D2B1E; border-bottom: none; font-weight: 700; font-size: 15px; padding-top: 12px; }
+  .empty { text-align: center; color: #6B5D52; font-size: 14px; padding: 30px 0; }
+  @media print {
+    body { background: #fff; padding: 0; }
+    .toolbar, .drive-link { display: none; }
+    .sheet { border: none; padding: 0; max-width: none; }
+  }
+</style>
+</head>
+<body>
+<div class="toolbar"><button class="print-btn" id="printBtn">🖨️ طباعة / حفظ PDF</button></div>
+<div class="sheet" id="sheet">
+  <div class="empty">جارِ التحميل...</div>
+</div>
+<script>
+  const DRIVE_ORIGIN_ = 'https:' + String.fromCharCode(47, 47) + 'drive.google.com'; // لا شرطتان مائلتان متتاليتان حرفيًا داخل نص في <script>: خلل خدمة صفحات Google يُفرغ الصفحة (انظر tests/static_check.js)
+  const CURRENT_USER_ID = MASAR_TPL.currentUserId;
+  const orderId = MASAR_TPL.currentOrderId;
+  const kind = MASAR_TPL.invoiceKind;
+
+  function fmtMoney(n) { return (Number(n) || 0).toFixed(2) + ' ر.ق'; }
+  function fmtDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return isNaN(d.getTime()) ? '' : d.toLocaleString('ar-QA-u-nu-latn', { dateStyle: 'medium', timeStyle: 'short' });
+  }
+
+  function renderInvoice(orderData, invoice) {
+    if (!invoice) {
+      document.getElementById('sheet').innerHTML = '<div class="empty">لا توجد فاتورة لعرضها</div>';
+      return;
+    }
+    const storeName = orderData.storeNameAR || orderData.storeNameEN || '';
+    const rows = invoice.items.map(it => `
+      <tr>
+        <td>${it.nameAR || it.nameEN}</td>
+        <td class="num">${it.qty} ${it.unitId}</td>
+        <td class="num">${fmtMoney(it.price)}</td>
+        <td class="num">${fmtMoney(it.lineTotal)}</td>
+      </tr>`).join('');
+    const total = invoice.items.reduce((sum, it) => sum + it.lineTotal, 0);
+    document.getElementById('sheet').innerHTML = `
+      <div class="head">
+        <div>
+          <h1>ALAKER SWEETS</h1>
+          <div style="font-size:12.5px; color:#6B5D52; margin-top:4px;">${kind === 'raw' ? 'فاتورة مواد أولية' : 'فاتورة منتجات'}</div>
+        </div>
+        <div class="meta">
+          <div><b>${invoice.invoiceNumber || invoice.invoiceId}</b></div>
+          <div>${storeName}</div>
+          <div>${orderId}</div>
+          <div>${fmtDate(invoice.issuedAt)}</div>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>الصنف</th><th class="num">الكمية</th><th class="num">سعر الوحدة</th><th class="num">الإجمالي</th></tr></thead>
+        <tbody>${rows}</tbody>
+        <tfoot><tr class="total-row"><td colspan="3">الإجمالي الكلي</td><td class="num">${fmtMoney(total)}</td></tr></tfoot>
+      </table>
+      ${!invoice.issued ? '<div class="empty" style="color:#B4802A;">⚠️ هذه معاينة أولية — الفاتورة لم تُصدَر نهائيًا بعد، والسعر قابل للتغيير</div>' : ''}
+      ${invoice.pdfFileId ? '<div class="drive-link" style="text-align:center; margin-top:10px;"><a href="' + DRIVE_ORIGIN_ + '/file/d/' + invoice.pdfFileId + '/view" target="_blank" style="font-size:12.5px; color:#C85A18;">📁 فتح النسخة المحفوظة على Drive</a></div>' : ''}
+    `;
+  }
+
+  google.script.run
+    .withSuccessHandler(result => {
+      if (!result || !result.success) {
+        document.getElementById('sheet').innerHTML = '<div class="empty">تعذّر تحميل الفاتورة</div>';
+        return;
+      }
+      const invoice = kind === 'raw' ? result.data.rawInvoice : result.data.goodsInvoice;
+      renderInvoice(result.data, invoice);
+    })
+    .withFailureHandler(() => {
+      document.getElementById('sheet').innerHTML = '<div class="empty">تعذّر تحميل الفاتورة</div>';
+    })
+    .getInvoiceDetail(CURRENT_USER_ID, orderId);
+
+  document.getElementById('printBtn').addEventListener('click', () => window.print());
+</script>
+</body>
+</html>

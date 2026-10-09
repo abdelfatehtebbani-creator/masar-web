@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#3D2B1E">
+<link rel="apple-touch-icon" href="icon-192.png">
+<script src="masar-config.js"></script>
+<script src="masar-runtime.js"></script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALAKER SWEETS — مرفق</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #FAF7F1; color: #2B211B; font-family: sans-serif; padding: 20px; min-height: 100vh; }
+  .card { max-width: 480px; margin: 0 auto; background: #fff; border: 1px solid #E7DFD2; border-radius: 16px; padding: 18px; }
+  img { width: 100%; border-radius: 12px; display: block; margin-bottom: 12px; }
+  audio { width: 100%; margin-bottom: 12px; }
+  .empty { text-align: center; color: #6B5D52; font-size: 14px; padding: 30px 0; }
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="empty">جارِ التحميل...</div>
+</div>
+<script>
+  const imgId = MASAR_TPL.attImgId;
+  const audioId = MASAR_TPL.attAudioId;
+  const DRIVE_ORIGIN_ = 'https:' + String.fromCharCode(47, 47) + 'drive.google.com'; // لا شرطتان مائلتان متتاليتان حرفيًا داخل نص في <script>: خلل خدمة صفحات Google يُفرغ الصفحة (انظر tests/static_check.js)
+  let html = '';
+  if (imgId) html += '<img src="' + DRIVE_ORIGIN_ + '/thumbnail?id=' + encodeURIComponent(imgId) + '&sz=w800" alt="">';
+  if (audioId) html += '<audio controls src="' + DRIVE_ORIGIN_ + '/uc?export=download&id=' + encodeURIComponent(audioId) + '"></audio>';
+  document.getElementById('card').innerHTML = html || '<div class="empty">لا يوجد مرفق</div>';
+</script>
+</body>
+</html>
