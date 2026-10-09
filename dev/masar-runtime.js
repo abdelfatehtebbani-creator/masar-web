@@ -19,6 +19,7 @@
     currentStoreId: p('storeId'), currentStoreName: p('storeName'), currentAssignmentId: p('assignmentId'), currentFullName: p('fullName'),
     currentOrderId: p('id'), currentTab: p('tab'), attImgId: p('img'), attAudioId: p('audio'), invoiceKind: p('kind'),
     userLang: lang(), timeoutScale: 3, pageParams: pageParams,
+    testLoginEnabled: !!(CFG.env && CFG.env !== 'PROD'), // تلميح للواجهة فقط (بناء DIV)؛ الخادم هو من يسمح فعليًا
     reloadQuery: page === 'login' ? 'page=login' : location.search.slice(1).replace(/'/g, '%27')
   };
 
@@ -62,6 +63,7 @@
         if (action === 'login' && r && r.success && r.data) {
           if (args[2] === true && r.data.rememberToken) saveRt(r.data.userId, r.data.rememberToken); else clearRt();
         }
+        if (action === 'testLogin') clearRt(); // جلسة الاختبار لا تُحفَظ للاستعادة إطلاقًا
         if (action === 'resumeSession' && r) {
           if (r.success && r.data && r.data.rememberToken) saveRt(r.data.userId, r.data.rememberToken);
           else if (r.error && r.error.code === 'REMEMBER_INVALID') clearRt();

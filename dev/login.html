@@ -8,8 +8,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="مسار">
 <link rel="apple-touch-icon" href="icon-180.png">
-<script src="masar-config.js?v=b64637d6"></script>
-<script src="masar-runtime.js?v=b64637d6"></script>
+<script src="masar-config.js?v=ba4dfc13"></script>
+<script src="masar-runtime.js?v=ba4dfc13"></script>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -75,6 +75,22 @@
   .remember-note { display: none; font-size: 11.5px; color: var(--ink-soft); margin: -4px 0 10px; line-height: 1.6; }
   html.masar-web .remember-row { display: flex; }
   html.masar-web .remember-note { display: block; }
+  /* الدخول التجريبي (DIV فقط): يظهر فقط إن سمح الخادم، ويُبرز بصريًا أن البيئة تجريبية */
+  .test-banner { display: none; background: #B23B2E; color: #fff; border-radius: 12px; padding: 9px 12px; font-size: 12.5px; font-weight: 700; line-height: 1.6; text-align: center; margin-bottom: 12px; }
+  .test-panel { display: none; }
+  .test-panel select { width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--card, #fff); color: var(--ink); font: inherit; font-size: 14.5px; }
+  .test-profile { display: none; border: 1px dashed #B23B2E; border-radius: 12px; padding: 10px 12px; margin: 4px 0 12px; font-size: 13px; line-height: 1.7; background: rgba(178,59,46,.05); }
+  .test-profile .tp-name { font-weight: 800; font-size: 14.5px; }
+  .test-profile .tp-meta { color: var(--ink-soft); }
+  .test-profile details { margin-top: 6px; }
+  .test-profile summary { cursor: pointer; font-weight: 700; color: #B23B2E; }
+  .test-profile .tp-cat { margin: 8px 0 2px; font-weight: 700; font-size: 12.5px; }
+  .test-profile ul { margin: 0; padding-inline-start: 18px; }
+  .test-profile li { font-size: 12.5px; }
+  .test-profile code { font-size: 11px; color: var(--ink-soft); direction: ltr; unicode-bidi: embed; }
+  .test-profile .tp-cond { font-size: 11px; background: rgba(238,113,38,.15); color: var(--primary); border-radius: 6px; padding: 0 5px; margin-inline-start: 4px; }
+  .test-toggle { display: none; text-align: center; margin-top: 10px; font-size: 12.5px; }
+  .test-toggle a { color: var(--ink-soft); }
   .login-btn {
     width: 100%; background: var(--secondary); color: #fff; border: none; font-family: inherit; font-size: 15px; font-weight: 600;
     padding: 13px; border-radius: var(--radius-md); cursor: pointer; margin-top: 4px;
@@ -147,6 +163,13 @@
     <div id="loginFormPanel">
       <h1 data-i18n="loginTitle"></h1>
       <div class="error-banner" id="errorBanner"></div>
+      <div class="test-banner" id="testBanner" data-i18n="testBanner"></div>
+      <div class="test-panel" id="testPanel">
+        <div class="field"><label data-i18n="testAccountLbl"></label>
+          <select id="fTestAccount"></select></div>
+        <div class="test-profile" id="testProfile"></div>
+      </div>
+      <div id="normalFields">
       <div class="field">
         <label data-i18n="usernameLbl"></label>
         <input type="text" id="fUsername" autocomplete="username">
@@ -157,7 +180,9 @@
       </div>
       <label class="remember-row"><input type="checkbox" id="fRemember"><span data-i18n="rememberLbl"></span></label>
       <div class="remember-note" data-i18n="rememberNote"></div>
+      </div>
       <button class="login-btn" id="loginBtn" data-i18n="loginBtn"></button>
+      <div class="test-toggle" id="testToggle"><a href="#" id="testToggleLink"></a></div>
 
       <div class="demo-hint">
         <div data-i18n="seedNote"></div>
@@ -257,6 +282,7 @@
   // deployment URL. APP_BASE_URL is injected server-side (WebApp.gs
   // doGet(), HtmlTemplate) so every cross-page link here is absolute.
   const APP_BASE_URL = MASAR_TPL.appBaseUrl;
+  const TEST_LOGIN_HINT = MASAR_TPL.testLoginEnabled; // تلميح من الخادم فقط؛ الخادم يرفض النداءات إن لم يكن الدخول التجريبي مسموحًا في بيئته
   var TIMEOUT_SCALE = MASAR_TPL.timeoutScale; // مضاعِف مُهَل الانتظار: ١ في الإنتاج، أكبر في DIV (مشروع بارد/شبكة اختبار)
 
   /**
@@ -318,6 +344,8 @@
       loginTitle: 'تسجيل الدخول',
       usernameLbl: 'اسم المستخدم', passwordLbl: 'كلمة المرور',
       loginBtn: 'دخول', loggingInBtn: 'جارٍ التحقق...',
+      testBanner: '🧪 بيئة DIV التجريبية — حسابات اختبار ببيانات غير حقيقية، ولا علاقة لها بالإنتاج', testAccountLbl: 'حساب الاختبار', testPick: '— اختر حساب اختبار —', testLoginBtn: 'دخول للاختبار', testToNormal: 'دخول عادي بكلمة مرور', testToTest: 'العودة إلى حسابات الاختبار',
+      tpUser: 'اسم المستخدم', tpRole: 'الدور', tpDept: 'القسم', tpPerms: (n) => 'الصلاحيات الفعلية (' + n + ')', tpNote: 'تُنفَّذ بصلاحيات هذا الدور نفسها بالضبط، ويتحقق الخادم منها عند كل عملية.', testNeedPick: 'اختر حساب اختبار أولًا',
       rememberLbl: 'تذكّرني على هذا الجهاز', rememberNote: 'لا تفعّل هذا الخيار على جهاز مشترك. تُنهي كلمة المرور الجديدة أو تعطيل الحساب أو تسجيل الخروج هذا التذكّر.',
       errorEmpty: 'الرجاء إدخال اسم المستخدم وكلمة المرور',
       errorGeneric: 'تعذّر الاتصال بالخادم — تحقّق من اتصالك وحاول مجددًا',
@@ -339,6 +367,8 @@
       loginTitle: 'Log in',
       usernameLbl: 'Username', passwordLbl: 'Password',
       loginBtn: 'Log in', loggingInBtn: 'Checking...',
+      testBanner: '🧪 DIV test environment — fake test accounts, unrelated to production', testAccountLbl: 'Test account', testPick: '— Choose a test account —', testLoginBtn: 'Enter for testing', testToNormal: 'Normal login with password', testToTest: 'Back to test accounts',
+      tpUser: 'Username', tpRole: 'Role', tpDept: 'Department', tpPerms: (n) => 'Effective permissions (' + n + ')', tpNote: 'Runs with exactly this role\'s permissions, enforced by the server on every action.', testNeedPick: 'Choose a test account first',
       rememberLbl: 'Remember me on this device', rememberNote: 'Do not enable on a shared device. A new password, a disabled account, or logging out ends this.',
       errorEmpty: 'Please enter both username and password',
       errorGeneric: 'Could not reach the server — check your connection and try again',
@@ -398,6 +428,7 @@
    * immediately in that case.
    */
   function attemptLogin() {
+    if (testMode) { attemptTestLogin(); return; }
     const username = document.getElementById('fUsername').value.trim();
     const password = document.getElementById('fPassword').value;
     if (!username || !password) { showError(t('errorEmpty')); return; }
@@ -624,11 +655,64 @@
     showToast._t = setTimeout(() => el.classList.remove('show'), 2400);
   }
 
+  // ===== الدخول التجريبي (DIV فقط) =====
+  // لا قرار أمني هنا: الواجهة تعرض القائمة إن (وفقط إن) ردّ الخادم بها؛ ويصدر الخادم الجلسة بعد أن يتحقق بنفسه من البيئة والخاصية وأن الحساب مصنَّع للاختبار.
+  let testMode = false, testAccounts = [];
+  const TASK_CAT_AR = { ORDERS: 'الطلبيات والنوبات', APPROVALS: 'الاعتمادات والقرارات', PRODUCTION: 'الإنتاج والتنفيذ', DISTRIBUTION: 'التوزيع والشحن', RECEIVING: 'استلام المحل والإرجاع والفوترة', INVENTORY: 'المخازن والأرصدة', PURCHASING: 'المشتريات والموردون', REPORTS: 'التقارير والمتابعة', ADMIN: 'الإدارة', OTHER: 'أخرى' };
+  const escHtml = (x) => String(x == null ? '' : x).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  function setTestMode(on) {
+    testMode = on;
+    document.getElementById('testPanel').style.display = on ? 'block' : 'none';
+    document.getElementById('normalFields').style.display = on ? 'none' : 'block';
+    const btn = document.getElementById('loginBtn');
+    btn.setAttribute('data-i18n', on ? 'testLoginBtn' : 'loginBtn'); btn.textContent = t(on ? 'testLoginBtn' : 'loginBtn');
+    document.getElementById('testToggleLink').textContent = t(on ? 'testToNormal' : 'testToTest');
+    hideError();
+  }
+  function renderTestProfile() {
+    const box = document.getElementById('testProfile');
+    const a = testAccounts.find((x) => x.username === document.getElementById('fTestAccount').value);
+    if (!a) { box.style.display = 'none'; box.innerHTML = ''; return; }
+    const isAr = state.lang === 'ar';
+    const byCat = {};
+    (a.permissions || []).forEach((p) => { (byCat[p.category] = byCat[p.category] || []).push(p); });
+    const cats = Object.keys(byCat).map((c) => `<div class="tp-cat">${escHtml(TASK_CAT_AR[c] || c)}</div><ul>${byCat[c].map((p) => `<li>${escHtml(p.descriptionAR || p.key)} <code>${escHtml(p.key)}</code>${p.condition ? `<span class="tp-cond">${escHtml(p.condition)}</span>` : ''}</li>`).join('')}</ul>`).join('');
+    box.innerHTML = `<div class="tp-name">${escHtml(isAr ? a.fullNameAR : a.fullNameEN)}</div>
+      <div class="tp-meta">${escHtml(t('tpUser'))}: <b>${escHtml(a.username)}</b> · ${escHtml(t('tpRole'))}: <b>${escHtml(isAr ? a.roleNameAR : a.roleNameEN)}</b>${a.departmentNameAR ? ' · ' + escHtml(t('tpDept')) + ': <b>' + escHtml(a.departmentNameAR) + '</b>' : ''}</div>
+      <div class="tp-meta">${escHtml(t('tpNote'))}</div>
+      <details><summary>${escHtml(t('tpPerms')((a.permissions || []).length))}</summary>${cats || ''}</details>`;
+    box.style.display = 'block';
+  }
+  function attemptTestLogin() {
+    const username = document.getElementById('fTestAccount').value;
+    if (!username) { showError(t('testNeedPick')); return; }
+    hideError(); setLoginBusy(true);
+    google.script.run.withSuccessHandler(onLoginResult).withFailureHandler(onServerFailure).testLogin(username);
+  }
+  function initTestLogin() {
+    if (!TEST_LOGIN_HINT) return;
+    google.script.run
+      .withSuccessHandler((res) => {
+        if (!res || !res.success || !res.data || !res.data.accounts || !res.data.accounts.length) return; // غير مسموح/لا حسابات: تبقى الواجهة العادية
+        testAccounts = res.data.accounts;
+        const sel = document.getElementById('fTestAccount');
+        sel.innerHTML = `<option value="">${escHtml(t('testPick'))}</option>` + testAccounts.map((a) => `<option value="${escHtml(a.username)}">${escHtml((state.lang === 'ar' ? a.roleNameAR : a.roleNameEN) + ' — ' + (state.lang === 'ar' ? a.fullNameAR : a.fullNameEN) + ' (' + a.username + ')')}</option>`).join('');
+        sel.addEventListener('change', renderTestProfile);
+        document.getElementById('testBanner').style.display = 'block';
+        document.getElementById('testToggle').style.display = 'block';
+        document.getElementById('testToggleLink').addEventListener('click', (e) => { e.preventDefault(); setTestMode(!testMode); });
+        setTestMode(true);
+      })
+      .withFailureHandler(() => { /* بلا قائمة: الدخول العادي كما هو */ })
+      .getTestLoginAccounts();
+  }
+
   document.getElementById('loginBtn').addEventListener('click', attemptLogin);
   document.getElementById('fPassword').addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
   document.getElementById('langToggle').addEventListener('click', () => { state.lang = state.lang === 'ar' ? 'en' : 'ar'; applyI18n(); });
 
   applyI18n();
+  initTestLogin();
 </script>
 
 </body>
