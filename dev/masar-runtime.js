@@ -74,6 +74,21 @@
 
   // service worker: قشرة الواجهة فقط
   if (CFG.pwa && 'serviceWorker' in navigator && location.protocol === 'https:') {
+    var hadController = !!navigator.serviceWorker.controller;
+    // نسخة جديدة من الواجهة فُعِّلت: لا نُعيد التحميل تلقائيًا (قد يفقد المستخدم عملًا)، نعرض زرًا صغيرًا
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+      if (!hadController) { hadController = true; return; }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', showUpdate); else showUpdate();
+    });
     window.addEventListener('load', function () { navigator.serviceWorker.register(base + 'sw.js').catch(function () { /* التثبيت اختياري */ }); });
+  }
+  function showUpdate() {
+    if (document.getElementById('masarUpdateBtn') || !document.body) return;
+    var b = document.createElement('button');
+    b.id = 'masarUpdateBtn'; b.type = 'button';
+    b.textContent = lang() === 'en' ? '🔄 App updated — tap to reload' : '🔄 تحديث جديد للتطبيق — اضغط لإعادة التحميل';
+    b.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:2147483200;border:none;border-radius:999px;padding:11px 20px;background:#EE7126;color:#fff;font:700 14px sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.3);cursor:pointer;';
+    b.addEventListener('click', function () { location.reload(); });
+    document.body.appendChild(b);
   }
 })();
