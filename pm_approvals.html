@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#3D2B1E">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="مسار">
+<link rel="apple-touch-icon" href="icon-180.png">
+<script src="masar-config.js?v=67ea158b"></script>
+<script src="masar-runtime.js?v=67ea158b"></script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALAKER SWEETS — المراجعة والاعتمادات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Markazi+Text:wght@600;700&family=Fraunces:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #EE7126; --primary-dark: #C85A18; --primary-tint: #FCE8D8;
+    --secondary: #3D2B1E; --ink: #2B211B; --ink-soft: #6B5D52;
+    --bg: #FAF7F1; --surface: #FFFFFF; --line: #E7DFD2;
+    --success: #4B7A4F; --success-tint: #E7EFE6;
+    --warn: #B23B2E; --warn-tint: #F7E6E2;
+    --pending: #B4802A; --pending-tint: #F5EAD9;
+    --locked: #8A7A6B; --locked-tint: #ECE7E0;
+    --radius-lg: 16px; --radius-md: 12px; --radius-sm: 8px;
+    --shadow-card: 0 1px 2px rgba(43,33,27,0.06), 0 4px 16px rgba(43,33,27,0.05);
+    --font-ar: 'IBM Plex Sans Arabic', sans-serif; --font-en: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { overflow-x: hidden; max-width: 100vw; }
+  html[lang="ar"] body { font-family: var(--font-ar); }
+  html[lang="en"] body { font-family: var(--font-en); }
+  body {
+    background-color: var(--bg);
+    background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 38px, rgba(61,43,30,0.035) 38px, rgba(61,43,30,0.035) 39px);
+    color: var(--ink); min-height: 100vh; -webkit-font-smoothing: antialiased; padding-bottom: 30px;
+  }
+  header.topbar {
+    display: flex; align-items: center; gap: 16px; background: var(--secondary); color: #fff;
+    padding: 10px 20px; position: sticky; top: 0; z-index: 30; box-shadow: 0 2px 10px rgba(0,0,0,0.15); max-width: 100%;
+  }
+  .brand-logo { height: 40px; width: auto; display: block; flex-shrink: 0; }
+  .brand-meta { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; overflow: hidden; }
+  .brand-meta .system-name { font-size: 11px; letter-spacing: 0.14em; color: rgba(255,255,255,0.55); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .brand-meta .role-name { font-size: 15px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .topbar-spacer { flex: 1; min-width: 8px; }
+  .icon-btn {
+    display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #fff; cursor: pointer;
+    font-size: 14px; font-weight: 600; transition: background 0.15s ease; position: relative; flex-shrink: 0;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,0.16); }
+  .user-menu { position: relative; flex-shrink: 0; }
+  .user-dropdown {
+    position: absolute; top: calc(100% + 8px); inset-inline-end: 0; background: var(--surface); color: var(--ink);
+    border: 1px solid var(--line); border-radius: var(--radius-md); box-shadow: var(--shadow-card);
+    min-width: 200px; padding: 6px; display: none; z-index: 40;
+  }
+  .user-dropdown.open { display: block; }
+  .user-dropdown button {
+    display: flex; align-items: center; gap: 10px; width: 100%; text-align: start; background: none; border: none;
+    padding: 10px 12px; border-radius: var(--radius-sm); font-size: 14px; font-family: inherit; color: var(--ink); cursor: pointer;
+  }
+  .user-dropdown button:hover { background: var(--bg); }
+  @media (max-width: 420px) {
+    header.topbar { flex-wrap: wrap; row-gap: 8px; padding: 10px 12px; gap: 8px; }
+    .topbar-spacer { flex: 0 0 100%; height: 0; }
+    .brand-meta .system-name { display: none; }
+  }
+  main { max-width: 880px; margin: 0 auto; padding: 20px 20px 20px; }
+  .pm-nav-row { display: flex; gap: 6px; max-width: 880px; margin: 10px auto 0; padding: 0 20px; overflow-x: auto; scrollbar-width: none; }
+  .pm-nav-row::-webkit-scrollbar { display: none; }
+  .pm-nav-btn {
+    flex-shrink: 0; padding: 9px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface);
+    color: var(--ink-soft); font-family: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; white-space: nowrap;
+  }
+  .pm-nav-btn.active { background: var(--secondary); color: #fff; border-color: var(--secondary); }
+  .greeting-card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-card);
+    padding: 20px 22px; margin-bottom: 18px;
+  }
+  .greeting-card h1 { font-size: 22px; font-weight: 600; color: var(--secondary); }
+  .greeting-card .date-line { color: var(--ink-soft); font-size: 13.5px; margin-top: 4px; }
+
+  .tabs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin-bottom: 16px; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex-shrink: 0; font-size: 13px; font-weight: 600; color: var(--ink-soft); background: var(--surface); border: 1px solid var(--line);
+    padding: 9px 15px; border-radius: 999px; cursor: pointer; white-space: nowrap; font-family: inherit;
+  }
+  .tab.active { background: var(--secondary); color: #fff; border-color: var(--secondary); }
+  .tab .count { margin-inline-start: 5px; font-size: 11px; opacity: 0.8; }
+
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); }
+  .approval-card { padding: 16px 18px; margin-bottom: 14px; }
+  .approval-top { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+  .approval-type-badge { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--primary-tint); color: var(--primary-dark); }
+  .approval-order-tag { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-soft); }
+  .approval-spacer { flex: 1; }
+  .approval-time { font-size: 11px; color: var(--ink-soft); }
+
+  .approval-context { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .item-thumb {
+    width: 44px; height: 44px; border-radius: var(--radius-sm); flex-shrink: 0;
+    background: linear-gradient(135deg, #F3E9DC, #EDE1D0); display: flex; align-items: center; justify-content: center; font-size: 19px;
+  }
+  .approval-item-name { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .approval-store { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+  .attachment-badge {
+    display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600;
+    padding: 3px 9px; border-radius: 999px; background: var(--primary-tint); color: var(--primary-dark);
+    border: 1px solid rgba(238,113,38,0.35); cursor: pointer; white-space: nowrap; margin-top: 4px;
+  }
+  .attachment-modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 200;
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .attachment-modal-overlay.open { display: flex; }
+  .attachment-modal {
+    background: var(--surface); border-radius: var(--radius-lg); padding: 18px; max-width: 420px; width: 100%;
+    max-height: 85vh; overflow-y: auto; box-shadow: var(--shadow-card);
+  }
+  .attachment-modal img { width: 100%; border-radius: var(--radius-md); display: block; margin-bottom: 12px; }
+  .attachment-modal audio, .attachment-modal iframe { width: 100%; margin-bottom: 12px; }
+  .attachment-modal-close {
+    width: 100%; border: none; background: var(--secondary); color: #fff; font-family: inherit; font-size: 14px;
+    font-weight: 600; padding: 10px; border-radius: var(--radius-md); cursor: pointer;
+  }
+
+  .value-compare { display: flex; align-items: center; gap: 10px; background: var(--bg); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 12px; }
+  .value-box { flex: 1; text-align: center; }
+  .value-box .lbl { font-size: 10.5px; color: var(--ink-soft); margin-bottom: 3px; }
+  .value-box .val { font-family: var(--font-mono); font-size: 15px; font-weight: 700; color: var(--ink); }
+  .value-arrow { color: var(--ink-soft); font-size: 14px; }
+  .value-box.proposed .val { color: var(--primary-dark); }
+  .approval-note { font-size: 12.5px; color: var(--ink-soft); margin-bottom: 8px; line-height: 1.6; }
+  .qty-table { width: 100%; border-collapse: collapse; background: var(--bg); border-radius: var(--radius-md); overflow: hidden; margin-bottom: 12px; font-size: 13px; }
+  .qty-table th { font-size: 10.5px; font-weight: 600; color: var(--ink-soft); text-align: center; padding: 8px 6px; border-bottom: 1px solid var(--line); }
+  .qty-table th:first-child, .qty-table td:first-child { text-align: start; padding-inline-start: 12px; }
+  .qty-table td { padding: 8px 6px; text-align: center; border-bottom: 1px solid var(--line); font-family: var(--font-mono); }
+  .qty-table td:first-child { font-family: inherit; font-weight: 600; color: var(--ink); }
+  .edit-changes { background: var(--bg); border-radius: var(--radius-md); padding: 6px 12px; margin-bottom: 12px; }
+  .edit-change-row { display: flex; gap: 12px; align-items: baseline; padding: 8px 0; border-bottom: 1px dashed var(--line); font-size: 13px; }
+  .edit-change-row:last-child { border-bottom: none; }
+  .edit-kind { font-weight: 700; color: var(--secondary); white-space: nowrap; min-width: 110px; }
+  .edit-text { flex: 1; color: var(--ink); word-break: break-word; }
+  .qty-table td .unit { display: block; font-size: 10.5px; font-weight: 400; color: var(--ink-soft); }
+  .qty-table td .reason { display: block; font-size: 11px; font-weight: 400; color: var(--warn); margin-top: 3px; line-height: 1.5; }
+  .qty-table tr:last-child td { border-bottom: none; }
+  .qty-table td.prop { font-weight: 700; color: var(--primary-dark); }
+  .modify-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; font-size: 13px; }
+  .modify-row small { color: var(--ink-soft); font-size: 11px; }
+  .modify-row input { width: 90px; flex-shrink: 0; }
+
+  .priority-note {
+    font-size: 12px; color: var(--pending); background: var(--pending-tint); border-radius: var(--radius-sm);
+    padding: 10px 12px; margin-bottom: 12px; line-height: 1.6;
+  }
+
+  .decision-btns { display: flex; gap: 8px; }
+  .decision-btn {
+    flex: 1; font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 10px 6px; border-radius: var(--radius-sm);
+    border: 1.5px solid; cursor: pointer;
+  }
+  .decision-btn.approve { background: var(--success-tint); border-color: var(--success); color: var(--success); }
+  .decision-btn.modify { background: var(--pending-tint); border-color: var(--pending); color: var(--pending); }
+  .decision-btn.reject { background: var(--warn-tint); border-color: var(--warn); color: var(--warn); }
+  .decision-btn:disabled { background: #ECE7E0; border-color: var(--line); color: var(--ink-soft); cursor: not-allowed; }
+  .confirm-armed { animation: pulse-confirm 1s ease-in-out infinite; }
+  @keyframes pulse-confirm { 0%, 100% { opacity: 1; } 50% { opacity: 0.75; } }
+
+  .dept-select-row { margin-top: 12px; }
+  .dept-select-row label { font-size: 12px; font-weight: 600; color: var(--ink-soft); display: block; margin-bottom: 6px; }
+  .dept-select-row select, .dept-select-row input {
+    width: 100%; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 9px 11px;
+    font-family: inherit; font-size: 13px; color: var(--ink); background: var(--surface);
+  }
+  .dept-select-row select.needs-choice, .dept-select-row input.needs-choice { border-color: var(--warn); }
+
+  .modify-form { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line); }
+  .modify-form input {
+    width: 100%; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 9px 11px;
+    font-family: inherit; font-size: 13px; margin-bottom: 8px;
+  }
+
+  .readonly-card { padding: 14px 16px; margin-bottom: 12px; opacity: 0.9; }
+  .readonly-note { font-size: 11.5px; color: var(--ink-soft); margin-top: 6px; font-style: italic; }
+  .section-title { font-size: 12px; font-weight: 600; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.06em; padding-inline-start: 4px; }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--ink-soft); font-size: 13.5px; }
+
+  .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(10px);
+    background: var(--secondary); color: #fff; font-size: 13.5px; padding: 11px 18px; border-radius: 999px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2); opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 60; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  #globalBusyOverlay { position: fixed; inset: 0; z-index: 999; cursor: wait; display: none; background: rgba(0,0,0,0.02); }
+  #globalBusyOverlay.show { display: block; }
+  .continue-armed { color: var(--success) !important; }
+  .refresh-btn { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; border-radius: 999px; background: rgba(255,255,255,0.18); border: 1.5px solid rgba(255,255,255,0.9); color: #fff; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; flex-shrink: 0; white-space: nowrap; transition: background 0.15s ease; }
+  .refresh-btn:hover { background: rgba(255,255,255,0.32); }
+  .refresh-btn:active { transform: scale(0.97); }
+  .refresh-btn.armed { background: #fff; color: var(--secondary); }
+  .refresh-btn.spin .ico { animation: masar-spin 0.8s linear infinite; }
+  @keyframes masar-spin { to { transform: rotate(360deg); } }
+  .usage-banner { margin: 0 0 12px; padding: 11px 14px; border-radius: var(--radius-md); font-size: 13.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .usage-banner.todo { background: var(--warn-tint); color: var(--warn); border: 1.5px solid var(--warn); }
+  .usage-banner.done { background: var(--success-tint); color: var(--success); border: 1.5px solid var(--success); cursor: default; }
+  .usage-banner .go { font-weight: 700; text-decoration: underline; white-space: nowrap; }
+  .usage-reminder-overlay { position: fixed; inset: 0; background: rgba(43,33,27,0.55); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+  .usage-reminder-overlay.open { display: flex; }
+  .usage-reminder { background: var(--surface); border-radius: var(--radius-lg); padding: 22px 20px; max-width: 380px; width: 100%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+  .usage-reminder .ur-icon { font-size: 34px; margin-bottom: 6px; }
+  .usage-reminder .ur-title { font-weight: 700; font-size: 16px; margin-bottom: 8px; }
+  .usage-reminder .ur-text { font-size: 13.5px; color: var(--ink-soft); line-height: 1.7; margin-bottom: 16px; }
+  .usage-reminder .ur-actions { display: flex; flex-direction: column; gap: 8px; }
+  .usage-reminder .ur-go { background: var(--primary); color: #fff; border: none; font-family: inherit; font-size: 14.5px; font-weight: 700; padding: 12px; border-radius: var(--radius-sm); cursor: pointer; }
+  .usage-reminder .ur-later { background: none; border: none; font-family: inherit; font-size: 13px; color: var(--ink-soft); padding: 8px; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <img src="asset-82d7b1e2.png" alt="ALAKER SWEETS" class="brand-logo">
+  <div class="brand-meta">
+    <span class="system-name">MASAR</span>
+    <span class="role-name" data-i18n="roleName"></span>
+  </div>
+  <div class="topbar-spacer"></div>
+  <button class="refresh-btn" id="refreshBtn" type="button" title="تحديث / Refresh"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span class="rf-label">تحديث</span></button>
+  <button class="icon-btn" id="langToggle" title="AR / EN">AR</button>
+  <div class="user-menu">
+    <button class="icon-btn" id="userMenuBtn">⋮</button>
+    <div class="user-dropdown" id="userDropdown">
+      <button data-i18n="changePassword" data-toast="notReady"></button>
+      <button id="logoutBtn" data-i18n="logout"></button>
+    </div>
+  </div>
+</header>
+
+<!-- SPEC v1.4 (إصلاح فجوة تنقّل حقيقية اكتُشفت أثناء بناء بند 24: pm_overview.html
+     وpm_quarantine.html لم يكونا قابلين للوصول إطلاقًا من تسجيل الدخول العادي --
+     لا رابط كان يقود إليهما من أي مكان). شريط تنقّل بسيط بين شاشات مدير الإنتاج الأربع. -->
+<div class="pm-nav-row">
+  <button class="pm-nav-btn active" id="pmNavApprovals" data-i18n="pmNavApprovals"></button>
+  <button class="pm-nav-btn" id="pmNavOrders" data-i18n="pmNavOrders"></button>
+  <button class="pm-nav-btn" id="pmNavStock" data-i18n="pmNavStock"></button>
+  <button class="pm-nav-btn" id="pmNavQuarantine" data-i18n="pmNavQuarantine"></button>
+</div>
+
+<main>
+  <div class="greeting-card">
+    <h1 data-i18n="screenTitle"></h1>
+    <div class="date-line" id="dateLine"></div>
+  </div>
+  <div id="usageBanner" style="display:none;"></div>
+  <div class="tabs" id="tabsBar"></div>
+  <div id="tabContent"></div>
+</main>
+
+<div class="toast" id="toast"></div>
+<div id="globalBusyOverlay"></div>
+<div class="usage-reminder-overlay" id="usageReminderOverlay">
+  <div class="usage-reminder">
+    <div class="ur-icon">🌾</div>
+    <div class="ur-title" id="urTitle"></div>
+    <div class="ur-text" id="urText"></div>
+    <div class="ur-actions"><button type="button" class="ur-go" id="urGo"></button><button type="button" class="ur-later" id="urLater"></button></div>
+  </div>
+</div>
+<div class="attachment-modal-overlay" id="attModalOverlay">
+  <div class="attachment-modal">
+    <div id="attModalBody"></div>
+    <button class="attachment-modal-close" id="attModalCloseBtn" type="button" data-i18n="attachmentModalClose"></button>
+  </div>
+</div>
+
+<script>
+  const APP_BASE_URL = MASAR_TPL.appBaseUrl;
+  var TIMEOUT_SCALE = MASAR_TPL.timeoutScale; // مضاعِف مُهَل الانتظار: ١ في الإنتاج، أكبر في DIV (مشروع بارد/شبكة اختبار)
+  // ===== شبكة الاتصال (١٠ أكتوبر ٢٠٢٦) =====
+  // مولَّد من tools/net_snippet.js بواسطة tools/build_client_snippets.js -- لا تعدّله يدويًا داخل الصفحات.
+  // (١) يتتبّع نداءات الحفظ (أي نداء لا يبدأ بـ get/list) ليعرف التحديث التلقائي أن الصفحة حفظت بنفسها.
+  // (٢) بلاغ "تعذّر تنفيذ العملية" المتكرر: بطء بدء Google (أو انقطاع لحظي) كان يُسقط النداء. للقراءات الصرفة فقط (قائمة مولَّدة آليًا من الخادم: دوال لا تكتب هي
+  // ولا ما تستدعيه) تُعاد المحاولة مرة واحدة عند الفشل/الردّ الفارغ، ويُرسَل نداء ثانٍ موازٍ إن تأخّر الأول ٦ ثوانٍ؛ يُسلَّم أول ردّ صالح. الحفظ والإنشاء لا يُكرَّران أبدًا.
+  const MASAR_RAW_RUN_ = (typeof google !== 'undefined' && google.script) ? google.script.run : null;
+  const MASAR_AR_INSTANCES_ = [];
+  const MASAR_PURE_READS_ = { getActiveDriversList:1,getActiveShipments:1,getActiveStoresWithOccupancy:1,getAllDepartments:1,getAllLists:1,getAllProducts:1,getAllRoles:1,getAllSettings:1,getAllStores:1,getAllUsers:1,getChangeTokens:1,getDepartmentStoreOrders:1,getDisposalFormData:1,getDistributionComparisonDetail:1,getDistributionManagerCancelEditRequests:1,getDistributionsReadyToPrepare:1,getFinishedGoodsQuarantineHistory:1,getFinishedGoodsStockBoard:1,getIssueToDepartmentFormData:1,getManagementReports:1,getMyNotifications:1,getMyShipments:1,getMySupplyRequests:1,getOffCatalogPurchaseRequests:1,getOrderDetails:1,getOrderEditStage:1,getOrderProductionApprovalDetail:1,getOrdersAwaitingInvoice:1,getOrdersAwaitingProductionApproval:1,getOrdersReadyForShipment:1,getOrdersReadyToReceive:1,getPendingLoadDiscrepancies:1,getPendingReturnItems:1,getPendingSupplyRequestsForRMS:1,getProductionManagerApprovals:1,getProductionManagerOrderFullDetail:1,getProductionManagerOrdersOverview:1,getPurchasingRawMaterialReports:1,getRawMaterialCatalog:1,getRawMaterialCatalogForRequest:1,getRawMaterialExpiryReport:1,getRawMaterialMovementSummary:1,getRawMaterialProductHistory:1,getRawMaterialQuarantineHistory:1,getRawMaterialShortageNotices:1,getRawMaterialStockBoard:1,getReceiveSurplusFormData:1,getReceivingDetails:1,getReferenceLists:1,getReturnReasons:1,getRolePermissionsMatrix:1,getShipmentPrepareDetail:1,getShortageReasons:1,getStoreDirectRawMaterialOrders:1,getStoreOrderDetail:1,getSuppliers:1,getSuppliersList:1,getTasksCatalog:1,getUnitsAndFamiliesList:1,getVehicleCoordinatorDriverStatus:1,getVehicleCoordinatorSpecialOrders:1,listOrders:1 };
+  (function masarTrackOwnCalls() {
+    try {
+      if (!MASAR_RAW_RUN_) return;
+      Object.defineProperty(google.script, 'run', {
+        configurable: true,
+        get() {
+          const handlers = { onSuccess: null, onFailure: null };
+          let proxy;
+          const chain = {
+            withSuccessHandler(fn) { handlers.onSuccess = fn; return proxy; },
+            withFailureHandler(fn) { handlers.onFailure = fn; return proxy; }
+          };
+          proxy = new Proxy(chain, {
+            get(target, prop) {
+              if (prop === 'withSuccessHandler' || prop === 'withFailureHandler') return target[prop];
+              return (...args) => {
+                // لقطة المعالجات لحظة النداء: غلاف حاجز الانشغال في الصفحات يمسك مرجعًا واحدًا من run فتتشارك النداءات المتزامنة كائن handlers، فلو قُرئ
+                // وقت الرد لاستلم كل رد معالج آخر نداء (بلاغ: "تعذّر فتح إنشاء رحلة" -- نداءا السائقين والجاهزة كانا يتبادلان معالجيهما)
+                const onS = handlers.onSuccess, onF = handlers.onFailure;
+                const name = String(prop);
+                if (Object.prototype.hasOwnProperty.call(MASAR_PURE_READS_, name)) {
+                  let settled = false, attempts = 0, pending = 0, hedge = null;
+                  const finish = (ok, v) => { if (settled) return; settled = true; clearTimeout(hedge); if (ok) { if (onS) onS(v); } else if (onF) onF(v); else { try { console.error(v); } catch (e) { /* تجاهل */ } } };
+                  const launch = () => {
+                    attempts++; pending++;
+                    const bad = v => {
+                      pending--;
+                      if (settled) return;
+                      if (attempts < 2) { setTimeout(launch, 700); return; }   // محاولة ثانية واحدة فقط
+                      if (pending === 0) finish(false, v);                       // الأخيرة فشلت ولا نداء آخر في الطريق
+                    };
+                    MASAR_RAW_RUN_
+                      .withSuccessHandler(r => { if (r === null || r === undefined) { bad(r); } else { pending--; finish(true, r); } })
+                      .withFailureHandler(e => bad(e))
+                      [name](...args);
+                  };
+                  hedge = setTimeout(() => { if (!settled && attempts < 2) launch(); }, 6000);
+                  launch();
+                  return;
+                }
+                const done = () => { if (!/^(get|list)/.test(name)) MASAR_AR_INSTANCES_.forEach(i => { try { i.ownDone(); } catch (e) { /* لا يعطّل النداء */ } }); };
+                return MASAR_RAW_RUN_
+                  .withSuccessHandler((...r) => { done(); if (onS) onS(...r); })
+                  .withFailureHandler((...r) => { done(); if (onF) onF(...r); else { try { console.error(r[0]); } catch (e) { /* تجاهل */ } } })
+                  [prop](...args);
+              };
+            }
+          });
+          return proxy;
+        }
+      });
+    } catch (e) { /* لا تتبّع: يبقى السلوك القديم كما هو */ }
+  })();
+  // يستعمله التحديث التلقائي الصامت: نفس طبقة الاتصال (إعادة المحاولة) لكن بلا غلاف حاجز الانشغال الذي تُركّبه الصفحة لاحقًا فوقها
+  let MASAR_NET_GETTER_ = null;
+  try { MASAR_NET_GETTER_ = Object.getOwnPropertyDescriptor(google.script, 'run').get || null; } catch (e) { MASAR_NET_GETTER_ = null; }
+  // ===== نهاية شبكة الاتصال =====
+  // ===== تحديث تلقائي بالتغيّر (٩ أكتوبر ٢٠٢٦، نُقّح ١٠ أكتوبر) =====
+  // كل ٣٠ ثانية تسأل الصفحة (نداء خفيف بلا قراءة جداول) هل تغيّر شيء في مجالاتها؛ إن تغيّر تُعيد جلب بياناتها مرة واحدة. تتوقف والتبويب مخفيّ، وتستأنف عند
+  // العودة. إن كان المستخدم يكتب أو توجد نافذة مفتوحة أو حقل معدَّل لا تُبدَّل الشاشة تحت يده: يظهر شريط "توجد تحديثات" ينقر عليه حين يشاء.
+  // النداء الخفيف يمرّ عبر مرجع google.script.run الأصلي (قبل غلاف حاجز الانشغال) فلا يحجب الشاشة، ولا يمدّ الجلسة.
+  // تنقيح (بلاغ ميداني: "ساعة رملية كل برهة" و"الشاشة تُعاد بعد كل حفظ"): (١) التحديث التلقائي صامت: لا حاجز انشغال ولا ومضة "جارٍ التحميل"،
+  // ويحفظ موضع التمرير؛ (٢) ما تحفظه هذه الصفحة نفسها (أي نداء لا يبدأ بـ get) لا يُحدِّثها هي: تُعاد قراءة الرمز بعده فيصير خط الأساس الجديد؛ (٣) شارة
+  // صغيرة أسفل الشاشة تُظهر وقت آخر فحص وتومض عند التحديث، ولون أحمر إن تعذّر الفحص.
+  // ينفّذ إعادة جلب بيانات الصفحة بصمت: بلا حاجز انشغال (النداءات داخلها تمرّ بالمرجع الأصلي)، بلا ومضة "جارٍ التحميل"، وبحفظ موضع التمرير
+  function masarRunSilently(fn) {
+    let desc = null, area = null, proto = null;
+    try { desc = Object.getOwnPropertyDescriptor(google.script, 'run'); Object.defineProperty(google.script, 'run', { configurable: true, get() { return MASAR_NET_GETTER_ ? MASAR_NET_GETTER_() : MASAR_RAW_RUN_; } }); } catch (e) { desc = null; }
+    try {
+      area = document.getElementById('mainArea');
+      if (area && typeof Element !== 'undefined') {
+        proto = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
+        Object.defineProperty(area, 'innerHTML', {
+          configurable: true,
+          get() { return proto.get.call(area); },
+          set(v) { const s = String(v); if (/empty-state/.test(s) && !/order-card|<table|<button/.test(s)) return; proto.set.call(area, v); }
+        });
+      }
+    } catch (e) { proto = null; }
+    let keep = null;
+    try {
+      if (area && typeof window !== 'undefined' && typeof MutationObserver !== 'undefined') {
+        const scrollers = [document.scrollingElement, area.parentElement].filter(Boolean).map(el => ({ el: el, top: el.scrollTop }));
+        let moved = false;
+        const mark = () => { moved = true; };
+        ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(ev => window.addEventListener(ev, mark, true));
+        const mo = new MutationObserver(() => { if (!moved) requestAnimationFrame(() => scrollers.forEach(s => { if (s.top > 0 && Math.abs(s.el.scrollTop - s.top) > 4) s.el.scrollTop = s.top; })); });
+        mo.observe(area, { childList: true });
+        keep = () => { try { mo.disconnect(); ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(ev => window.removeEventListener(ev, mark, true)); } catch (e) { /* تجاهل */ } };
+        setTimeout(keep, 9000);
+      }
+    } catch (e) { keep = null; }
+    try { fn(); }
+    finally {
+      if (desc) { try { Object.defineProperty(google.script, 'run', desc); } catch (e) { /* تجاهل */ } }
+      if (proto && area) { try { delete area.innerHTML; } catch (e) { /* تجاهل */ } }
+    }
+  }
+  function masarAutoRefresh(opts) {
+    if (!MASAR_RAW_RUN_ || !opts || typeof opts.refresh !== 'function') return null;
+    const domains = opts.domains || [];
+    const interval = (opts.intervalMs || 30000) + Math.floor(Math.random() * 4000); // تشتيت بسيط كي لا تتزامن شاشات كثيرة
+    let baseline = null, inflight = false, inflightSince = 0, stopped = false, banner = null, pill = null, ownDoneAt = 0, rebaseWanted = false, changes = 0;
+    const uid = () => (typeof CURRENT_USER_ID !== 'undefined' ? CURRENT_USER_ID : (typeof Core !== 'undefined' ? Core.currentUserId : ''));
+    const isAr = () => (document.documentElement.lang || 'ar') !== 'en';
+    function setPill(text, bad) {
+      try {
+        if (!pill) {
+          pill = document.createElement('div');
+          pill.style.cssText = 'position:fixed;right:8px;bottom:6px;z-index:2147482000;font:600 10px sans-serif;color:#fff;padding:2px 8px;border-radius:999px;pointer-events:none;opacity:0.85;';
+          document.body.appendChild(pill);
+        }
+        pill.style.background = bad ? 'rgba(176,42,42,0.9)' : 'rgba(61,43,30,0.55)';
+        pill.textContent = text;
+      } catch (e) { /* الشارة تكميلية */ }
+    }
+    function clock() { try { return new Date().toTimeString().slice(0, 8); } catch (e) { return ''; } }
+    function busy() {
+      try {
+        if (opts.isBusy && opts.isBusy()) return true;
+        const a = document.activeElement;
+        if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && !/^(button|checkbox|radio|submit)$/.test(a.type || '')) return true;
+        if (document.querySelector('.header-modal-overlay.open, [class*="overlay"].open, [class*="modal"].open')) return true;
+        const fields = document.querySelectorAll('main input, main textarea, main select, #mainArea input, #mainArea textarea, #mainArea select');
+        for (let i = 0; i < fields.length; i++) {
+          const f = fields[i];
+          if (f.type === 'checkbox' || f.type === 'radio') { if (f.checked !== f.defaultChecked) return true; }
+          else if (f.type !== 'hidden' && f.type !== 'button' && f.tagName !== 'SELECT' && f.value !== f.defaultValue) return true;
+        }
+      } catch (e) { /* عند الشك نعتبر الشاشة غير مشغولة */ }
+      return false;
+    }
+    function hideBanner() { if (banner) { banner.style.display = 'none'; } }
+    function showBanner() {
+      if (!banner) {
+        banner = document.createElement('button');
+        banner.type = 'button';
+        banner.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:76px;z-index:2147483000;border:none;border-radius:999px;padding:10px 18px;background:#3D2B1E;color:#fff;font:700 13px sans-serif;box-shadow:0 6px 20px rgba(0,0,0,0.3);cursor:pointer;';
+        banner.addEventListener('click', () => doRefresh());
+        document.body.appendChild(banner);
+      }
+      banner.textContent = isAr() ? '🔄 توجد تحديثات جديدة — اضغط للتحديث' : '🔄 New updates — tap to refresh';
+      banner.style.display = 'block';
+    }
+    function doRefresh() {
+      hideBanner();
+      setPill((isAr() ? '✅ تحديث ' : '✅ Updated ') + clock(), false);
+      try { masarRunSilently(opts.refresh); } catch (e) { /* لا يعطّل الصفحة */ }
+    }
+    function handle(r, startedAt) {
+      if (!r || !r.success) {
+        if (r && r.error && r.error.code === 'SESSION_EXPIRED') stopped = true;
+        setPill('⚠ ' + ((r && r.error && r.error.code) || (isAr() ? 'تعذّر الفحص' : 'check failed')), true);
+        return;
+      }
+      setPill((isAr() ? '🔄 آخر فحص ' : '🔄 Checked ') + clock() + (changes ? (isAr() ? ' · تغيّرات ' : ' · changes ') + changes : ''), false);
+      const sig = JSON.stringify(domains.map(d => r.data.tokens[d] || ''));
+      if (rebaseWanted) {
+        // هذه الصفحة حفظت شيئًا بنفسها: الرمز بعد حفظها هو خط الأساس الجديد (لا تُحدَّث هي بما كتبته). ردٌّ بدأ قبل انتهاء حفظها قديم: نعيد السؤال
+        if (startedAt >= ownDoneAt) { rebaseWanted = false; baseline = sig; } else { setTimeout(tick, 300); }
+        return;
+      }
+      if (baseline === null) { baseline = sig; return; }
+      if (sig === baseline) return;
+      baseline = sig; changes++;
+      if (busy()) { showBanner(); return; }
+      doRefresh();
+      // الكتابة قد لا تكون ظهرت للقراءة بعد لحظة الرمز: إن كان التغيّر حديثًا (<٨ ثوانٍ) نُعيد الجلب مرة ثانية بعد استقراره
+      const newest = Math.max.apply(null, domains.map(d => parseFloat(r.data.tokens[d]) || 0));
+      const age = (r.data.serverTime || Date.now()) - newest;
+      if (age < 8000) setTimeout(() => { if (!document.hidden && !busy()) doRefresh(); }, 8500 - Math.max(0, age));
+    }
+    function tick() {
+      if (stopped || document.hidden) return;
+      // نداء ضاع بلا ردّ (شبكة بطيئة/تبويب مجمَّد) كان يُبقي inflight=true فيتوقف التحديث للأبد: بعد ٢٥ ثانية نعدّه مفقودًا ونسأل من جديد
+      if (inflight && Date.now() - inflightSince < 25000) return;
+      inflight = true;
+      const startedAt = Date.now();
+      inflightSince = startedAt;
+      MASAR_RAW_RUN_.withSuccessHandler(r => { inflight = false; handle(r, startedAt); }).withFailureHandler(() => { inflight = false; setPill(isAr() ? '⚠ تعذّر الفحص' : '⚠ check failed', true); }).getChangeTokens(uid(), domains);
+    }
+    function ownDone() { ownDoneAt = Date.now(); rebaseWanted = true; hideBanner(); setTimeout(tick, 500); }
+    MASAR_AR_INSTANCES_.push({ ownDone: ownDone });
+    setInterval(tick, interval);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) { rebaseWanted = false; setTimeout(tick, 400); } });
+    setTimeout(tick, 1500); // يلتقط خط الأساس مبكرًا
+    return { tick: tick };
+  }
+  // تسجيل الخروج (٨ أكتوبر ٢٠٢٦، بلاغ مستخدم: "لا يأخذني دائمًا لشاشة الدخول حتى أضغط زرًا في الصفحة التي بقيت مفتوحة"): المتصفحات (خصوصًا
+  // الهاتف) تحجب التنقّل غير المرتبط بلمسة مباشرة، فكانت الصفحة تبقى ظاهرة بزر "اضغط للمتابعة" مخبّأ داخل قائمة مغلقة. الآن أول ما يُستدعى
+  // logout يُغطّى المحتوى بحاجز كامل الشاشة "تم تسجيل الخروج" بزر كبير ظاهر، مع محاولة تلقائية للانتقال حيث يسمح المتصفح.
+  function masarLogoutMarker() {
+    try {
+      if (document.getElementById('masarLoggedOutOverlay')) return null;
+      var ar = (document.documentElement.lang || 'ar') !== 'en';
+      var o = document.createElement('div');
+      o.id = 'masarLoggedOutOverlay';
+      o.dir = ar ? 'rtl' : 'ltr';
+      o.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:2147483646;background:#3D2B1E;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font:600 19px/1.6 sans-serif;text-align:center;padding:24px;';
+      o.innerHTML = '<div style="font-size:48px">\uD83D\uDD12</div><div>' + (ar ? 'تم تسجيل الخروج' : 'You have been logged out') + '</div>' +
+        '<button type="button" style="border:none;background:#EE7126;color:#fff;font:700 17px sans-serif;padding:15px 34px;border-radius:999px;cursor:pointer;">' + (ar ? 'العودة إلى شاشة الدخول' : 'Back to login') + '</button>';
+      document.body.appendChild(o);
+      var go = function () { try { window.top.location.href = APP_BASE_URL; } catch (e) { window.location.href = APP_BASE_URL; } };
+      o.getElementsByTagName('button')[0].addEventListener('click', go);
+      setTimeout(go, 700);
+    } catch (e) { /* عرض فقط */ }
+    return null;
+  }
+  const CURRENT_USER_ID = MASAR_TPL.currentUserId;
+  let APPROVALS = [];
+  let OFF_CATALOG_APPROVALS = [];
+  let OFF_CATALOG_PENDING = [];
+  let RAW_MATERIAL_NOTICES = [];
+  let SPECIAL_REDIRECT_APPROVALS = [];
+  let DEPARTMENTS_LIST = []; // {id, nameAR, nameEN} من الخادم الحقيقي
+  let STORES_LIST_REAL = []; // {id, nameAR, nameEN} من الخادم الحقيقي
+
+  /**
+   * transformApprovals(raw) -- يُحوِّل استجابة getProductionManagerApprovals()
+   * الحقيقية (ApprovalService.gs) إلى الشكل الذي صُمِّمت له دوال العرض هنا.
+   * *** ملاحظة تصميم: القسم العام لا يعرض أيقونة/اسم صنف مفرد بعد الآن (كان
+   * افتراضًا في نموذج أولي) -- DISTRIBUTION_CHANGE/QUANTITY_CHANGE/SHORTAGE_DECISION
+   * تقع على مستوى توزيع كامل قد يضمّ عدة أصناف، لا صنفًا واحدًا محدَّدًا؛ ولا
+   * مُنشئ فعلي بعد لهذه الاعتمادات يُقرِّر شكل هذا التفصيل. سياق الطلبية/المحل
+   * والقيمتين (سابق/مقترح) كافٍ ومطابق للبيانات الفعلية المتوفرة حاليًا. ***
+   */
+  function formatTimeAgo(iso) {
+    if (!iso) return '';
+    const diffMin = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
+    if (diffMin < 60) return state.lang === 'ar' ? `قبل ${diffMin} دقيقة` : `${diffMin}m ago`;
+    const diffH = Math.round(diffMin / 60);
+    if (diffH < 24) return state.lang === 'ar' ? `قبل ${diffH} ساعة` : `${diffH}h ago`;
+    return new Date(iso).toLocaleDateString(state.lang === 'ar' ? 'ar-QA-u-nu-latn' : 'en-US');
+  }
+
+  function transformApprovals(raw) {
+    APPROVALS = raw.general.map(a => ({
+      id: a.approvalId, type: a.type, orderId: a.orderId,
+      store: state.lang === 'ar' ? a.storeNameAR : a.storeNameEN, time: formatTimeAgo(a.requestedAt),
+      previous: a.previousValue || '—', proposed: a.proposedValue || '—', decision: null,
+      details: a.details || [], editChanges: a.editChanges || [], noteAr: a.commentAR || '', noteEn: a.commentEN || a.commentAR || ''
+    }));
+    OFF_CATALOG_APPROVALS = raw.offCatalog.map(o => ({
+      id: o.approvalId, orderId: o.orderId, store: state.lang === 'ar' ? o.storeNameAR : o.storeNameEN,
+      time: formatTimeAgo(o.requestedAt), icon: '🏰',
+      nameAr: o.descriptionAR, nameEn: o.descriptionEN || o.descriptionAR, decision: null,
+      attImg: o.attachmentImageFileId || '', attAudio: o.attachmentAudioFileId || ''
+    }));
+    // *** طلب مباشر (٢٢ سبتمبر ٢٠٢٦): "تظهر عنده قبل الاعتماد للاطلاع وبعد الاعتماد لاسناد المهام،
+    // مثل الأقسام" -- أصناف لم تُعتمَد كميتها من مسؤول التوزيع بعد، للعِلم فقط، بلا أي إجراء. ***
+    OFF_CATALOG_PENDING = (raw.offCatalogPending || []).map(o => ({
+      orderId: o.orderId, orderItemId: o.orderItemId, store: state.lang === 'ar' ? o.storeNameAR : o.storeNameEN,
+      nameAr: o.descriptionAR, nameEn: o.descriptionEN || o.descriptionAR, qty: o.qty, unit: o.unitId,
+      attImg: o.attachmentImageFileId || '', attAudio: o.attachmentAudioFileId || ''
+    }));
+    RAW_MATERIAL_NOTICES = raw.rawMaterial.map(n => ({
+      id: n.approvalId, itemAr: n.productNameAR, itemEn: n.productNameEN, orderId: n.orderId,
+      time: formatTimeAgo(n.requestedAt), status: n.decision
+    }));
+    SPECIAL_REDIRECT_APPROVALS = raw.redirects.map(r => ({
+      id: r.approvalId, orderId: r.orderId, store: state.lang === 'ar' ? r.storeNameAR : r.storeNameEN,
+      time: formatTimeAgo(r.requestedAt), addressAr: r.deliveryAddressText, addressEn: r.deliveryAddressText,
+      reasonAr: r.reasonAR, reasonEn: r.reasonEN || r.reasonAR,
+      items: r.items.map(it => ({ icon: '📦', nameAr: it.nameAR, nameEn: it.nameEN, unit: it.unitId, qty: it.qty })),
+      decision: null
+    }));
+    DEPARTMENTS_LIST = raw.departments.map(d => ({ id: d.departmentId, nameAR: d.nameAR, nameEN: d.nameEN }));
+    STORES_LIST_REAL = raw.stores.map(s => ({ id: s.storeId, nameAR: s.nameAR, nameEN: s.nameEN }));
+  }
+
+  function onceWithTimeout(fn, timeoutMs) {
+    let fired = false;
+    const timer = setTimeout(() => { if (!fired) { fired = true; forceHideBusyOverlay(); fn(); } }, timeoutMs * (typeof TIMEOUT_SCALE === 'number' ? TIMEOUT_SCALE : 1));
+    return (...args) => { if (fired) return; fired = true; clearTimeout(timer); fn(...args); };
+  }
+
+  function loadApprovals(onDone) {
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(result => {
+        if (!result || !result.success) {
+          const detail = result ? JSON.stringify(result) : '';
+          document.getElementById('tabContent').innerHTML = `<div class="card empty-state" style="color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} — ${detail}</div>`;
+          return;
+        }
+        transformApprovals(result.data);
+        renderTabs(); renderTabContent();
+        if (onDone) onDone();
+      }, 8000))
+      .withFailureHandler(error => {
+        let detail = ''; try { detail = (error && error.message) ? error.message : JSON.stringify(error); } catch (e) { detail = String(error); }
+        document.getElementById('tabContent').innerHTML = `<div class="card empty-state" style="color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} (FAIL) — ${detail}</div>`;
+      })
+      .getProductionManagerApprovals(CURRENT_USER_ID);
+  }
+
+  const dict = {
+    ar: {
+      roleName: 'مدير الإنتاج',
+      changePassword: '🔑 تغيير كلمة المرور', logout: '↩ تسجيل الخروج',
+      screenTitle: 'المراجعة والاعتمادات', dateLine: '',
+      pmNavApprovals: 'الموافقات', pmNavOrders: 'دورة الطلبيات', pmNavStock: 'نظرة عامة على المخزون', pmNavQuarantine: 'متابعة Quarantine',
+      usageBannerTodo: (day) => `🌾 لم تطّلع على تقرير استهلاك الأقسام اليوم (تقرير أمس ${day})`, usageBannerGo: 'افتح التقرير ←',
+      usageBannerDone: (time) => `✅ اطّلعتَ على تقرير استهلاك الأقسام اليوم — ${time}`,
+      urTitle: 'تقرير استهلاك الأقسام جاهز', urText: 'المواد الأولية التي استفادت منها الأقسام أمس. الاطلاع اليومي مطلوب منك، ولا يمنع أي اعتماد.', urGo: 'اذهب للتقرير الآن', urLater: 'لاحقًا',
+      tabGeneral: 'الاعتمادات العامة', tabOffCatalog: 'تصنيع خارج الكتالوج', tabRawMaterial: 'نقص مواد أولية',
+      tabRedirect: 'إعادة توجيه بعد المغادرة',
+      typeQuantity: 'تغيير كمية', typeShortage: 'قرار عجز', typePriority: 'تغيير أولوية', typeCancellation: 'طلب إلغاء',
+      typeDistribution: 'تغيير توزيع', typeOrderEdit: 'طلب تعديل طلبية',
+      loadingText: 'جارٍ التحميل...', loadErrorText: 'تعذّر تنفيذ العملية — أعد المحاولة', savingText: 'جارٍ الحفظ...',
+      toastNotReady: 'هذه الميزة ستُبنى في خطوة قادمة', continueBtn: 'اضغط هنا للمتابعة',
+      previousLbl: 'الحالي', proposedLbl: 'المقترح', deptLbl: 'القسم',
+      editAddLbl: 'إضافة صنف', editRemoveLbl: 'حذف صنف', editQtyLbl: 'تعديل كمية', editNoteLbl: 'ملاحظات جديدة', editDeliveryLbl: 'تغيير التسليم', reasonLbl: 'سبب القسم', itemLbl: 'الصنف', requestedQtyLbl: 'المطلوب', executedQtyLbl: 'المنفَّذ', qtyInvalid: 'أدخل كمية صحيحة (0 أو أكثر) لكل صنف',
+      priorityWarning: '⚠️ القاعدة الافتراضية للنظام هي خدمة الطلبيات الأقدم أولًا (FIFO)؛ الموافقة هنا استثناء يمنح هذه الطلبية أولوية يدوية دائمة عند أي تعارض مستقبلي على نفس الصنف.',
+      approveBtn: '✅ موافقة', modifyBtn: '✏️ تعديل', rejectBtn: '✕ رفض',
+      modifyPlaceholder: 'القيمة المعدَّلة', modifySubmit: 'تأكيد التعديل',
+      deptRequiredLabel: 'القسم المسؤول عن التصنيع (إلزامي)',
+      priceRequiredLabel: 'سعر بيع الصنف (إلزامي)', pricePlaceholder: 'مثال: 25.00',
+      offCatalogApproveBtn: '✅ موافقة وتحديد القسم', offCatalogRejectBtn: '✕ رفض',
+      toastApproved: 'اعتُمد الطلب بنجاح', toastRejected: 'رُفض الطلب', toastModified: 'حُفظ التعديل واعتُمد الطلب',
+      toastMissingDept: 'الرجاء اختيار القسم المسؤول أولًا', toastMissingPrice: 'الرجاء إدخال سعر بيع صحيح أولًا',
+      rawMaterialNote: 'للمتابعة فقط — القرار حصريًا لمسؤول مخزن المواد الأولية',
+      rmPending: 'بانتظار التحرك', rmApproved: 'جارٍ التوفير', rmRejected: 'تأجيل التوفير الآن',
+      offCatalogPendingSection: 'بانتظار اعتماد مسؤول التوزيع — للعِلم فقط', offCatalogPendingNote: 'لا يمكن تحديد القسم قبل أن يعتمد مسؤول التوزيع الكمية',
+      hasAttachmentNote: '📎 مرفق صورة/تسجيل مع هذا الصنف', attachmentModalClose: 'إغلاق',
+      emptyGeneral: 'لا توجد اعتمادات معلَّقة حاليًا', emptyOffCatalog: 'لا توجد طلبات تصنيع خارج الكتالوج حاليًا',
+      emptyRedirect: 'لا توجد طلبات إعادة توجيه حاليًا',
+      redirectDriverLbl: 'السائق', redirectAddressLbl: 'عنوان التسليم الأصلي', redirectReasonLbl: 'سبب طلب الكاشير',
+      redirectItemsLbl: 'الأصناف المحمَّلة فعليًا',
+      redirectToStoreBtn: '🏪 تحويل لمحل', returnToFactoryBtn: '🏭 إعادة للمصنع',
+      chooseTargetStore: 'اختر المحل الوجهة (إلزامي)',
+      confirmRedirectBtn: 'تأكيد التحويل', confirmReturnBtn: 'تأكيد الإعادة للمصنع',
+      redirectToStoreMsg: 'ستُنشأ طلبية جديدة لنفس البضاعة موجَّهة لهذا المحل، جاهزة للشحن مباشرة (لا حاجة لإعادة إنتاجها)',
+      returnToFactoryMsg: 'ستدخل هذه الكمية مراجعة Quarantine فور استلامها فعليًا — القرار النهائي (متاح للبيع/تالف/منتهي الصلاحية) يُتَّخذ هناك، لا يُحسَب رصيدًا متاحًا تلقائيًا هنا',
+      toastRedirected: (store) => `أُنشئت طلبية جديدة لـ${store} — جاهزة مباشرة لشاشة إنشاء رحلة`,
+      toastReturned: 'سُجِّلت العودة للمصنع — الصنف الآن بانتظار قرار Quarantine (متاح للبيع/تالف/منتهي)',
+      toastMissingStore: 'الرجاء اختيار المحل الوجهة أولًا'
+    },
+    en: {
+      roleName: 'Production manager',
+      changePassword: '🔑 Change password', logout: '↩ Log out',
+      screenTitle: 'Review & approvals', dateLine: '',
+      pmNavApprovals: 'Approvals', pmNavOrders: 'Order lifecycle', pmNavStock: 'Stock overview', pmNavQuarantine: 'Quarantine tracking',
+      usageBannerTodo: (day) => `🌾 You have not reviewed the department usage report today (yesterday\'s report ${day})`, usageBannerGo: 'Open the report →',
+      usageBannerDone: (time) => `✅ You reviewed the department usage report today — ${time}`,
+      urTitle: 'Department usage report is ready', urText: 'The raw materials used by departments yesterday. A daily review is expected from you and never blocks any approval.', urGo: 'Go to the report now', urLater: 'Later',
+      tabGeneral: 'General approvals', tabOffCatalog: 'Off-catalog manufacturing', tabRawMaterial: 'Raw material shortages',
+      tabRedirect: 'Redirect after departure',
+      typeQuantity: 'Quantity change', typeShortage: 'Shortage decision', typePriority: 'Priority change', typeCancellation: 'Cancellation request',
+      typeDistribution: 'Distribution change', typeOrderEdit: 'Order edit request',
+      loadingText: 'Loading...', loadErrorText: 'Could not complete the operation — please try again', savingText: 'Saving...',
+      toastNotReady: 'This feature is coming up next', continueBtn: 'Tap here to continue',
+      previousLbl: 'Current', proposedLbl: 'Proposed', deptLbl: 'Department',
+      editAddLbl: 'Add item', editRemoveLbl: 'Remove item', editQtyLbl: 'Change quantity', editNoteLbl: 'New notes', editDeliveryLbl: 'Delivery change', reasonLbl: "Department's reason", itemLbl: 'Item', requestedQtyLbl: 'Requested', executedQtyLbl: 'Executed', qtyInvalid: 'Enter a valid quantity (0 or more) for every item',
+      priorityWarning: "⚠️ The system's default rule is first-in-first-out (FIFO); approving here is an exception that gives this order a permanent manual priority in any future conflict over the same item.",
+      approveBtn: '✅ Approve', modifyBtn: '✏️ Modify', rejectBtn: '✕ Reject',
+      modifyPlaceholder: 'Modified value', modifySubmit: 'Confirm modification',
+      deptRequiredLabel: 'Responsible manufacturing department (required)',
+      priceRequiredLabel: 'Item sale price (required)', pricePlaceholder: 'e.g. 25.00',
+      offCatalogApproveBtn: '✅ Approve & assign department', offCatalogRejectBtn: '✕ Reject',
+      toastApproved: 'Request approved successfully', toastRejected: 'Request rejected', toastModified: 'Modification saved and request approved',
+      toastMissingDept: 'Please choose the responsible department first', toastMissingPrice: 'Please enter a valid sale price first',
+      rawMaterialNote: "Tracking only — the decision belongs exclusively to the raw-materials store",
+      rmPending: 'Awaiting action', rmApproved: 'Being sourced', rmRejected: 'Deferred for now',
+      offCatalogPendingSection: 'Awaiting distribution manager approval — for information only', offCatalogPendingNote: 'A department cannot be assigned until the distribution manager approves the quantity',
+      hasAttachmentNote: '📎 A photo/recording is attached to this item', attachmentModalClose: 'Close',
+      emptyGeneral: 'No pending approvals right now', emptyOffCatalog: 'No off-catalog manufacturing requests right now',
+      emptyRedirect: 'No redirect requests right now',
+      redirectDriverLbl: 'Driver', redirectAddressLbl: 'Original delivery address', redirectReasonLbl: "Cashier's stated reason",
+      redirectItemsLbl: 'Items actually loaded',
+      redirectToStoreBtn: '🏪 Redirect to store', returnToFactoryBtn: '🏭 Return to factory',
+      chooseTargetStore: 'Choose the target store (required)',
+      confirmRedirectBtn: 'Confirm redirect', confirmReturnBtn: 'Confirm return to factory',
+      redirectToStoreMsg: 'A new order for the same goods will be created for this store, ready to ship directly (no need to re-produce it)',
+      returnToFactoryMsg: "This quantity will enter quarantine review once physically received — the final decision (available for sale/damaged/expired) is made there, not counted as available stock automatically here",
+      toastRedirected: (store) => `New order created for ${store} — ready directly for the trip-creation screen`,
+      toastReturned: 'Return to factory recorded — the item now awaits a quarantine decision (available for sale/damaged/expired)',
+      toastMissingStore: 'Please choose the target store first'
+    }
+  };
+
+  const state = { lang: (MASAR_TPL.userLang === 'en' ? 'en' : 'ar'), activeTab: 'GENERAL' };
+  // لغة المستخدم المحفوظة على الخادم (Users.Language) -- طلب مباشر ٢٥ سبتمبر ٢٠٢٦: تُفتح بها كل الشاشات وتبقى عند التنقّل
+  (function () {
+    if (state.lang === 'en') { document.documentElement.lang = 'en'; document.documentElement.dir = 'ltr'; }
+    const langBtn = document.getElementById('langToggle');
+    if (!langBtn) return;
+    langBtn.textContent = state.lang === 'ar' ? 'EN' : 'AR';
+    langBtn.addEventListener('click', () => setTimeout(() => {
+      try { if (MASAR_TPL.currentUserId) google.script.run.withFailureHandler(() => {}).setUserLanguage(MASAR_TPL.currentUserId, state.lang); } catch (e) { /* لا يعطّل الشاشة */ }
+    }, 0));
+  })();
+  // ---- زر التحيين (طلب مباشر ٢٦ سبتمبر ٢٠٢٦): تحديث ناعم إن وُجد مُحمِّل للصفحة، وإلا إعادة تحميل الصفحة بنفس رابطها ----
+  (function () {
+    const btn = document.getElementById('refreshBtn');
+    if (!btn) return;
+    const CONFIRM = false;
+    const label = btn.querySelector('.rf-label');
+    const idleText = () => (state.lang === 'ar' ? 'تحديث' : 'Refresh');
+    const sureText = () => (state.lang === 'ar' ? 'اضغط للتأكيد' : 'Tap to confirm');
+    const setIdle = () => { btn.classList.remove('armed'); if (label) label.textContent = idleText(); };
+    setIdle();
+    const lt = document.getElementById('langToggle');
+    if (lt) lt.addEventListener('click', () => setTimeout(setIdle, 0));
+    let armed = false, timer = null;
+    const hardReload = () => {
+      try { window.top.location.href = APP_BASE_URL + '?' + MASAR_TPL.reloadQuery; } catch (e) { window.location.reload(); }
+    };
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      if (CONFIRM && !armed) {
+        armed = true; btn.classList.add('armed'); if (label) label.textContent = sureText();
+        clearTimeout(timer); timer = setTimeout(() => { armed = false; setIdle(); }, 2800);
+        return;
+      }
+      clearTimeout(timer); armed = false; setIdle();
+      const soft = () => loadApprovals();
+      if (soft) {
+        btn.classList.add('spin');
+        try { soft(); setTimeout(() => btn.classList.remove('spin'), 1200); return; } catch (e) { btn.classList.remove('spin'); }
+      }
+      hardReload();
+    });
+  })();
+  function t(key) { return (dict[state.lang] && dict[state.lang][key]) || key; }
+  function itemName(it) { return state.lang === 'ar' ? it.itemNameAr : it.itemNameEn; }
+
+  function applyI18n() {
+    document.documentElement.lang = state.lang;
+    document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+    document.getElementById('langToggle').textContent = state.lang === 'ar' ? 'EN' : 'AR';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (dict[state.lang][key] !== undefined) el.textContent = dict[state.lang][key];
+    });
+  }
+
+  function renderDate() {
+    const now = new Date();
+    const locale = state.lang === 'ar' ? 'ar-QA-u-nu-latn' : 'en-US';
+    const fmt = new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    document.getElementById('dateLine').textContent = fmt.format(now);
+  }
+
+  // يُلحِق رمز الخطأ الفعلي القادم من الخادم بالرسالة العامة، فلا يبقى سبب الفشل مخفيًا خلف "تعذّر تنفيذ العملية"
+  function failText(result) {
+    const code = result && result.error && result.error.code ? result.error.code : '';
+    return t('loadErrorText') + (code ? ' (' + code + ')' : '');
+  }
+
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => el.classList.remove('show'), 2600);
+  }
+
+  // بناء الرابط بلا "//" حرفية في الكود المصدري -- انظر نفس الإصلاح في admin_products_v2.html
+  // (updateImageBtn): شرطتان مائلتان متتاليتان في المصدر تُعامَلان كبداية تعليق جافاسكريبت من
+  // طرف آلية غوغل الداخلية حتى داخل نص بين علامتَي اقتباس، فيُقتَطع الملف صامتًا من تلك النقطة.
+  function driveUrl_(path) {
+    const s = String.fromCharCode(47);
+    return 'https:' + s + s + 'drive.google.com' + s + path;
+  }
+  function attachmentBadgeHtml(it) {
+    if (!it.attImg && !it.attAudio) return '';
+    return `<span class="attachment-badge" data-att-img="${it.attImg || ''}" data-att-audio="${it.attAudio || ''}">${t('hasAttachmentNote')}</span>`;
+  }
+  function openAttachmentModal(imgId, audioId) {
+    let html = '';
+    if (imgId) html += '<img src="' + driveUrl_('thumbnail?id=' + encodeURIComponent(imgId) + '&sz=w800') + '" alt="">';
+    if (audioId) html += '<iframe src="' + driveUrl_('file/d/' + encodeURIComponent(audioId) + '/preview') + '" style="width:100%; height:80px; border:none;" allow="autoplay"></iframe>';
+    document.getElementById('attModalBody').innerHTML = html;
+    document.getElementById('attModalOverlay').classList.add('open');
+  }
+  document.addEventListener('click', (e) => {
+    const badge = e.target.closest('.attachment-badge');
+    if (badge) openAttachmentModal(badge.getAttribute('data-att-img'), badge.getAttribute('data-att-audio'));
+  });
+
+  const typeMeta = {
+    DISTRIBUTION_CHANGE: 'typeDistribution', QUANTITY_CHANGE: 'typeQuantity', SHORTAGE_DECISION: 'typeShortage',
+    PRIORITY_CHANGE: 'typePriority', CANCELLATION: 'typeCancellation', ORDER_EDIT_REQUEST: 'typeOrderEdit'
+  };
+
+  function renderTabs() {
+    const bar = document.getElementById('tabsBar');
+    const pendingGeneral = APPROVALS.filter(a => !a.decision).length;
+    const pendingOffCatalog = OFF_CATALOG_APPROVALS.filter(a => !a.decision).length;
+    const pendingRedirect = SPECIAL_REDIRECT_APPROVALS.filter(a => !a.decision).length;
+    bar.innerHTML = `
+      <button class="tab ${state.activeTab === 'GENERAL' ? 'active' : ''}" data-tab="GENERAL">${t('tabGeneral')}<span class="count">(${pendingGeneral})</span></button>
+      <button class="tab ${state.activeTab === 'OFFCATALOG' ? 'active' : ''}" data-tab="OFFCATALOG">${t('tabOffCatalog')}<span class="count">(${pendingOffCatalog})</span></button>
+      <button class="tab ${state.activeTab === 'REDIRECT' ? 'active' : ''}" data-tab="REDIRECT">${t('tabRedirect')}<span class="count">(${pendingRedirect})</span></button>
+      <button class="tab ${state.activeTab === 'RAWMATERIAL' ? 'active' : ''}" data-tab="RAWMATERIAL">${t('tabRawMaterial')}<span class="count">(${RAW_MATERIAL_NOTICES.length})</span></button>
+    `;
+    bar.querySelectorAll('.tab').forEach(el => {
+      el.addEventListener('click', () => { state.activeTab = el.getAttribute('data-tab'); renderTabs(); renderTabContent(); });
+    });
+  }
+
+  function wireConfirmable(btn, onConfirm) {
+    let armed = false;
+    let timer = null;
+    const original = btn.innerHTML;
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      if (!armed) {
+        armed = true;
+        btn.classList.add('confirm-armed');
+        btn.innerHTML = state.lang === 'ar' ? '👆 تأكيد' : '👆 Confirm';
+        timer = setTimeout(() => { armed = false; btn.classList.remove('confirm-armed'); btn.innerHTML = original; }, 2500);
+      } else {
+        clearTimeout(timer);
+        onConfirm();
+      }
+    });
+  }
+
+  function qtyOrDash(v) { return v === null || v === undefined || isNaN(v) ? '—' : v; }
+  function itemName(d) { return state.lang === 'ar' ? d.nameAR : d.nameEN; }
+
+  /**
+   * generalValueHtml(a) -- اعتمادات الكمية/العجز تصل بقائمة أصناف مُفسَّرة من الخادم (details): جدول
+   * الصنف/المطلوب/المنفَّذ/المقترح بدل JSON خام. ما لا تفسير له (أولوية، إلغاء، تعديل) يبقى صندوق الحالي/المقترح.
+   */
+  function generalValueHtml(a) {
+    if (a.editChanges && a.editChanges.length) {
+      const kindLbl = { ADD: 'editAddLbl', REMOVE: 'editRemoveLbl', QTY: 'editQtyLbl', NOTE: 'editNoteLbl', DELIVERY: 'editDeliveryLbl' };
+      const kindIcon = { ADD: '➕', REMOVE: '➖', QTY: '✏️', NOTE: '📝', DELIVERY: '🚚' };
+      return `<div class="edit-changes">${a.editChanges.map(c => {
+        const text = c.kind === 'NOTE' || c.kind === 'DELIVERY'
+          ? (state.lang === 'ar' ? c.textAR : c.textEN)
+          : `${state.lang === 'ar' ? c.nameAR : c.nameEN}: ` + (c.kind === 'ADD' ? `${c.newQty} ${c.unitId || ''}` : c.kind === 'REMOVE' ? `${qtyOrDash(c.oldQty)} ${c.unitId || ''}` : `${qtyOrDash(c.oldQty)} ← ${qtyOrDash(c.newQty)} ${c.unitId || ''}`);
+        return `<div class="edit-change-row"><span class="edit-kind">${kindIcon[c.kind] || ''} ${t(kindLbl[c.kind] || '')}</span><span class="edit-text">${text}</span></div>`;
+      }).join('')}</div>`;
+    }
+    if (!a.details || !a.details.length) {
+      return `
+        <div class="value-compare">
+          <div class="value-box"><div class="lbl">${t('previousLbl')}</div><div class="val">${a.previous}</div></div>
+          <span class="value-arrow">←</span>
+          <div class="value-box proposed"><div class="lbl">${t('proposedLbl')}</div><div class="val">${a.proposed}</div></div>
+        </div>`;
+    }
+    const note = state.lang === 'ar' ? a.noteAr : a.noteEn;
+    return `
+      ${note ? `<div class="approval-note">${note}</div>` : ''}
+      <table class="qty-table">
+        <thead><tr><th>${t('itemLbl')}</th><th>${t('requestedQtyLbl')}</th><th>${t('executedQtyLbl')}</th><th>${t('proposedLbl')}</th></tr></thead>
+        <tbody>${a.details.map(d => `
+          <tr><td>${itemName(d)}<span class="unit">${d.unitId || ''}</span>${(state.lang === 'ar' ? d.reasonAR : d.reasonEN) ? `<span class="reason">❗ ${t('reasonLbl')}: ${state.lang === 'ar' ? d.reasonAR : d.reasonEN}</span>` : ''}</td>
+              <td>${qtyOrDash(d.requestedQty)}</td><td>${qtyOrDash(d.executedQty)}</td><td class="prop">${qtyOrDash(d.proposedQty)}</td></tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  function renderGeneralTab() {
+    const wrap = document.getElementById('tabContent');
+    const pending = APPROVALS.filter(a => !a.decision);
+    if (!pending.length) { wrap.innerHTML = `<div class="card empty-state">${t('emptyGeneral')}</div>`; return; }
+
+    wrap.innerHTML = pending.map(a => `
+      <div class="card approval-card" data-approval="${a.id}">
+        <div class="approval-top">
+          <span class="approval-type-badge">${t(typeMeta[a.type] || a.type)}</span>
+          <span class="approval-order-tag">${a.orderId} · ${a.store}</span>
+          <span class="approval-spacer"></span>
+          <span class="approval-time">${a.time}</span>
+        </div>
+        ${generalValueHtml(a)}
+        ${a.type === 'PRIORITY_CHANGE' ? `<div class="priority-note">${t('priorityWarning')}</div>` : ''}
+        <div class="decision-btns">
+          <button class="decision-btn approve" data-approve="${a.id}">${t('approveBtn')}</button>
+          <button class="decision-btn modify" data-modify-toggle="${a.id}">${t('modifyBtn')}</button>
+          <button class="decision-btn reject" data-reject="${a.id}">${t('rejectBtn')}</button>
+        </div>
+        <div id="modifyForm-${a.id}"></div>
+      </div>`).join('');
+
+    /**
+     * SPEC v1.4 -- كل زرّي approve/reject لهذه البطاقة يُعطَّلان معًا أثناء
+     * تنفيذ أيّهما (تفاديًا لنداءين متزامنين على نفس الاعتماد)، ثم إعادة
+     * جلب فعلية من الخادم بدل تعديل محلي -- نفس النمط المُثبَّت عبر كل
+     * الأدوار السابقة.
+     */
+    pending.forEach(a => {
+      const card = wrap.querySelector(`[data-approval="${a.id}"]`);
+      const approveBtn = card.querySelector('[data-approve]');
+      const rejectBtn = card.querySelector('[data-reject]');
+      function disableBoth() { approveBtn.disabled = true; rejectBtn.disabled = true; }
+      function enableBoth() { approveBtn.disabled = false; rejectBtn.disabled = false; }
+
+      wireConfirmable(approveBtn, () => {
+        disableBoth();
+        google.script.run
+          .withSuccessHandler(onceWithTimeout(result => {
+            if (result && !result.success) { enableBoth(); showToast(failText(result)); return; }
+            showToast(t('toastApproved'));
+            loadApprovals();
+          }, 8000))
+          .withFailureHandler(() => { enableBoth(); showToast(t('loadErrorText')); })
+          .decideApproval(CURRENT_USER_ID, a.id, 'APPROVED', '');
+      });
+      wireConfirmable(rejectBtn, () => {
+        disableBoth();
+        google.script.run
+          .withSuccessHandler(onceWithTimeout(result => {
+            if (result && !result.success) { enableBoth(); showToast(failText(result)); return; }
+            showToast(t('toastRejected'));
+            loadApprovals();
+          }, 8000))
+          .withFailureHandler(() => { enableBoth(); showToast(t('loadErrorText')); })
+          .decideApproval(CURRENT_USER_ID, a.id, 'REJECTED', '');
+      });
+      card.querySelector('[data-modify-toggle]').addEventListener('click', () => {
+        const formWrap = card.querySelector(`[id="modifyForm-${a.id}"]`);
+        if (formWrap.innerHTML) { formWrap.innerHTML = ''; return; }
+        const hasDetails = a.details && a.details.length;
+        // اعتمادات الكمية: حقل رقمي لكل صنف (يُبنى منه JSON [{orderItemId, proposedQty}] الذي تتوقعه resolveShortage).
+        // غيرها: نص حر كما كان.
+        formWrap.innerHTML = hasDetails ? `
+          <div class="modify-form">
+            ${a.details.map((d, i) => `
+              <label class="modify-row"><span>${itemName(d)} <small>(${t('requestedQtyLbl')}: ${qtyOrDash(d.requestedQty)} · ${t('executedQtyLbl')}: ${qtyOrDash(d.executedQty)})</small></span>
+                <input type="number" min="0" step="any" data-qty-idx="${i}" value="${d.proposedQty}"></label>`).join('')}
+            <button class="decision-btn modify" id="modifySubmit-${a.id}" style="width:100%;">${t('modifySubmit')}</button>
+          </div>` : `
+          <div class="modify-form">
+            <input type="text" id="modifyInput-${a.id}" placeholder="${t('modifyPlaceholder')}" value="${a.proposed}">
+            <button class="decision-btn modify" id="modifySubmit-${a.id}" style="width:100%;">${t('modifySubmit')}</button>
+          </div>`;
+        wireConfirmable(formWrap.querySelector(`[id="modifySubmit-${a.id}"]`), () => {
+          let modifiedText, comment = '';
+          if (hasDetails) {
+            const values = Array.from(formWrap.querySelectorAll('[data-qty-idx]')).map(inp => inp.value === '' ? NaN : Number(inp.value));
+            if (values.some(v => isNaN(v) || v < 0)) { showToast(t('qtyInvalid')); return; }
+            modifiedText = JSON.stringify(a.details.map((d, i) => ({ orderItemId: d.orderItemId, proposedQty: values[i] })));
+          } else {
+            modifiedText = formWrap.querySelector(`[id="modifyInput-${a.id}"]`).value;
+            comment = modifiedText;
+          }
+          const submitBtn = formWrap.querySelector(`[id="modifySubmit-${a.id}"]`);
+          submitBtn.disabled = true;
+          google.script.run
+            .withSuccessHandler(onceWithTimeout(result => {
+              if (result && !result.success) { submitBtn.disabled = false; showToast(failText(result)); return; }
+              showToast(t('toastModified'));
+              loadApprovals();
+            }, 8000))
+            .withFailureHandler(() => { submitBtn.disabled = false; showToast(t('loadErrorText')); })
+            .decideApproval(CURRENT_USER_ID, a.id, 'MODIFIED', comment, modifiedText);
+        });
+      });
+    });
+  }
+
+  function renderOffCatalogTab() {
+    const wrap = document.getElementById('tabContent');
+    const pending = OFF_CATALOG_APPROVALS.filter(a => !a.decision);
+    // *** طلب مباشر (٢٢ سبتمبر ٢٠٢٦): قسم معلوماتي بحت أعلى التبويب لأصناف "يُصنَّع محليًا" لم
+    // تُعتمَد كميتها من مسؤول التوزيع بعد -- بلا أي إجراء، نفس نمط الأقسام الإنتاجية. ***
+    const pendingInfoHtml = OFF_CATALOG_PENDING.length ? `
+      <div class="section-title" style="margin-bottom:8px;">${t('offCatalogPendingSection')}</div>
+      ${OFF_CATALOG_PENDING.map(o => `
+        <div class="card readonly-card">
+          <div class="approval-top" style="margin-bottom:6px;">
+            <span class="approval-order-tag">${o.orderId} · ${o.store}</span>
+          </div>
+          <div class="approval-item-name">${state.lang === 'ar' ? o.nameAr : o.nameEn}</div>
+          <div class="approval-store">${o.qty} ${o.unit}</div>
+          ${attachmentBadgeHtml(o)}
+          <div class="readonly-note">ℹ️ ${t('offCatalogPendingNote')}</div>
+        </div>`).join('')}
+      <div class="section-title" style="margin:16px 0 8px;">${t('tabOffCatalog')}</div>
+    ` : '';
+
+    if (!pending.length) { wrap.innerHTML = pendingInfoHtml + `<div class="card empty-state">${t('emptyOffCatalog')}</div>`; return; }
+
+    wrap.innerHTML = pendingInfoHtml + pending.map(a => `
+      <div class="card approval-card" data-approval="${a.id}">
+        <div class="approval-top">
+          <span class="approval-order-tag">${a.orderId} · ${a.store}</span>
+          <span class="approval-spacer"></span>
+          <span class="approval-time">${a.time}</span>
+        </div>
+        <div class="approval-context">
+          <div class="item-thumb">${a.icon}</div>
+          <div class="approval-item-name">${state.lang === 'ar' ? a.nameAr : a.nameEn}</div>
+        </div>
+        ${attachmentBadgeHtml(a)}
+        <div class="dept-select-row">
+          <label>${t('deptRequiredLabel')}</label>
+          <select class="needs-choice" id="deptSelect-${a.id}">
+            <option value="" selected disabled>${t('deptRequiredLabel')}</option>
+            ${DEPARTMENTS_LIST.map(d => `<option value="${d.id}">${state.lang === 'ar' ? d.nameAR : d.nameEN}</option>`).join('')}
+          </select>
+        </div>
+        <div class="dept-select-row">
+          <label>${t('priceRequiredLabel')}</label>
+          <input type="number" step="0.01" min="0.01" class="needs-choice" id="priceInput-${a.id}" placeholder="${t('pricePlaceholder')}">
+        </div>
+        <div class="decision-btns" style="margin-top:10px;">
+          <button class="decision-btn approve" data-oc-approve="${a.id}" disabled>${t('offCatalogApproveBtn')}</button>
+          <button class="decision-btn reject" data-oc-reject="${a.id}">${t('offCatalogRejectBtn')}</button>
+        </div>
+      </div>`).join('');
+
+    pending.forEach(a => {
+      const card = wrap.querySelector(`[data-approval="${a.id}"]`);
+      const sel = card.querySelector(`[id="deptSelect-${a.id}"]`);
+      const priceInput = card.querySelector(`[id="priceInput-${a.id}"]`);
+      const approveBtn = card.querySelector('[data-oc-approve]');
+      const rejectBtn = card.querySelector('[data-oc-reject]');
+      function hasValidPrice() { return priceInput.value !== '' && !isNaN(Number(priceInput.value)) && Number(priceInput.value) > 0; }
+      function refreshApproveState() { approveBtn.disabled = !sel.value || !hasValidPrice(); }
+      sel.addEventListener('change', () => {
+        sel.classList.toggle('needs-choice', !sel.value);
+        refreshApproveState();
+      });
+      priceInput.addEventListener('input', () => {
+        priceInput.classList.toggle('needs-choice', !hasValidPrice());
+        refreshApproveState();
+      });
+      function disableBoth() { approveBtn.disabled = true; rejectBtn.disabled = true; }
+      function enableBoth() { refreshApproveState(); rejectBtn.disabled = false; }
+
+      wireConfirmable(approveBtn, () => {
+        if (!sel.value) { showToast(t('toastMissingDept')); return; }
+        if (!hasValidPrice()) { showToast(t('toastMissingPrice')); return; }
+        disableBoth();
+        google.script.run
+          .withSuccessHandler(onceWithTimeout(result => {
+            if (result && !result.success) { enableBoth(); showToast(failText(result)); return; }
+            showToast(t('toastApproved'));
+            loadApprovals();
+          }, 8000))
+          .withFailureHandler(() => { enableBoth(); showToast(t('loadErrorText')); })
+          .decideManufactureRequest(CURRENT_USER_ID, a.id, 'APPROVED', sel.value, '', Number(priceInput.value));
+      });
+      wireConfirmable(rejectBtn, () => {
+        disableBoth();
+        google.script.run
+          .withSuccessHandler(onceWithTimeout(result => {
+            if (result && !result.success) { enableBoth(); showToast(failText(result)); return; }
+            showToast(t('toastRejected'));
+            loadApprovals();
+          }, 8000))
+          .withFailureHandler(() => { enableBoth(); showToast(t('loadErrorText')); })
+          .decideManufactureRequest(CURRENT_USER_ID, a.id, 'REJECTED', '', '');
+      });
+    });
+  }
+
+  function renderRawMaterialTab() {
+    const wrap = document.getElementById('tabContent');
+    wrap.innerHTML = RAW_MATERIAL_NOTICES.map(n => `
+      <div class="card readonly-card">
+        <div class="approval-top" style="margin-bottom:6px;">
+          <span class="approval-order-tag">${n.orderId}</span>
+          <span class="approval-spacer"></span>
+          <span class="approval-time">${n.time}</span>
+        </div>
+        <div class="approval-item-name">${state.lang === 'ar' ? n.itemAr : n.itemEn}</div>
+        <div class="approval-store">${n.status === 'PENDING' ? t('rmPending') : n.status === 'APPROVED' ? t('rmApproved') : t('rmRejected')}</div>
+        <div class="readonly-note">ℹ️ ${t('rawMaterialNote')}</div>
+      </div>`).join('');
+  }
+
+  function renderRedirectTab() {
+    const wrap = document.getElementById('tabContent');
+    const pending = SPECIAL_REDIRECT_APPROVALS.filter(a => !a.decision);
+    if (!pending.length) { wrap.innerHTML = `<div class="card empty-state">${t('emptyRedirect')}</div>`; return; }
+
+    wrap.innerHTML = pending.map(a => `
+      <div class="card approval-card" data-approval="${a.id}">
+        <div class="approval-top">
+          <span class="approval-order-tag">${a.orderId} · ${a.store}</span>
+          <span class="approval-spacer"></span>
+          <span class="approval-time">${a.time}</span>
+        </div>
+        <div style="margin-bottom:12px; font-size:12.5px; color:var(--ink-soft); line-height:1.7;">
+          <div><strong style="color:var(--ink);">${t('redirectAddressLbl')}:</strong> ${(state.lang === 'ar' ? a.addressAr : a.addressEn) || '—'}</div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <div style="font-size:11.5px; font-weight:600; color:var(--ink-soft); margin-bottom:6px;">${t('redirectItemsLbl')}</div>
+          ${a.items.map(it => `
+            <div style="display:flex; align-items:center; gap:10px; padding:6px 0;">
+              <div class="item-thumb" style="width:34px;height:34px;font-size:15px;">${it.icon}</div>
+              <div style="flex:1; font-size:13px; font-weight:600;">${state.lang === 'ar' ? it.nameAr : it.nameEn}</div>
+              <div style="font-family:var(--font-mono); font-size:12px; color:var(--ink-soft);">${it.qty} ${it.unit}</div>
+            </div>`).join('')}
+        </div>
+        <div class="priority-note">💬 ${t('redirectReasonLbl')}: ${(state.lang === 'ar' ? a.reasonAr : a.reasonEn) || '—'}</div>
+        <div id="redirectAction-${a.id}"></div>
+        <div id="returnAction-${a.id}"></div>
+        <div class="decision-btns">
+          <button class="decision-btn approve" data-redirect-store-toggle="${a.id}">${t('redirectToStoreBtn')}</button>
+          <button class="decision-btn modify" data-return-factory-toggle="${a.id}">${t('returnToFactoryBtn')}</button>
+        </div>
+      </div>`).join('');
+
+    pending.forEach(a => {
+      const card = wrap.querySelector(`[data-approval="${a.id}"]`);
+      const actionWrap = card.querySelector(`[id="redirectAction-${a.id}"]`);
+
+      card.querySelector('[data-redirect-store-toggle]').addEventListener('click', () => {
+        if (actionWrap.innerHTML) { actionWrap.innerHTML = ''; return; }
+        actionWrap.innerHTML = `
+          <div class="dept-select-row">
+            <label>${t('chooseTargetStore')}</label>
+            <select class="needs-choice" id="targetStore-${a.id}">
+              <option value="" selected disabled>${t('chooseTargetStore')}</option>
+              ${STORES_LIST_REAL.map(s => `<option value="${s.id}">${state.lang === 'ar' ? s.nameAR : s.nameEN}</option>`).join('')}
+            </select>
+          </div>
+          <div class="priority-note" style="margin-top:8px;">ℹ️ ${t('redirectToStoreMsg')}</div>
+          <button class="decision-btn approve" id="confirmRedirect-${a.id}" style="width:100%; margin-top:8px;" disabled>${t('confirmRedirectBtn')}</button>
+        `;
+        const sel = actionWrap.querySelector(`[id="targetStore-${a.id}"]`);
+        const confirmBtn = actionWrap.querySelector(`[id="confirmRedirect-${a.id}"]`);
+        sel.addEventListener('change', () => {
+          confirmBtn.disabled = !sel.value;
+          sel.classList.toggle('needs-choice', !sel.value);
+        });
+        wireConfirmable(confirmBtn, () => {
+          if (!sel.value) { showToast(t('toastMissingStore')); return; }
+          const storeLabel = state.lang === 'ar'
+            ? STORES_LIST_REAL.find(s => s.id === sel.value).nameAR
+            : STORES_LIST_REAL.find(s => s.id === sel.value).nameEN;
+          confirmBtn.disabled = true;
+          google.script.run
+            .withSuccessHandler(onceWithTimeout(result => {
+              if (result && !result.success) { confirmBtn.disabled = false; showToast(t('loadErrorText')); return; }
+              showToast(t('toastRedirected')(storeLabel));
+              loadApprovals();
+            }, 8000))
+            .withFailureHandler(() => { confirmBtn.disabled = false; showToast(t('loadErrorText')); })
+            .decideSpecialOrderRedirect(CURRENT_USER_ID, a.id, 'REDIRECT_TO_STORE', sel.value, '');
+        });
+      });
+
+      const returnWrap = card.querySelector(`[id="returnAction-${a.id}"]`);
+      card.querySelector('[data-return-factory-toggle]').addEventListener('click', () => {
+        if (returnWrap.innerHTML) { returnWrap.innerHTML = ''; return; }
+        returnWrap.innerHTML = `
+          <div class="priority-note">ℹ️ ${t('returnToFactoryMsg')}</div>
+          <button class="decision-btn modify" id="confirmReturn-${a.id}" style="width:100%; margin-top:8px;">${t('confirmReturnBtn')}</button>
+        `;
+        const confirmReturnBtn = returnWrap.querySelector(`[id="confirmReturn-${a.id}"]`);
+        wireConfirmable(confirmReturnBtn, () => {
+          confirmReturnBtn.disabled = true;
+          google.script.run
+            .withSuccessHandler(onceWithTimeout(result => {
+              if (result && !result.success) { confirmReturnBtn.disabled = false; showToast(t('loadErrorText')); return; }
+              showToast(t('toastReturned'));
+              loadApprovals();
+            }, 8000))
+            .withFailureHandler(() => { confirmReturnBtn.disabled = false; showToast(t('loadErrorText')); })
+            .decideSpecialOrderRedirect(CURRENT_USER_ID, a.id, 'RETURN_TO_FACTORY', '', '');
+        });
+      });
+    });
+  }
+
+  function renderTabContent() {
+    if (state.activeTab === 'GENERAL') renderGeneralTab();
+    else if (state.activeTab === 'OFFCATALOG') renderOffCatalogTab();
+    else if (state.activeTab === 'REDIRECT') renderRedirectTab();
+    else renderRawMaterialTab();
+  }
+
+  document.getElementById('pmNavOrders').addEventListener('click', () => {
+    window.top.location.href = APP_BASE_URL + '?page=pm_orders_overview&uid=' + encodeURIComponent(CURRENT_USER_ID);
+  });
+  document.getElementById('pmNavStock').addEventListener('click', () => {
+    // مفتاح التوجيه في WebApp.gs هو production_manager_overview (لا اسم الملف pm_overview) -- مفتاح مجهول يسقط لصفحة الدخول
+    window.top.location.href = APP_BASE_URL + '?page=production_manager_overview&uid=' + encodeURIComponent(CURRENT_USER_ID);
+  });
+  document.getElementById('pmNavQuarantine').addEventListener('click', () => {
+    window.top.location.href = APP_BASE_URL + '?page=production_manager_quarantine&uid=' + encodeURIComponent(CURRENT_USER_ID);
+  });
+
+  document.getElementById('langToggle').addEventListener('click', () => {
+    state.lang = state.lang === 'ar' ? 'en' : 'ar';
+    applyI18n(); renderDate(); renderTabs(); renderTabContent(); renderUsageBanner();
+  });
+  document.getElementById('userMenuBtn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('userDropdown').classList.toggle('open'); });
+  document.addEventListener('click', () => document.getElementById('userDropdown').classList.remove('open'));
+  document.querySelectorAll('[data-toast="notReady"]').forEach(el => {
+    el.addEventListener('click', (e) => { e.stopPropagation(); showToast(t('toastNotReady')); });
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    const btn = document.getElementById('logoutBtn');
+    if (btn.classList.contains('continue-armed')) { window.top.location.href = APP_BASE_URL; return; }
+    document.getElementById('userDropdown').classList.remove('open');
+    btn.disabled = true;
+    const originalContent = btn.textContent;
+    btn.textContent = t('savingText');
+    const finishLogout = onceWithTimeout(() => {
+      btn.disabled = false;
+      btn.classList.add('continue-armed');
+      btn.textContent = '👆 ' + t('continueBtn');
+    }, 8000);
+    google.script.run.withSuccessHandler(finishLogout).withFailureHandler(finishLogout).logout(CURRENT_USER_ID, masarLogoutMarker());
+  });
+
+  // ===== الاطلاع اليومي على تقرير استهلاك الأقسام (طلب مباشر ٢٦ سبتمبر ٢٠٢٦): شريط + نافذة تذكير، بلا حجب لأي اعتماد =====
+  let USAGE_REVIEW = null;
+  function usageReportUrl() { return APP_BASE_URL + '?page=production_manager_overview&uid=' + encodeURIComponent(CURRENT_USER_ID) + '&tab=usage'; }
+  function renderUsageBanner() {
+    const box = document.getElementById('usageBanner'); const rv = USAGE_REVIEW;
+    if (!box || !rv) return;
+    box.style.display = '';
+    if (rv.reviewedToday) {
+      const time = new Date(rv.reviewedAt).toLocaleTimeString(state.lang === 'ar' ? 'ar-QA-u-nu-latn' : 'en-US', { hour: '2-digit', minute: '2-digit' });
+      box.innerHTML = `<div class="usage-banner done"><span>${t('usageBannerDone')(time)}</span></div>`;
+      return;
+    }
+    box.innerHTML = `<div class="usage-banner todo" id="usageBannerGo"><span>${t('usageBannerTodo')(rv.reportDay)}</span><span class="go">${t('usageBannerGo')}</span></div>`;
+    document.getElementById('usageBannerGo').addEventListener('click', () => { window.top.location.href = usageReportUrl(); });
+  }
+  function showUsageReminder() {
+    document.getElementById('urTitle').textContent = t('urTitle');
+    document.getElementById('urText').textContent = t('urText');
+    document.getElementById('urGo').textContent = t('urGo');
+    document.getElementById('urLater').textContent = t('urLater');
+    document.getElementById('usageReminderOverlay').classList.add('open');
+  }
+  function loadUsageReviewStatus() {
+    try {
+      (USAGE_RUN || google.script.run)
+        .withSuccessHandler(res => {
+          if (!res || !res.success) return;
+          USAGE_REVIEW = res.data; renderUsageBanner();
+          if (!USAGE_REVIEW.reviewedToday && !USAGE_REVIEW.skippedToday) showUsageReminder();
+        })
+        .withFailureHandler(() => { /* الميزة مساعدة: فشلها لا يعطّل الاعتمادات */ })
+        .getUsageReviewStatus(CURRENT_USER_ID);
+    } catch (e) { /* تجاهل */ }
+  }
+  document.getElementById('urGo').addEventListener('click', () => { window.top.location.href = usageReportUrl(); });
+  document.getElementById('urLater').addEventListener('click', () => {
+    document.getElementById('usageReminderOverlay').classList.remove('open');
+    try { (USAGE_RUN || google.script.run).withSuccessHandler(res => { if (res && res.success) { USAGE_REVIEW = res.data; renderUsageBanner(); } }).withFailureHandler(() => {}).dismissUsageReminder(CURRENT_USER_ID); } catch (e) { /* تجاهل */ }
+  });
+
+  let forceHideOverlayFn = () => {};
+  function forceHideBusyOverlay() { forceHideOverlayFn(); }
+  function wrapGoogleScriptRunWithBusyOverlay() {
+    if (typeof google === 'undefined' || !google.script || !google.script.run) return;
+    const realRun = google.script.run;
+    const overlay = document.getElementById('globalBusyOverlay');
+    let busyCount = 0;
+    function showBusy() { busyCount++; overlay.classList.add('show'); }
+    function hideBusy() { busyCount = Math.max(0, busyCount - 1); if (busyCount === 0) overlay.classList.remove('show'); }
+    forceHideOverlayFn = () => { busyCount = 0; overlay.classList.remove('show'); };
+    Object.defineProperty(google.script, 'run', {
+      configurable: true,
+      get() {
+        const handlers = { onSuccess: null, onFailure: null };
+        let proxy;
+        const chain = {
+          withSuccessHandler(fn) { handlers.onSuccess = fn; return proxy; },
+          withFailureHandler(fn) { handlers.onFailure = fn; return proxy; }
+        };
+        proxy = new Proxy(chain, {
+          get(target, prop) {
+            if (prop === 'withSuccessHandler' || prop === 'withFailureHandler') return target[prop];
+            return (...args) => {
+              showBusy();
+              return realRun
+                .withSuccessHandler((...r) => { hideBusy(); if (handlers.onSuccess) handlers.onSuccess(...r); })
+                .withFailureHandler((...r) => { hideBusy(); if (handlers.onFailure) handlers.onFailure(...r); })
+                [prop](...args);
+            };
+          }
+        });
+        return proxy;
+      }
+    });
+  }
+
+  // نداءات الاطلاع اليومي صامتة (لا تحجب النقر): التقاط google.script.run قبل غلاف "مؤشر الانشغال"
+  const USAGE_RUN = google.script.run;
+  wrapGoogleScriptRunWithBusyOverlay();
+  applyI18n();
+  renderDate();
+  document.getElementById('tabContent').innerHTML = `<div class="card empty-state">${t('loadingText')}</div>`;
+  loadApprovals();
+  loadUsageReviewStatus();
+  document.getElementById('attModalCloseBtn').addEventListener('click', () => document.getElementById('attModalOverlay').classList.remove('open'));
+  document.getElementById('attModalOverlay').addEventListener('click', (e) => { if (e.target.id === 'attModalOverlay') e.currentTarget.classList.remove('open'); });
+  masarAutoRefresh({ domains: ['APPROVALS', 'PRODUCTION', 'ORDERS'], refresh: () => loadApprovals() });
+</script>
+
+</body>
+</html>

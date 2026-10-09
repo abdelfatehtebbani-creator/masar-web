@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#3D2B1E">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="مسار">
+<link rel="apple-touch-icon" href="icon-180.png">
+<script src="masar-config.js?v=67ea158b"></script>
+<script src="masar-runtime.js?v=67ea158b"></script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MASAR — نظرة عامة — مدير الإنتاج</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Markazi+Text:wght@600;700&family=Fraunces:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #EE7126; --primary-dark: #C85A18; --primary-tint: #FCE8D8;
+    --secondary: #3D2B1E; --ink: #2B211B; --ink-soft: #6B5D52;
+    --bg: #FAF7F1; --surface: #FFFFFF; --line: #E7DFD2;
+    --success: #4B7A4F; --success-tint: #E7EFE6;
+    --warn: #B23B2E; --warn-tint: #F7E6E2;
+    --pending: #B4802A; --pending-tint: #F5EAD9;
+    --radius-lg: 16px; --radius-md: 12px; --radius-sm: 8px;
+    --shadow-card: 0 1px 2px rgba(43,33,27,0.06), 0 4px 16px rgba(43,33,27,0.05);
+    --font-ar: 'IBM Plex Sans Arabic', sans-serif; --font-en: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { overflow-x: hidden; max-width: 100vw; }
+  html[lang="ar"] body { font-family: var(--font-ar); }
+  html[lang="en"] body { font-family: var(--font-en); }
+  body {
+    background-color: var(--bg);
+    background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 38px, rgba(61,43,30,0.035) 38px, rgba(61,43,30,0.035) 39px);
+    color: var(--ink); min-height: 100vh; -webkit-font-smoothing: antialiased; padding-bottom: 30px;
+  }
+  header.topbar {
+    display: flex; align-items: center; gap: 16px; background: var(--secondary); color: #fff;
+    padding: 10px 20px; position: sticky; top: 0; z-index: 30; box-shadow: 0 2px 10px rgba(0,0,0,0.15); max-width: 100%;
+  }
+  .brand-logo { height: 40px; width: auto; display: block; flex-shrink: 0; }
+  .brand-meta { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; overflow: hidden; }
+  .brand-meta .system-name { font-size: 11px; letter-spacing: 0.14em; color: rgba(255,255,255,0.55); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .brand-meta .role-name { font-size: 15px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .topbar-spacer { flex: 1; min-width: 8px; }
+  .icon-btn {
+    display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #fff; cursor: pointer;
+    font-size: 14px; font-weight: 600; transition: background 0.15s ease; position: relative; flex-shrink: 0;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,0.16); }
+  .user-menu { position: relative; flex-shrink: 0; }
+  .user-dropdown {
+    position: absolute; top: calc(100% + 8px); inset-inline-end: 0; background: var(--surface); color: var(--ink);
+    border: 1px solid var(--line); border-radius: var(--radius-md); box-shadow: var(--shadow-card);
+    min-width: 200px; padding: 6px; display: none; z-index: 40;
+  }
+  .user-dropdown.open { display: block; }
+  .user-dropdown button {
+    display: flex; align-items: center; gap: 10px; width: 100%; text-align: start; background: none; border: none;
+    padding: 10px 12px; border-radius: var(--radius-sm); font-size: 14px; font-family: inherit; color: var(--ink); cursor: pointer;
+  }
+  .user-dropdown button:hover { background: var(--bg); }
+  @media (max-width: 420px) {
+    header.topbar { flex-wrap: wrap; row-gap: 8px; padding: 10px 12px; gap: 8px; }
+    .topbar-spacer { flex: 0 0 100%; height: 0; }
+    .brand-meta .system-name { display: none; }
+  }
+  .subheader { display: flex; align-items: center; gap: 12px; max-width: 880px; margin: 0 auto; padding: 16px 20px 4px; }
+  .pm-nav-row { display: flex; gap: 6px; max-width: 880px; margin: 10px auto 0; padding: 0 20px; overflow-x: auto; scrollbar-width: none; }
+  .pm-nav-row::-webkit-scrollbar { display: none; }
+  .pm-nav-btn {
+    flex-shrink: 0; padding: 9px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface);
+    color: var(--ink-soft); font-family: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; white-space: nowrap;
+  }
+  .pm-nav-btn.active { background: var(--secondary); color: #fff; border-color: var(--secondary); }
+  .back-btn {
+    display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 10px;
+    background: var(--surface); border: 1px solid var(--line); color: var(--secondary); cursor: pointer; font-size: 16px;
+    flex-shrink: 0; box-shadow: var(--shadow-card);
+  }
+  html[dir="rtl"] .back-btn .arrow { transform: scaleX(-1); display: inline-block; }
+  .subheader h1 { font-size: 19px; font-weight: 600; color: var(--secondary); flex: 1; }
+  .meta-badge {
+    font-size: 12.5px; font-weight: 600; color: var(--primary-dark); background: var(--primary-tint);
+    border: 1px solid rgba(238,113,38,0.35); padding: 5px 11px; border-radius: 999px; white-space: nowrap;
+  }
+  main { max-width: 880px; margin: 0 auto; padding: 12px 20px 20px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); overflow: hidden; }
+  .form-card { padding: 6px 0 16px; }
+  .banner {
+    display: flex; align-items: flex-start; gap: 10px; padding: 14px 16px; border-radius: var(--radius-md);
+    margin-bottom: 16px; font-size: 13px; line-height: 1.6; background: var(--pending-tint); color: #7A5A1C; border: 1px solid rgba(180,128,42,0.3);
+  }
+
+  .shift-row { padding: 15px 18px; border-bottom: 1px dashed var(--line); }
+  .shift-row:last-child { border-bottom: none; }
+  .shift-top { display: flex; align-items: center; gap: 12px; }
+  .shift-icon {
+    width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0; background: var(--success-tint); color: var(--success);
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+  }
+  .shift-main { flex: 1; min-width: 0; }
+  .shift-store { font-size: 14.5px; font-weight: 700; color: var(--ink); }
+  .shift-cashier { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+  .shift-duration { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-soft); white-space: nowrap; }
+  .close-btn {
+    font-size: 12px; font-weight: 600; padding: 8px 14px; border-radius: 999px; cursor: pointer; font-family: inherit;
+    background: var(--surface); color: var(--warn); border: 1.5px solid var(--warn); white-space: nowrap;
+  }
+  .close-btn:hover { background: var(--warn-tint); }
+  .confirm-armed { background: var(--warn) !important; color: #fff !important; animation: pulse-confirm 1s ease-in-out infinite; }
+  @keyframes pulse-confirm { 0%, 100% { opacity: 1; } 50% { opacity: 0.75; } }
+
+  .blocking-notice {
+    display: none; margin-top: 10px; font-size: 12px; color: var(--pending); background: var(--pending-tint);
+    border-radius: var(--radius-sm); padding: 10px 12px; line-height: 1.6;
+  }
+  .blocking-notice.show { display: block; }
+  .blocking-notice .send-empty-btn {
+    display: block; margin-top: 8px; width: 100%; background: var(--secondary); color: #fff; border: none;
+    font-family: inherit; font-size: 12px; font-weight: 600; padding: 8px; border-radius: var(--radius-sm); cursor: pointer;
+  }
+
+  .tabs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 16px 16px 8px; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex-shrink: 0; font-size: 13px; font-weight: 600; color: var(--ink-soft); background: var(--surface); border: 1px solid var(--line);
+    padding: 9px 15px; border-radius: 999px; cursor: pointer; white-space: nowrap; font-family: inherit;
+  }
+  .tab.active { background: var(--secondary); color: #fff; border-color: var(--secondary); }
+
+  .stock-item-card { padding: 14px 16px; border-bottom: 1px solid var(--line); }
+  .stock-item-card:last-child { border-bottom: none; }
+  .stock-item-name { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+  .stock-numbers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .stock-num-box { background: var(--bg); border-radius: var(--radius-sm); padding: 8px; text-align: center; }
+  .stock-num-box .lbl { font-size: 10.5px; color: var(--ink-soft); margin-bottom: 3px; }
+  .stock-num-box .val { font-family: var(--font-mono); font-size: 15px; font-weight: 700; color: var(--ink); }
+  .stock-num-box.available .val { color: var(--success); }
+  .stock-num-box.quarantine .val { color: var(--pending); }
+  .stock-num-box.damaged .val, .stock-num-box.expired .val { color: var(--warn); }
+
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 12.5px; font-weight: 600; color: var(--ink-soft); margin-bottom: 6px; }
+  .field select, .field input[type="number"] {
+    width: 100%; padding: 11px 12px; border: 1.5px solid var(--line); border-radius: var(--radius-sm);
+    font-family: inherit; font-size: 14px; color: var(--ink); background: var(--surface);
+  }
+  .submit-btn {
+    width: 100%; background: var(--secondary); color: #fff; border: none; font-family: inherit;
+    font-size: 14.5px; font-weight: 700; padding: 13px; border-radius: var(--radius-md); cursor: pointer;
+  }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .quarantine-row { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .quarantine-row:last-child { border-bottom: none; }
+  .quarantine-icon { font-size: 18px; }
+  .quarantine-main { flex: 1; min-width: 0; }
+  .quarantine-name { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+  .quarantine-meta { font-size: 11.5px; color: var(--ink-soft); margin-top: 2px; }
+  .quarantine-decision { font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+  .quarantine-decision.AVAILABLE { background: var(--success-tint); color: var(--success); }
+  .quarantine-decision.DAMAGED, .quarantine-decision.EXPIRED { background: var(--warn-tint); color: var(--warn); }
+
+
+
+  .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(10px);
+    background: var(--secondary); color: #fff; font-size: 13.5px; padding: 11px 18px; border-radius: 999px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2); opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 60; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  #globalBusyOverlay { position: fixed; inset: 0; z-index: 999; cursor: wait; display: none; background: rgba(0,0,0,0.02); }
+  #globalBusyOverlay.show { display: block; }
+  .continue-armed { color: var(--success) !important; }
+  .refresh-btn { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; border-radius: 999px; background: rgba(255,255,255,0.18); border: 1.5px solid rgba(255,255,255,0.9); color: #fff; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; flex-shrink: 0; white-space: nowrap; transition: background 0.15s ease; }
+  .refresh-btn:hover { background: rgba(255,255,255,0.32); }
+  .refresh-btn:active { transform: scale(0.97); }
+  .refresh-btn.armed { background: #fff; color: var(--secondary); }
+  .refresh-btn.spin .ico { animation: masar-spin 0.8s linear infinite; }
+  @keyframes masar-spin { to { transform: rotate(360deg); } }
+  .ack-card { margin: 0 16px 12px; padding: 14px 16px; border-radius: var(--radius-lg); border: 1.5px solid var(--pending); background: var(--pending-tint); }
+  .ack-card.done { border-color: var(--success); background: var(--success-tint); }
+  .ack-card .ack-title { font-weight: 700; font-size: 14px; margin-bottom: 6px; }
+  .ack-card .ack-text { font-size: 13px; line-height: 1.7; color: var(--ink); margin-bottom: 10px; }
+  .ack-card.done .ack-text { margin-bottom: 0; color: var(--success); font-weight: 600; }
+  .ack-btn { background: var(--secondary); color: #fff; border: none; font-family: inherit; font-size: 14px; font-weight: 700; padding: 11px 18px; border-radius: var(--radius-sm); cursor: pointer; }
+  .ack-btn:disabled { opacity: 0.6; cursor: default; }
+  .bday-note { font-size: 12px; color: var(--ink-soft); margin-top: 8px; }
+  /* ============ استهلاك الأقسام (إعادة تصميم ٢٦ سبتمبر ٢٠٢٦) ============ */
+  .us2-toolbar { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 14px 14px 12px; margin: 0 16px 14px; }
+  .us2-chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
+  .us2-chip { flex-shrink: 0; border: 1.5px solid var(--line); background: var(--bg); color: var(--ink-soft); font-family: inherit; font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: 999px; cursor: pointer; white-space: nowrap; transition: all .15s ease; }
+  .us2-chip:hover { border-color: var(--primary); color: var(--primary-dark); }
+  .us2-chip.active { background: var(--secondary); border-color: var(--secondary); color: #fff; }
+  .us2-range { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin: 10px 0 2px; padding: 12px; background: var(--bg); border-radius: var(--radius-md); }
+  .us2-range label { display: block; font-size: 11.5px; color: var(--ink-soft); margin-bottom: 4px; font-weight: 600; }
+  .us2-range input { font-family: inherit; font-size: 14px; padding: 9px 10px; border: 1.5px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink); }
+  .us2-go { background: var(--primary); color: #fff; border: none; font-family: inherit; font-size: 13.5px; font-weight: 700; padding: 10px 20px; border-radius: var(--radius-sm); cursor: pointer; }
+  .us2-filters { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .us2-field { position: relative; }
+  .us2-field .ico { position: absolute; inset-inline-start: 11px; top: 50%; transform: translateY(-50%); font-size: 14px; opacity: 0.55; pointer-events: none; }
+  .us2-field input, .us2-field select { width: 100%; box-sizing: border-box; font-family: inherit; font-size: 14px; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: var(--radius-md); background: var(--bg); color: var(--ink); }
+  .us2-field input { padding-inline-start: 34px; }
+  .us2-field input:focus, .us2-field select:focus { outline: none; border-color: var(--primary); background: var(--surface); }
+  @media (max-width: 640px) { .us2-filters { grid-template-columns: 1fr 1fr; } .us2-filters .us2-field:first-child { grid-column: 1 / -1; } }
+  .us2-bday { margin: -4px 18px 12px; font-size: 12.5px; color: var(--ink-soft); display: flex; align-items: center; gap: 6px; }
+  .us2-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 0 16px 14px; }
+  @media (max-width: 640px) { .us2-kpis { grid-template-columns: repeat(2, 1fr); } }
+  .us2-kpi { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 14px 14px 12px; position: relative; overflow: hidden; }
+  .us2-kpi::before { content: ''; position: absolute; top: 0; inset-inline-start: 0; width: 4px; height: 100%; background: var(--kpi, var(--primary)); }
+  .us2-kpi .ic { font-size: 18px; margin-bottom: 4px; }
+  .us2-kpi .v { font-size: 26px; font-weight: 800; line-height: 1.1; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .us2-kpi .v.sm { font-size: 15px; line-height: 1.3; padding-top: 4px; }
+  .us2-kpi .l { font-size: 12px; color: var(--ink-soft); margin-top: 4px; font-weight: 600; }
+  .us2-seg { display: inline-flex; background: var(--line); border-radius: 999px; padding: 4px; margin: 0 16px 14px; gap: 2px; }
+  .us2-seg button { border: none; background: transparent; font-family: inherit; font-size: 13.5px; font-weight: 700; color: var(--ink-soft); padding: 8px 20px; border-radius: 999px; cursor: pointer; transition: all .15s ease; }
+  .us2-seg button.active { background: var(--surface); color: var(--ink); box-shadow: 0 1px 4px rgba(43,33,27,0.15); }
+  .us2-card { margin: 0 16px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); overflow: hidden; border-inline-start: 5px solid var(--dc, var(--primary)); }
+  .us2-head { display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer; user-select: none; }
+  .us2-head .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--dc, var(--primary)); flex-shrink: 0; }
+  .us2-head .nm { font-weight: 800; font-size: 15.5px; flex: 1; min-width: 0; }
+  .us2-pill { font-size: 12px; font-weight: 700; padding: 4px 11px; border-radius: 999px; background: var(--bg); color: var(--ink-soft); white-space: nowrap; }
+  .us2-head .chev { color: var(--ink-soft); font-size: 13px; transition: transform .2s ease; }
+  .us2-head .chev.open { transform: rotate(180deg); }
+  .us2-items { border-top: 1px solid var(--line); }
+  .us2-row { padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .us2-row:last-child { border-bottom: none; }
+  .us2-row-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .us2-row .name { font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
+  .us2-fam { font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 999px; background: var(--primary-tint); color: var(--primary-dark); white-space: nowrap; }
+  .us2-qty { font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--ink); }
+  .us2-qty small { font-size: 12px; font-weight: 600; color: var(--ink-soft); margin-inline-start: 4px; }
+  .us2-bar { height: 8px; background: var(--bg); border-radius: 999px; margin: 9px 0 7px; overflow: hidden; display: flex; }
+  .us2-bar > span { display: block; height: 100%; background: var(--dc, var(--primary)); border-radius: 999px; }
+  .us2-bar.stack > span { border-radius: 0; }
+  .us2-meta { font-size: 12px; color: var(--ink-soft); display: flex; flex-wrap: wrap; gap: 4px 14px; }
+  .us2-legend { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12px; color: var(--ink); margin-top: 2px; }
+  .us2-legend .lg { display: inline-flex; align-items: center; gap: 6px; }
+  .us2-legend .lg i { width: 9px; height: 9px; border-radius: 50%; background: var(--dc); display: inline-block; }
+  .us2-legend .lg b { font-weight: 800; font-variant-numeric: tabular-nums; }
+  .us2-empty { margin: 0 16px; padding: 44px 20px; text-align: center; background: var(--surface); border: 1px dashed var(--line); border-radius: var(--radius-lg); color: var(--ink-soft); }
+  .us2-empty .big { font-size: 46px; margin-bottom: 10px; }
+  .us2-empty .tt { font-weight: 700; color: var(--ink); margin-bottom: 4px; font-size: 15px; }
+  /* ============ أرصدة المخزون: شريط الفلاتر ============ */
+  .stk-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin: 16px 16px 10px; }
+  .stk-head .ttl { font-size: 14px; font-weight: 800; color: var(--ink); }
+  .stk-head .cnt { font-size: 12px; color: var(--ink-soft); font-weight: 600; margin-inline-start: 8px; }
+  .stk-head select { font-family: inherit; font-size: 13.5px; padding: 8px 12px; border: 1.5px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink); max-width: 100%; }
+  .stk-search { margin: 0 16px 6px; }
+  .stk-search input { width: 100%; box-sizing: border-box; font-family: inherit; font-size: 14px; padding: 10px 14px; border: 1.5px solid var(--line); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); }
+  .stk-empty { padding: 22px 16px; text-align: center; color: var(--ink-soft); font-size: 13.5px; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <img src="asset-82d7b1e2.png" alt="ALAKER SWEETS" class="brand-logo">
+  <div class="brand-meta">
+    <span class="system-name">MASAR</span>
+    <span class="role-name" data-i18n="roleName"></span>
+  </div>
+  <div class="topbar-spacer"></div>
+  <button class="refresh-btn" id="refreshBtn" type="button" title="تحديث / Refresh"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span class="rf-label">تحديث</span></button>
+  <button class="icon-btn" id="langToggle" title="AR / EN">AR</button>
+  <div class="user-menu">
+    <button class="icon-btn" id="userMenuBtn">⋮</button>
+    <div class="user-dropdown" id="userDropdown">
+      <button data-i18n="changePassword" data-toast="notReady"></button>
+      <button id="logoutBtn" data-i18n="logout"></button>
+    </div>
+  </div>
+</header>
+
+<!-- طلب مباشر (٢٢ سبتمبر ٢٠٢٦): شريط تنقّل موحَّد بين شاشات مدير الإنتاج الأربع، نفس شريط pm_approvals.html بالضبط -->
+<div class="pm-nav-row">
+  <button class="pm-nav-btn" id="pmNavApprovals" data-i18n="pmNavApprovals"></button>
+  <button class="pm-nav-btn" id="pmNavOrders" data-i18n="pmNavOrders"></button>
+  <button class="pm-nav-btn active" id="pmNavStock" data-i18n="pmNavStock"></button>
+  <button class="pm-nav-btn" id="pmNavQuarantine" data-i18n="pmNavQuarantine"></button>
+</div>
+
+<div class="subheader">
+  <button class="back-btn" id="backBtn"><span class="arrow">←</span></button>
+  <h1 data-i18n="screenTitle"></h1>
+</div>
+<div class="tabs" id="tabsRow"></div>
+
+<main>
+  <div id="mainArea"></div>
+</main>
+
+<div class="toast" id="toast"></div>
+<div id="globalBusyOverlay"></div>
+
+<script>
+  const APP_BASE_URL = MASAR_TPL.appBaseUrl;
+  var TIMEOUT_SCALE = MASAR_TPL.timeoutScale; // مضاعِف مُهَل الانتظار: ١ في الإنتاج، أكبر في DIV (مشروع بارد/شبكة اختبار)
+  // ===== شبكة الاتصال (١٠ أكتوبر ٢٠٢٦) =====
+  // مولَّد من tools/net_snippet.js بواسطة tools/build_client_snippets.js -- لا تعدّله يدويًا داخل الصفحات.
+  // (١) يتتبّع نداءات الحفظ (أي نداء لا يبدأ بـ get/list) ليعرف التحديث التلقائي أن الصفحة حفظت بنفسها.
+  // (٢) بلاغ "تعذّر تنفيذ العملية" المتكرر: بطء بدء Google (أو انقطاع لحظي) كان يُسقط النداء. للقراءات الصرفة فقط (قائمة مولَّدة آليًا من الخادم: دوال لا تكتب هي
+  // ولا ما تستدعيه) تُعاد المحاولة مرة واحدة عند الفشل/الردّ الفارغ، ويُرسَل نداء ثانٍ موازٍ إن تأخّر الأول ٦ ثوانٍ؛ يُسلَّم أول ردّ صالح. الحفظ والإنشاء لا يُكرَّران أبدًا.
+  const MASAR_RAW_RUN_ = (typeof google !== 'undefined' && google.script) ? google.script.run : null;
+  const MASAR_AR_INSTANCES_ = [];
+  const MASAR_PURE_READS_ = { getActiveDriversList:1,getActiveShipments:1,getActiveStoresWithOccupancy:1,getAllDepartments:1,getAllLists:1,getAllProducts:1,getAllRoles:1,getAllSettings:1,getAllStores:1,getAllUsers:1,getChangeTokens:1,getDepartmentStoreOrders:1,getDisposalFormData:1,getDistributionComparisonDetail:1,getDistributionManagerCancelEditRequests:1,getDistributionsReadyToPrepare:1,getFinishedGoodsQuarantineHistory:1,getFinishedGoodsStockBoard:1,getIssueToDepartmentFormData:1,getManagementReports:1,getMyNotifications:1,getMyShipments:1,getMySupplyRequests:1,getOffCatalogPurchaseRequests:1,getOrderDetails:1,getOrderEditStage:1,getOrderProductionApprovalDetail:1,getOrdersAwaitingInvoice:1,getOrdersAwaitingProductionApproval:1,getOrdersReadyForShipment:1,getOrdersReadyToReceive:1,getPendingLoadDiscrepancies:1,getPendingReturnItems:1,getPendingSupplyRequestsForRMS:1,getProductionManagerApprovals:1,getProductionManagerOrderFullDetail:1,getProductionManagerOrdersOverview:1,getPurchasingRawMaterialReports:1,getRawMaterialCatalog:1,getRawMaterialCatalogForRequest:1,getRawMaterialExpiryReport:1,getRawMaterialMovementSummary:1,getRawMaterialProductHistory:1,getRawMaterialQuarantineHistory:1,getRawMaterialShortageNotices:1,getRawMaterialStockBoard:1,getReceiveSurplusFormData:1,getReceivingDetails:1,getReferenceLists:1,getReturnReasons:1,getRolePermissionsMatrix:1,getShipmentPrepareDetail:1,getShortageReasons:1,getStoreDirectRawMaterialOrders:1,getStoreOrderDetail:1,getSuppliers:1,getSuppliersList:1,getTasksCatalog:1,getUnitsAndFamiliesList:1,getVehicleCoordinatorDriverStatus:1,getVehicleCoordinatorSpecialOrders:1,listOrders:1 };
+  (function masarTrackOwnCalls() {
+    try {
+      if (!MASAR_RAW_RUN_) return;
+      Object.defineProperty(google.script, 'run', {
+        configurable: true,
+        get() {
+          const handlers = { onSuccess: null, onFailure: null };
+          let proxy;
+          const chain = {
+            withSuccessHandler(fn) { handlers.onSuccess = fn; return proxy; },
+            withFailureHandler(fn) { handlers.onFailure = fn; return proxy; }
+          };
+          proxy = new Proxy(chain, {
+            get(target, prop) {
+              if (prop === 'withSuccessHandler' || prop === 'withFailureHandler') return target[prop];
+              return (...args) => {
+                // لقطة المعالجات لحظة النداء: غلاف حاجز الانشغال في الصفحات يمسك مرجعًا واحدًا من run فتتشارك النداءات المتزامنة كائن handlers، فلو قُرئ
+                // وقت الرد لاستلم كل رد معالج آخر نداء (بلاغ: "تعذّر فتح إنشاء رحلة" -- نداءا السائقين والجاهزة كانا يتبادلان معالجيهما)
+                const onS = handlers.onSuccess, onF = handlers.onFailure;
+                const name = String(prop);
+                if (Object.prototype.hasOwnProperty.call(MASAR_PURE_READS_, name)) {
+                  let settled = false, attempts = 0, pending = 0, hedge = null;
+                  const finish = (ok, v) => { if (settled) return; settled = true; clearTimeout(hedge); if (ok) { if (onS) onS(v); } else if (onF) onF(v); else { try { console.error(v); } catch (e) { /* تجاهل */ } } };
+                  const launch = () => {
+                    attempts++; pending++;
+                    const bad = v => {
+                      pending--;
+                      if (settled) return;
+                      if (attempts < 2) { setTimeout(launch, 700); return; }   // محاولة ثانية واحدة فقط
+                      if (pending === 0) finish(false, v);                       // الأخيرة فشلت ولا نداء آخر في الطريق
+                    };
+                    MASAR_RAW_RUN_
+                      .withSuccessHandler(r => { if (r === null || r === undefined) { bad(r); } else { pending--; finish(true, r); } })
+                      .withFailureHandler(e => bad(e))
+                      [name](...args);
+                  };
+                  hedge = setTimeout(() => { if (!settled && attempts < 2) launch(); }, 6000);
+                  launch();
+                  return;
+                }
+                const done = () => { if (!/^(get|list)/.test(name)) MASAR_AR_INSTANCES_.forEach(i => { try { i.ownDone(); } catch (e) { /* لا يعطّل النداء */ } }); };
+                return MASAR_RAW_RUN_
+                  .withSuccessHandler((...r) => { done(); if (onS) onS(...r); })
+                  .withFailureHandler((...r) => { done(); if (onF) onF(...r); else { try { console.error(r[0]); } catch (e) { /* تجاهل */ } } })
+                  [prop](...args);
+              };
+            }
+          });
+          return proxy;
+        }
+      });
+    } catch (e) { /* لا تتبّع: يبقى السلوك القديم كما هو */ }
+  })();
+  // يستعمله التحديث التلقائي الصامت: نفس طبقة الاتصال (إعادة المحاولة) لكن بلا غلاف حاجز الانشغال الذي تُركّبه الصفحة لاحقًا فوقها
+  let MASAR_NET_GETTER_ = null;
+  try { MASAR_NET_GETTER_ = Object.getOwnPropertyDescriptor(google.script, 'run').get || null; } catch (e) { MASAR_NET_GETTER_ = null; }
+  // ===== نهاية شبكة الاتصال =====
+  // ===== تحديث تلقائي بالتغيّر (٩ أكتوبر ٢٠٢٦، نُقّح ١٠ أكتوبر) =====
+  // كل ٣٠ ثانية تسأل الصفحة (نداء خفيف بلا قراءة جداول) هل تغيّر شيء في مجالاتها؛ إن تغيّر تُعيد جلب بياناتها مرة واحدة. تتوقف والتبويب مخفيّ، وتستأنف عند
+  // العودة. إن كان المستخدم يكتب أو توجد نافذة مفتوحة أو حقل معدَّل لا تُبدَّل الشاشة تحت يده: يظهر شريط "توجد تحديثات" ينقر عليه حين يشاء.
+  // النداء الخفيف يمرّ عبر مرجع google.script.run الأصلي (قبل غلاف حاجز الانشغال) فلا يحجب الشاشة، ولا يمدّ الجلسة.
+  // تنقيح (بلاغ ميداني: "ساعة رملية كل برهة" و"الشاشة تُعاد بعد كل حفظ"): (١) التحديث التلقائي صامت: لا حاجز انشغال ولا ومضة "جارٍ التحميل"،
+  // ويحفظ موضع التمرير؛ (٢) ما تحفظه هذه الصفحة نفسها (أي نداء لا يبدأ بـ get) لا يُحدِّثها هي: تُعاد قراءة الرمز بعده فيصير خط الأساس الجديد؛ (٣) شارة
+  // صغيرة أسفل الشاشة تُظهر وقت آخر فحص وتومض عند التحديث، ولون أحمر إن تعذّر الفحص.
+  // ينفّذ إعادة جلب بيانات الصفحة بصمت: بلا حاجز انشغال (النداءات داخلها تمرّ بالمرجع الأصلي)، بلا ومضة "جارٍ التحميل"، وبحفظ موضع التمرير
+  function masarRunSilently(fn) {
+    let desc = null, area = null, proto = null;
+    try { desc = Object.getOwnPropertyDescriptor(google.script, 'run'); Object.defineProperty(google.script, 'run', { configurable: true, get() { return MASAR_NET_GETTER_ ? MASAR_NET_GETTER_() : MASAR_RAW_RUN_; } }); } catch (e) { desc = null; }
+    try {
+      area = document.getElementById('mainArea');
+      if (area && typeof Element !== 'undefined') {
+        proto = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
+        Object.defineProperty(area, 'innerHTML', {
+          configurable: true,
+          get() { return proto.get.call(area); },
+          set(v) { const s = String(v); if (/empty-state/.test(s) && !/order-card|<table|<button/.test(s)) return; proto.set.call(area, v); }
+        });
+      }
+    } catch (e) { proto = null; }
+    let keep = null;
+    try {
+      if (area && typeof window !== 'undefined' && typeof MutationObserver !== 'undefined') {
+        const scrollers = [document.scrollingElement, area.parentElement].filter(Boolean).map(el => ({ el: el, top: el.scrollTop }));
+        let moved = false;
+        const mark = () => { moved = true; };
+        ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(ev => window.addEventListener(ev, mark, true));
+        const mo = new MutationObserver(() => { if (!moved) requestAnimationFrame(() => scrollers.forEach(s => { if (s.top > 0 && Math.abs(s.el.scrollTop - s.top) > 4) s.el.scrollTop = s.top; })); });
+        mo.observe(area, { childList: true });
+        keep = () => { try { mo.disconnect(); ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(ev => window.removeEventListener(ev, mark, true)); } catch (e) { /* تجاهل */ } };
+        setTimeout(keep, 9000);
+      }
+    } catch (e) { keep = null; }
+    try { fn(); }
+    finally {
+      if (desc) { try { Object.defineProperty(google.script, 'run', desc); } catch (e) { /* تجاهل */ } }
+      if (proto && area) { try { delete area.innerHTML; } catch (e) { /* تجاهل */ } }
+    }
+  }
+  function masarAutoRefresh(opts) {
+    if (!MASAR_RAW_RUN_ || !opts || typeof opts.refresh !== 'function') return null;
+    const domains = opts.domains || [];
+    const interval = (opts.intervalMs || 30000) + Math.floor(Math.random() * 4000); // تشتيت بسيط كي لا تتزامن شاشات كثيرة
+    let baseline = null, inflight = false, inflightSince = 0, stopped = false, banner = null, pill = null, ownDoneAt = 0, rebaseWanted = false, changes = 0;
+    const uid = () => (typeof CURRENT_USER_ID !== 'undefined' ? CURRENT_USER_ID : (typeof Core !== 'undefined' ? Core.currentUserId : ''));
+    const isAr = () => (document.documentElement.lang || 'ar') !== 'en';
+    function setPill(text, bad) {
+      try {
+        if (!pill) {
+          pill = document.createElement('div');
+          pill.style.cssText = 'position:fixed;right:8px;bottom:6px;z-index:2147482000;font:600 10px sans-serif;color:#fff;padding:2px 8px;border-radius:999px;pointer-events:none;opacity:0.85;';
+          document.body.appendChild(pill);
+        }
+        pill.style.background = bad ? 'rgba(176,42,42,0.9)' : 'rgba(61,43,30,0.55)';
+        pill.textContent = text;
+      } catch (e) { /* الشارة تكميلية */ }
+    }
+    function clock() { try { return new Date().toTimeString().slice(0, 8); } catch (e) { return ''; } }
+    function busy() {
+      try {
+        if (opts.isBusy && opts.isBusy()) return true;
+        const a = document.activeElement;
+        if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && !/^(button|checkbox|radio|submit)$/.test(a.type || '')) return true;
+        if (document.querySelector('.header-modal-overlay.open, [class*="overlay"].open, [class*="modal"].open')) return true;
+        const fields = document.querySelectorAll('main input, main textarea, main select, #mainArea input, #mainArea textarea, #mainArea select');
+        for (let i = 0; i < fields.length; i++) {
+          const f = fields[i];
+          if (f.type === 'checkbox' || f.type === 'radio') { if (f.checked !== f.defaultChecked) return true; }
+          else if (f.type !== 'hidden' && f.type !== 'button' && f.tagName !== 'SELECT' && f.value !== f.defaultValue) return true;
+        }
+      } catch (e) { /* عند الشك نعتبر الشاشة غير مشغولة */ }
+      return false;
+    }
+    function hideBanner() { if (banner) { banner.style.display = 'none'; } }
+    function showBanner() {
+      if (!banner) {
+        banner = document.createElement('button');
+        banner.type = 'button';
+        banner.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:76px;z-index:2147483000;border:none;border-radius:999px;padding:10px 18px;background:#3D2B1E;color:#fff;font:700 13px sans-serif;box-shadow:0 6px 20px rgba(0,0,0,0.3);cursor:pointer;';
+        banner.addEventListener('click', () => doRefresh());
+        document.body.appendChild(banner);
+      }
+      banner.textContent = isAr() ? '🔄 توجد تحديثات جديدة — اضغط للتحديث' : '🔄 New updates — tap to refresh';
+      banner.style.display = 'block';
+    }
+    function doRefresh() {
+      hideBanner();
+      setPill((isAr() ? '✅ تحديث ' : '✅ Updated ') + clock(), false);
+      try { masarRunSilently(opts.refresh); } catch (e) { /* لا يعطّل الصفحة */ }
+    }
+    function handle(r, startedAt) {
+      if (!r || !r.success) {
+        if (r && r.error && r.error.code === 'SESSION_EXPIRED') stopped = true;
+        setPill('⚠ ' + ((r && r.error && r.error.code) || (isAr() ? 'تعذّر الفحص' : 'check failed')), true);
+        return;
+      }
+      setPill((isAr() ? '🔄 آخر فحص ' : '🔄 Checked ') + clock() + (changes ? (isAr() ? ' · تغيّرات ' : ' · changes ') + changes : ''), false);
+      const sig = JSON.stringify(domains.map(d => r.data.tokens[d] || ''));
+      if (rebaseWanted) {
+        // هذه الصفحة حفظت شيئًا بنفسها: الرمز بعد حفظها هو خط الأساس الجديد (لا تُحدَّث هي بما كتبته). ردٌّ بدأ قبل انتهاء حفظها قديم: نعيد السؤال
+        if (startedAt >= ownDoneAt) { rebaseWanted = false; baseline = sig; } else { setTimeout(tick, 300); }
+        return;
+      }
+      if (baseline === null) { baseline = sig; return; }
+      if (sig === baseline) return;
+      baseline = sig; changes++;
+      if (busy()) { showBanner(); return; }
+      doRefresh();
+      // الكتابة قد لا تكون ظهرت للقراءة بعد لحظة الرمز: إن كان التغيّر حديثًا (<٨ ثوانٍ) نُعيد الجلب مرة ثانية بعد استقراره
+      const newest = Math.max.apply(null, domains.map(d => parseFloat(r.data.tokens[d]) || 0));
+      const age = (r.data.serverTime || Date.now()) - newest;
+      if (age < 8000) setTimeout(() => { if (!document.hidden && !busy()) doRefresh(); }, 8500 - Math.max(0, age));
+    }
+    function tick() {
+      if (stopped || document.hidden) return;
+      // نداء ضاع بلا ردّ (شبكة بطيئة/تبويب مجمَّد) كان يُبقي inflight=true فيتوقف التحديث للأبد: بعد ٢٥ ثانية نعدّه مفقودًا ونسأل من جديد
+      if (inflight && Date.now() - inflightSince < 25000) return;
+      inflight = true;
+      const startedAt = Date.now();
+      inflightSince = startedAt;
+      MASAR_RAW_RUN_.withSuccessHandler(r => { inflight = false; handle(r, startedAt); }).withFailureHandler(() => { inflight = false; setPill(isAr() ? '⚠ تعذّر الفحص' : '⚠ check failed', true); }).getChangeTokens(uid(), domains);
+    }
+    function ownDone() { ownDoneAt = Date.now(); rebaseWanted = true; hideBanner(); setTimeout(tick, 500); }
+    MASAR_AR_INSTANCES_.push({ ownDone: ownDone });
+    setInterval(tick, interval);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) { rebaseWanted = false; setTimeout(tick, 400); } });
+    setTimeout(tick, 1500); // يلتقط خط الأساس مبكرًا
+    return { tick: tick };
+  }
+  // تسجيل الخروج (٨ أكتوبر ٢٠٢٦، بلاغ مستخدم: "لا يأخذني دائمًا لشاشة الدخول حتى أضغط زرًا في الصفحة التي بقيت مفتوحة"): المتصفحات (خصوصًا
+  // الهاتف) تحجب التنقّل غير المرتبط بلمسة مباشرة، فكانت الصفحة تبقى ظاهرة بزر "اضغط للمتابعة" مخبّأ داخل قائمة مغلقة. الآن أول ما يُستدعى
+  // logout يُغطّى المحتوى بحاجز كامل الشاشة "تم تسجيل الخروج" بزر كبير ظاهر، مع محاولة تلقائية للانتقال حيث يسمح المتصفح.
+  function masarLogoutMarker() {
+    try {
+      if (document.getElementById('masarLoggedOutOverlay')) return null;
+      var ar = (document.documentElement.lang || 'ar') !== 'en';
+      var o = document.createElement('div');
+      o.id = 'masarLoggedOutOverlay';
+      o.dir = ar ? 'rtl' : 'ltr';
+      o.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:2147483646;background:#3D2B1E;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font:600 19px/1.6 sans-serif;text-align:center;padding:24px;';
+      o.innerHTML = '<div style="font-size:48px">\uD83D\uDD12</div><div>' + (ar ? 'تم تسجيل الخروج' : 'You have been logged out') + '</div>' +
+        '<button type="button" style="border:none;background:#EE7126;color:#fff;font:700 17px sans-serif;padding:15px 34px;border-radius:999px;cursor:pointer;">' + (ar ? 'العودة إلى شاشة الدخول' : 'Back to login') + '</button>';
+      document.body.appendChild(o);
+      var go = function () { try { window.top.location.href = APP_BASE_URL; } catch (e) { window.location.href = APP_BASE_URL; } };
+      o.getElementsByTagName('button')[0].addEventListener('click', go);
+      setTimeout(go, 700);
+    } catch (e) { /* عرض فقط */ }
+    return null;
+  }
+  const CURRENT_USER_ID = MASAR_TPL.currentUserId;
+
+
+
+  const state = { lang: (MASAR_TPL.userLang === 'en' ? 'en' : 'ar'), activeTab: (MASAR_TPL.currentTab === 'usage' ? 'USAGE' : 'STOCK') };
+  // لغة المستخدم المحفوظة على الخادم (Users.Language) -- طلب مباشر ٢٥ سبتمبر ٢٠٢٦: تُفتح بها كل الشاشات وتبقى عند التنقّل
+  (function () {
+    if (state.lang === 'en') { document.documentElement.lang = 'en'; document.documentElement.dir = 'ltr'; }
+    const langBtn = document.getElementById('langToggle');
+    if (!langBtn) return;
+    langBtn.textContent = state.lang === 'ar' ? 'EN' : 'AR';
+    langBtn.addEventListener('click', () => setTimeout(() => {
+      try { if (MASAR_TPL.currentUserId) google.script.run.withFailureHandler(() => {}).setUserLanguage(MASAR_TPL.currentUserId, state.lang); } catch (e) { /* لا يعطّل الشاشة */ }
+    }, 0));
+  })();
+  // ---- زر التحيين (طلب مباشر ٢٦ سبتمبر ٢٠٢٦): تحديث ناعم إن وُجد مُحمِّل للصفحة، وإلا إعادة تحميل الصفحة بنفس رابطها ----
+  (function () {
+    const btn = document.getElementById('refreshBtn');
+    if (!btn) return;
+    const CONFIRM = false;
+    const label = btn.querySelector('.rf-label');
+    const idleText = () => (state.lang === 'ar' ? 'تحديث' : 'Refresh');
+    const sureText = () => (state.lang === 'ar' ? 'اضغط للتأكيد' : 'Tap to confirm');
+    const setIdle = () => { btn.classList.remove('armed'); if (label) label.textContent = idleText(); };
+    setIdle();
+    const lt = document.getElementById('langToggle');
+    if (lt) lt.addEventListener('click', () => setTimeout(setIdle, 0));
+    let armed = false, timer = null;
+    const hardReload = () => {
+      try { window.top.location.href = APP_BASE_URL + '?' + MASAR_TPL.reloadQuery; } catch (e) { window.location.reload(); }
+    };
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      if (CONFIRM && !armed) {
+        armed = true; btn.classList.add('armed'); if (label) label.textContent = sureText();
+        clearTimeout(timer); timer = setTimeout(() => { armed = false; setIdle(); }, 2800);
+        return;
+      }
+      clearTimeout(timer); armed = false; setIdle();
+      const soft = () => loadActiveTab();
+      if (soft) {
+        btn.classList.add('spin');
+        try { soft(); setTimeout(() => btn.classList.remove('spin'), 1200); return; } catch (e) { btn.classList.remove('spin'); }
+      }
+      hardReload();
+    });
+  })();
+  let FGS_ITEMS = [];
+  let RMS_ITEMS = [];
+
+  const dict = {
+    ar: {
+      roleName: 'مدير الإنتاج',
+      pmNavApprovals: 'الموافقات', pmNavOrders: 'دورة الطلبيات', pmNavStock: 'نظرة عامة على المخزون', pmNavQuarantine: 'متابعة Quarantine',
+      changePassword: '🔑 تغيير كلمة المرور', logout: '↩ تسجيل الخروج',
+      screenTitle: 'لوحة متابعة عامة',
+      tabStock: 'أرصدة المخزون', tabOrders: 'تتبّع الطلبات', tabReports: 'التقارير الشاملة',
+      tabUsage: 'استهلاك الأقسام', usageTitle: '📅 الفترة الزمنية', usageByDept: 'حسب القسم', usageByItem: 'حسب الصنف',
+      usageBdayChip: 'أمس (يوم العمل)', ackTitle: '📋 الاطلاع اليومي على تقرير أمس', ackDone: (time) => `✅ اطّلعتَ على تقرير اليوم — ${time}`,
+      ackNeed: (day) => `لم تُقرّ بالاطلاع اليوم بعد. تقرير أمس: ${day} (اليوم يبدأ ٥ صباحًا بتوقيت قطر). لا يمنع هذا أي اعتماد.`,
+      ackBtn: '✅ تم الاطلاع على تقرير أمس', ackShowFirst: 'اعرض تقرير أمس أولًا', ackToast: 'سُجِّل اطلاعك على تقرير اليوم', ackFail: 'تعذّر تسجيل الاطلاع — أعد المحاولة',
+      bdayNote: (day) => `يوم العمل: ${day} — من ٥ صباحًا إلى ٥ صباحًا اليوم التالي بتوقيت قطر`,
+      presetCustom: 'فترة مخصصة', kpiDepts: 'أقسام استفادت', kpiItems: 'أصناف مصروفة', kpiIssues: 'عمليات صرف', kpiTop: 'الأكثر طلبًا',
+      usageEmptyTitle: 'لا صرف في هذه الفترة', usageEmptyHint: 'لم تُسلَّم مواد أولية لأي قسم ضمن الفترة المحددة.', usageNoMatchTitle: 'لا نتائج مطابقة', usageNoMatchHint: 'جرّب تغيير البحث أو الفلاتر.',
+      usageTimes: (n) => `${n} مرة`, usageLastOn: (d) => `آخر صرف ${d}`, usageDeptsCount: (n) => `${n} أقسام`,
+      stkAllDepts: 'كل الأقسام', stkAllFamilies: 'كل العائلات', stkSearchPh: 'ابحث باسم الصنف...', stkCount: (n, tot) => `${n} من ${tot}`, stkNoMatch: 'لا أصناف مطابقة',
+      presetToday: 'اليوم', preset7: 'آخر 7 أيام', presetMonth: 'هذا الشهر', presetLastMonth: 'الشهر الماضي', preset3m: 'آخر 3 أشهر', presetYear: 'هذه السنة',
+      fromLbl: 'من', toLbl: 'إلى', applyBtn: 'عرض', toastBadRange: 'اختر تاريخ بداية ونهاية صحيحين (البداية قبل النهاية)',
+      usageSearch: 'ابحث باسم الصنف...', usageDept: 'القسم', usageAllDepts: 'كل الأقسام', usageFamily: 'العائلة', usageAllFamilies: 'كل العائلات',
+      colItem: 'الصنف', colFamily: 'العائلة', colQty: 'الكمية المصروفة', colUnit: 'الوحدة', colTimes: 'مرات الصرف', colLast: 'آخر صرف', colDepts: 'الأقسام', colDeptBreak: 'التفصيل',
+      usageNote: 'ℹ️ الأصناف التي صُرفت فعليًا من مخزن المواد الأولية لكل قسم (عند تسليم طلبات التزويد)، خلال الفترة المحددة.',
+      usageEmpty: 'لا يوجد صرف مواد أولية للأقسام في هذه الفترة', usageNoMatch: 'لا نتائج مطابقة',
+      usageDeptSummary: (n, times) => `${n} صنف · ${times} عملية صرف`, usageTotalLines: (n) => `${n} صنف`,
+      viewOnlyBadge: 'للاطلاع فقط — بلا أي صلاحية تعديل أو اعتماد',
+      finishedGoodsTitle: '📦 المنتج النهائي', rawMaterialTitle: '🌾 المواد الأولية',
+      onHandLbl: 'الموجود', reservedLbl: 'محجوز', quarantineLbl: 'Quarantine',
+      damagedLbl: 'تالف', expiredLbl: 'منتهي', availableLbl: 'المتاح فعليًا',
+      emptyStock: 'لا توجد أصناف مسجَّلة بعد',
+      goToOrdersBtn: '📋 فتح تتبّع الطلبات الكامل', goToReportsBtn: '📊 فتح لوحة التقارير الشاملة',
+      redirectNote: 'تُفتَح هذه الشاشة في صفحة مستقلة — نفس البيانات الحقيقية المتاحة لمسؤول التوزيع/الإدارة، بعرض القراءة فقط.',
+      loadingText: 'جارٍ التحميل...', loadErrorText: 'تعذّر تحميل البيانات — أعد المحاولة',
+      toastNotReady: 'هذه الميزة ستُبنى في خطوة قادمة', savingText: 'جارٍ الحفظ...', continueBtn: 'اضغط هنا للمتابعة'
+    },
+    en: {
+      roleName: 'Production Manager',
+      pmNavApprovals: 'Approvals', pmNavOrders: 'Order lifecycle', pmNavStock: 'Stock overview', pmNavQuarantine: 'Quarantine tracking',
+      changePassword: '🔑 Change password', logout: '↩ Log out',
+      screenTitle: 'General Tracking Dashboard',
+      tabStock: 'Stock balances', tabOrders: 'Order tracking', tabReports: 'Full reports',
+      tabUsage: 'Department usage', usageTitle: '📅 Time period', usageByDept: 'By department', usageByItem: 'By item',
+      usageBdayChip: 'Yesterday (work day)', ackTitle: '📋 Daily review of yesterday\'s report', ackDone: (time) => `✅ You reviewed today\'s report — ${time}`,
+      ackNeed: (day) => `You have not confirmed your review today. Yesterday\'s report: ${day} (the day starts 5 AM Qatar time). This does not block any approval.`,
+      ackBtn: '✅ Mark yesterday\'s report as reviewed', ackShowFirst: 'Show yesterday\'s report first', ackToast: 'Your review has been recorded', ackFail: 'Could not record the review — please try again',
+      bdayNote: (day) => `Work day: ${day} — 5 AM to 5 AM next day, Qatar time`,
+      presetCustom: 'Custom range', kpiDepts: 'Departments served', kpiItems: 'Items issued', kpiIssues: 'Issue operations', kpiTop: 'Most requested',
+      usageEmptyTitle: 'No issues in this period', usageEmptyHint: 'No raw materials were delivered to any department in the selected period.', usageNoMatchTitle: 'No matching results', usageNoMatchHint: 'Try changing the search or filters.',
+      usageTimes: (n) => `${n}x`, usageLastOn: (d) => `Last issued ${d}`, usageDeptsCount: (n) => `${n} departments`,
+      stkAllDepts: 'All departments', stkAllFamilies: 'All families', stkSearchPh: 'Search by item name...', stkCount: (n, tot) => `${n} of ${tot}`, stkNoMatch: 'No matching items',
+      presetToday: 'Today', preset7: 'Last 7 days', presetMonth: 'This month', presetLastMonth: 'Last month', preset3m: 'Last 3 months', presetYear: 'This year',
+      fromLbl: 'From', toLbl: 'To', applyBtn: 'Show', toastBadRange: 'Choose a valid start and end date (start before end)',
+      usageSearch: 'Search by item name...', usageDept: 'Department', usageAllDepts: 'All departments', usageFamily: 'Family', usageAllFamilies: 'All families',
+      colItem: 'Item', colFamily: 'Family', colQty: 'Quantity issued', colUnit: 'Unit', colTimes: 'Times issued', colLast: 'Last issued', colDepts: 'Departments', colDeptBreak: 'Breakdown',
+      usageNote: 'ℹ️ Raw materials actually issued from the raw-materials store to each department (on supply-request delivery), within the selected period.',
+      usageEmpty: 'No raw materials were issued to departments in this period', usageNoMatch: 'No matching results',
+      usageDeptSummary: (n, times) => `${n} item(s) · ${times} issue(s)`, usageTotalLines: (n) => `${n} item(s)`,
+      viewOnlyBadge: 'View only — no edit or approval permission anywhere',
+      finishedGoodsTitle: '📦 Finished Goods', rawMaterialTitle: '🌾 Raw Materials',
+      onHandLbl: 'On hand', reservedLbl: 'Reserved', quarantineLbl: 'Quarantine',
+      damagedLbl: 'Damaged', expiredLbl: 'Expired', availableLbl: 'Actually available',
+      emptyStock: 'No items registered yet',
+      goToOrdersBtn: '📋 Open full order tracking', goToReportsBtn: '📊 Open full reports dashboard',
+      redirectNote: 'This opens in a dedicated page — the same real data available to distribution manager/management, in read-only view.',
+      loadingText: 'Loading...', loadErrorText: 'Could not load the data — please try again',
+      toastNotReady: 'This feature is coming up next', savingText: 'Saving...', continueBtn: 'Tap here to continue'
+    }
+  };
+
+  function t(key) { return (dict[state.lang] && dict[state.lang][key]) || key; }
+
+  function applyI18n(container) {
+    (container || document).querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (dict[state.lang][key] !== undefined) el.textContent = dict[state.lang][key];
+    });
+  }
+
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => el.classList.remove('show'), 2600);
+  }
+
+  function onceWithTimeout(fn, timeoutMs) {
+    let fired = false;
+    const timer = setTimeout(() => { if (!fired) { fired = true; forceHideBusyOverlay(); fn(); } }, timeoutMs * (typeof TIMEOUT_SCALE === 'number' ? TIMEOUT_SCALE : 1));
+    return (...args) => { if (fired) return; fired = true; clearTimeout(timer); fn(...args); };
+  }
+
+  function renderTabs() {
+    document.getElementById('tabsRow').innerHTML = `
+      <button class="tab ${state.activeTab === 'STOCK' ? 'active' : ''}" data-tab="STOCK">${t('tabStock')}</button>
+      <button class="tab ${state.activeTab === 'ORDERS' ? 'active' : ''}" data-tab="ORDERS">${t('tabOrders')}</button>
+      <button class="tab ${state.activeTab === 'REPORTS' ? 'active' : ''}" data-tab="REPORTS">${t('tabReports')}</button>
+      <button class="tab ${state.activeTab === 'USAGE' ? 'active' : ''}" data-tab="USAGE">${t('tabUsage')}</button>
+    `;
+    document.querySelectorAll('[data-tab]').forEach(el => {
+      el.addEventListener('click', () => {
+        state.activeTab = el.getAttribute('data-tab');
+        renderTabs();
+        loadActiveTab();
+      });
+    });
+  }
+
+  function loadActiveTab() {
+    if (state.activeTab === 'STOCK') loadStock();
+    else if (state.activeTab === 'ORDERS') renderRedirectCard('ORDERS');
+    else if (state.activeTab === 'USAGE') loadUsage();
+    else renderRedirectCard('REPORTS');
+  }
+
+  // ===================== استهلاك الأقسام (طلب مباشر ٢٦ سبتمبر ٢٠٢٦): المواد الأولية التي استفادت منها الأقسام =====================
+  const US = { data: null, view: 'DEPT', period: { preset: 'BDAY', from: '', to: '' }, ackBusy: false, q: '', dept: '', family: '', open: {} };
+  function ymd(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  function presetRange(p) {
+    const now = new Date(); const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    if (p === 'TODAY') return { from: ymd(today), to: ymd(today) };
+    if (p === 'LAST7') return { from: ymd(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6)), to: ymd(today) };
+    if (p === 'LASTMONTH') return { from: ymd(new Date(today.getFullYear(), today.getMonth() - 1, 1)), to: ymd(new Date(today.getFullYear(), today.getMonth(), 0)) };
+    if (p === 'LAST3M') return { from: ymd(new Date(today.getFullYear(), today.getMonth() - 2, 1)), to: ymd(today) };
+    if (p === 'YEAR') return { from: ymd(new Date(today.getFullYear(), 0, 1)), to: ymd(today) };
+    return { from: ymd(new Date(today.getFullYear(), today.getMonth(), 1)), to: ymd(today) };
+  }
+  (function () { const r = presetRange('MONTH'); US.period.from = r.from; US.period.to = r.to; })(); // تُستبدَل بيوم العمل حين preset=BDAY
+  const uName = o => state.lang === 'ar' ? o.nameAR : o.nameEN;
+  const uDate = iso => iso ? new Date(iso).toLocaleDateString(state.lang === 'ar' ? 'ar-QA-u-nu-latn' : 'en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }) : '';
+  const uAttr = v => String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+
+  function loadUsage() {
+    document.getElementById('mainArea').innerHTML = `<div class="card empty-state">${t('loadingText')}</div>`;
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(result => {
+        if (!result || !result.success) {
+          document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="color:var(--warn);">${t('loadErrorText')}</div>`;
+          return;
+        }
+        US.data = result.data;
+        if (US.period.preset === 'BDAY') { US.period.from = result.data.period.from; US.period.to = result.data.period.to; }
+        renderUsage();
+      }, 8000))
+      .withFailureHandler(() => { document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="color:var(--warn);">${t('loadErrorText')}</div>`; })
+      .getDepartmentRawMaterialUsage(CURRENT_USER_ID, US.period.preset === 'BDAY' ? 'BDAY' : US.period.from, US.period.preset === 'BDAY' ? '' : US.period.to);
+  }
+
+  const US_COLORS = ['#EE7126', '#3D2B1E', '#4B7A4F', '#2F6E8E', '#B4802A', '#8E4A7A', '#B23B2E', '#6B8E23', '#5D6D7E', '#C0762B'];
+  const usColor = id => { const i = US.data ? US.data.departments.findIndex(x => x.departmentId === id) : 0; return US_COLORS[(i < 0 ? 0 : i) % US_COLORS.length]; };
+
+  function renderUsage() {
+    const d = US.data;
+    const presets = [['BDAY', 'usageBdayChip'], ['TODAY', 'presetToday'], ['LAST7', 'preset7'], ['MONTH', 'presetMonth'], ['LASTMONTH', 'presetLastMonth'], ['LAST3M', 'preset3m'], ['YEAR', 'presetYear']];
+    document.getElementById('mainArea').innerHTML = `
+      <div id="ackCard"></div>
+      <div class="us2-toolbar">
+        <div class="us2-chips">
+          ${presets.map(p => `<button type="button" class="us2-chip ${US.period.preset === p[0] ? 'active' : ''}" data-uspreset="${p[0]}">${t(p[1])}</button>`).join('')}
+          <button type="button" class="us2-chip ${US.period.preset === 'CUSTOM' ? 'active' : ''}" data-uspreset="CUSTOM">📅 ${t('presetCustom')}</button>
+        </div>
+        ${US.period.preset === 'CUSTOM' ? `<div class="us2-range">
+          <div><label>${t('fromLbl')}</label><input type="date" id="usFrom" value="${US.period.from}"></div>
+          <div><label>${t('toLbl')}</label><input type="date" id="usTo" value="${US.period.to}"></div>
+          <button type="button" class="us2-go" id="usApply">${t('applyBtn')}</button></div>` : ''}
+        <div class="us2-filters">
+          <div class="us2-field"><span class="ico">🔍</span><input type="search" id="usSearch" placeholder="${uAttr(t('usageSearch'))}" value="${uAttr(US.q)}"></div>
+          <div class="us2-field"><select id="usDept"><option value="">${t('usageAllDepts')}</option>${d.departments.map(x => `<option value="${x.departmentId}" ${x.departmentId === US.dept ? 'selected' : ''}>${uName(x)}</option>`).join('')}</select></div>
+          <div class="us2-field"><select id="usFamily"><option value="">${t('usageAllFamilies')}</option>${d.families.map(f => `<option value="${uAttr(f)}" ${f === US.family ? 'selected' : ''}>${f}</option>`).join('')}</select></div>
+        </div>
+      </div>
+      ${US.period.preset === 'BDAY' ? `<div class="us2-bday">🕔 ${t('bdayNote')(d.period.from)}</div>` : ''}
+      <div id="usKpi"></div>
+      <div class="us2-seg" role="tablist">
+        <button type="button" data-usview="DEPT" class="${US.view === 'DEPT' ? 'active' : ''}">${t('usageByDept')}</button>
+        <button type="button" data-usview="ITEM" class="${US.view === 'ITEM' ? 'active' : ''}">${t('usageByItem')}</button>
+      </div>
+      <div id="usBody"></div>`;
+    renderAckCard();
+    document.querySelectorAll('[data-usview]').forEach(el => el.addEventListener('click', () => { US.view = el.getAttribute('data-usview'); renderUsage(); }));
+    document.querySelectorAll('[data-uspreset]').forEach(el => el.addEventListener('click', () => {
+      const pr = el.getAttribute('data-uspreset');
+      if (pr === 'CUSTOM') { US.period.preset = 'CUSTOM'; if (!US.period.from) { const r = presetRange('MONTH'); US.period.from = r.from; US.period.to = r.to; } renderUsage(); return; }
+      const r = pr === 'BDAY' ? { from: '', to: '' } : presetRange(pr);
+      US.period = { preset: pr, from: r.from, to: r.to }; loadUsage();
+    }));
+    const apply = document.getElementById('usApply');
+    if (apply) apply.addEventListener('click', () => {
+      const from = document.getElementById('usFrom').value, to = document.getElementById('usTo').value;
+      if (!from || !to || from > to) { showToast(t('toastBadRange')); return; }
+      US.period = { preset: 'CUSTOM', from: from, to: to }; loadUsage();
+    });
+    document.getElementById('usSearch').addEventListener('input', e => { US.q = e.target.value; renderUsageBody(); });
+    document.getElementById('usDept').addEventListener('change', e => { US.dept = e.target.value; renderUsageBody(); });
+    document.getElementById('usFamily').addEventListener('change', e => { US.family = e.target.value; renderUsageBody(); });
+    renderUsageBody();
+  }
+
+  // بطاقة الإقرار اليومي: لا تحجب أي شيء؛ تسجِّل الاطلاع فقط
+  function renderAckCard() {
+    const box = document.getElementById('ackCard'); const rv = US.data && US.data.review;
+    if (!box || !rv) return;
+    if (rv.reviewedToday) {
+      const time = new Date(rv.reviewedAt).toLocaleTimeString(state.lang === 'ar' ? 'ar-QA-u-nu-latn' : 'en-US', { hour: '2-digit', minute: '2-digit' });
+      box.innerHTML = `<div class="ack-card done"><div class="ack-title">${t('ackTitle')}</div><div class="ack-text">${t('ackDone')(time)}</div></div>`;
+      return;
+    }
+    const onBday = US.period.preset === 'BDAY';
+    box.innerHTML = `<div class="ack-card"><div class="ack-title">${t('ackTitle')}</div><div class="ack-text">${t('ackNeed')(rv.reportDay)}</div>
+      <button type="button" class="ack-btn" id="ackBtn" ${US.ackBusy ? 'disabled' : ''}>${onBday ? t('ackBtn') : t('ackShowFirst')}</button></div>`;
+    document.getElementById('ackBtn').addEventListener('click', () => {
+      if (US.period.preset !== 'BDAY') { US.period = { preset: 'BDAY', from: '', to: '' }; loadUsage(); return; }
+      US.ackBusy = true; renderAckCard();
+      google.script.run
+        .withSuccessHandler(res => {
+          US.ackBusy = false;
+          if (!res || !res.success) { renderAckCard(); showToast(t('ackFail') + (res && res.error && res.error.details ? ' — ' + res.error.details : '')); return; }
+          US.data.review = res.data; renderAckCard(); showToast(t('ackToast'));
+        })
+        .withFailureHandler(err => { US.ackBusy = false; renderAckCard(); showToast(t('ackFail') + (err && err.message ? ' — ' + err.message : '')); })
+        .acknowledgeUsageReport(CURRENT_USER_ID);
+    });
+  }
+
+  function usageLines() {
+    const d = US.data; const q = US.q.trim().toLowerCase();
+    const prod = {}; d.products.forEach(p => { prod[p.productId] = p; });
+    return d.lines.filter(l => {
+      const p = prod[l.productId] || { nameAR: l.productId, nameEN: l.productId, family: '' };
+      return (!US.dept || l.departmentId === US.dept) && (!US.family || p.family === US.family) &&
+        (!q || (String(p.nameAR || '') + ' ' + String(p.nameEN || '')).toLowerCase().indexOf(q) !== -1);
+    }).map(l => Object.assign({}, l, { p: prod[l.productId] || { productId: l.productId, nameAR: l.productId, nameEN: l.productId, unitId: '', family: '' } }));
+  }
+
+  function renderUsageKpi(lines) {
+    const box = document.getElementById('usKpi'); if (!box) return;
+    if (!lines.length) { box.innerHTML = ''; return; }
+    const depts = {}, items = {}; let issues = 0;
+    lines.forEach(l => { depts[l.departmentId] = 1; const g = items[l.productId] || (items[l.productId] = { p: l.p, times: 0, qty: 0 }); g.times += l.times; g.qty += l.qty; issues += l.times; });
+    const top = Object.keys(items).map(k => items[k]).sort((a, b) => b.times - a.times || b.qty - a.qty)[0];
+    box.innerHTML = `<div class="us2-kpis">
+      <div class="us2-kpi" style="--kpi:#EE7126"><div class="ic">🏭</div><div class="v">${Object.keys(depts).length}</div><div class="l">${t('kpiDepts')}</div></div>
+      <div class="us2-kpi" style="--kpi:#4B7A4F"><div class="ic">🌾</div><div class="v">${Object.keys(items).length}</div><div class="l">${t('kpiItems')}</div></div>
+      <div class="us2-kpi" style="--kpi:#2F6E8E"><div class="ic">🔁</div><div class="v">${issues}</div><div class="l">${t('kpiIssues')}</div></div>
+      <div class="us2-kpi" style="--kpi:#B4802A"><div class="ic">⭐</div><div class="v sm">${uName(top.p)}</div><div class="l">${t('kpiTop')} · ${t('usageTimes')(top.times)}</div></div>
+    </div>`;
+  }
+
+  function renderUsageBody() {
+    const d = US.data; const lines = usageLines(); const body = document.getElementById('usBody');
+    const empty = (ic, tt, hint) => `<div class="us2-empty"><div class="big">${ic}</div><div class="tt">${tt}</div><div>${hint}</div></div>`;
+    if (!d.lines.length) { renderUsageKpi([]); body.innerHTML = empty('🌾', t('usageEmptyTitle'), t('usageEmptyHint')); return; }
+    if (!lines.length) { renderUsageKpi([]); body.innerHTML = empty('🔍', t('usageNoMatchTitle'), t('usageNoMatchHint')); return; }
+    renderUsageKpi(lines);
+    const deptOf = id => d.departments.find(y => y.departmentId === id) || { departmentId: id, nameAR: id, nameEN: id };
+    // أشرطة النِّسب تُقاس داخل كل وحدة قياس (كجم/كيس/لتر...) -- لا معنى لمقارنة كجم بكيس
+    const unitMax = {}; lines.forEach(l => { const u = l.p.unitId || ''; unitMax[u] = Math.max(unitMax[u] || 0, l.qty); });
+    const pct = l => Math.max(4, Math.round(l.qty / (unitMax[l.p.unitId || ''] || 1) * 100));
+    const shortDate = iso => { if (!iso) return ''; const x = new Date(iso); const dd = ('0' + x.getDate()).slice(-2), mm = ('0' + (x.getMonth() + 1)).slice(-2); return state.lang === 'ar' ? dd + '/' + mm : mm + '/' + dd; };
+    const fam = p => p.family ? `<span class="us2-fam">${p.family}</span>` : '';
+
+    if (US.view === 'ITEM') {
+      const byItem = {};
+      lines.forEach(l => { const g = byItem[l.productId] || (byItem[l.productId] = { p: l.p, qty: 0, times: 0, depts: [] }); g.qty += l.qty; g.times += l.times; g.depts.push(l); });
+      const rows = Object.keys(byItem).map(k => byItem[k]).sort((a, b) => b.times - a.times || b.qty - a.qty);
+      body.innerHTML = rows.map(g => {
+        const total = g.depts.reduce((s2, l) => s2 + l.qty, 0) || 1;
+        const segs = g.depts.slice().sort((a, b) => b.qty - a.qty);
+        return `<div class="us2-card" style="--dc:#3D2B1E"><div class="us2-row">
+          <div class="us2-row-top"><div class="name">${uName(g.p)} ${fam(g.p)}</div><div class="us2-qty">${Math.round(g.qty * 1000) / 1000}<small>${g.p.unitId || ''}</small></div></div>
+          <div class="us2-bar stack">${segs.map(l => `<span style="width:${(l.qty / total * 100).toFixed(1)}%; background:${usColor(l.departmentId)};" title="${uAttr(uName(deptOf(l.departmentId)))}"></span>`).join('')}</div>
+          <div class="us2-legend">${segs.map(l => `<span class="lg" style="--dc:${usColor(l.departmentId)}"><i></i>${uName(deptOf(l.departmentId))} <b>${l.qty}</b></span>`).join('')}</div>
+          <div class="us2-meta" style="margin-top:8px;"><span>${t('usageTimes')(g.times)}</span><span>${t('usageDeptsCount')(g.depts.length)}</span></div>
+        </div></div>`;
+      }).join('');
+      return;
+    }
+
+    const byDept = {};
+    lines.forEach(l => { (byDept[l.departmentId] = byDept[l.departmentId] || []).push(l); });
+    const depts = Object.keys(byDept).map(id => ({ dept: deptOf(id), rows: byDept[id].sort((a, b) => b.times - a.times || b.qty - a.qty), times: byDept[id].reduce((s2, l) => s2 + l.times, 0) }))
+      .sort((a, b) => b.times - a.times || b.rows.length - a.rows.length);
+    body.innerHTML = depts.map(g => {
+      const id = g.dept.departmentId; const open = US.open[id] !== false; // مفتوحة افتراضيًا
+      return `<div class="us2-card" style="--dc:${usColor(id)}">
+        <div class="us2-head" data-usdept="${id}"><span class="dot"></span><span class="nm">${uName(g.dept)}</span>
+          <span class="us2-pill">${t('usageDeptSummary')(g.rows.length, g.times)}</span><span class="chev ${open ? 'open' : ''}">▼</span></div>
+        ${open ? `<div class="us2-items">${g.rows.map(l => `<div class="us2-row">
+          <div class="us2-row-top"><div class="name">${uName(l.p)} ${fam(l.p)}</div><div class="us2-qty">${l.qty}<small>${l.p.unitId || ''}</small></div></div>
+          <div class="us2-bar"><span style="width:${pct(l)}%"></span></div>
+          <div class="us2-meta"><span>${t('usageTimes')(l.times)}</span>${l.lastAt ? `<span>${t('usageLastOn')(shortDate(l.lastAt))}</span>` : ''}</div>
+        </div>`).join('')}</div>` : ''}
+      </div>`;
+    }).join('');
+    body.querySelectorAll('[data-usdept]').forEach(el => el.addEventListener('click', () => {
+      const id = el.getAttribute('data-usdept'); US.open[id] = US.open[id] === false; renderUsageBody();
+    }));
+  }
+
+  // ===================== أرصدة المخزون (منتج نهائي + مواد أولية معًا) =====================
+  function loadStock() {
+    document.getElementById('mainArea').innerHTML = `<div class="card empty-state">${t('loadingText')}</div>`;
+    let fgsResult = null, rmsResult = null, finished = false;
+    function checkDone() {
+      if (finished || fgsResult === null || rmsResult === null) return;
+      finished = true;
+      if (!fgsResult.success || !rmsResult.success) {
+        const failed = !fgsResult.success ? fgsResult : rmsResult;
+        document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} — ${JSON.stringify(failed)}</div>`;
+        return;
+      }
+      FGS_ITEMS = fgsResult.data.items;
+      RMS_ITEMS = rmsResult.data.items;
+      FGS_DEPTS = fgsResult.data.departments || [];
+      RMS_FAMILIES = rmsResult.data.families || [];
+      renderStock();
+    }
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(r => { fgsResult = r || { success: true, data: { items: [] } }; checkDone(); }, 8000))
+      .withFailureHandler(() => { fgsResult = { success: false }; checkDone(); })
+      .getFinishedGoodsStockBoard(CURRENT_USER_ID);
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(r => { rmsResult = r || { success: true, data: { items: [] } }; checkDone(); }, 8000))
+      .withFailureHandler(() => { rmsResult = { success: false }; checkDone(); })
+      .getRawMaterialStockBoard(CURRENT_USER_ID);
+  }
+
+  // فلاتر أرصدة المخزون (طلب مباشر ٢٦ سبتمبر ٢٠٢٦): المنتج النهائي حسب القسم، والمواد الأولية حسب العائلة + بحث بالاسم
+  const STK = { q: '', dept: '', family: '' };
+  let FGS_DEPTS = [], RMS_FAMILIES = [];
+
+  function stockCardHtml(items) {
+    if (!items.length) return `<div class="stk-empty">${t('stkNoMatch')}</div>`;
+    const n = v => (v === undefined || v === null || v === '' || isNaN(Number(v))) ? 0 : Number(v);
+    return items.map(it => `
+      <div class="stock-item-card">
+        <div class="stock-item-name">${state.lang === 'ar' ? it.nameAR : it.nameEN} <span style="font-weight:400; color:var(--ink-soft); font-size:12px;">(${it.unitId})</span></div>
+        <div class="stock-numbers">
+          <div class="stock-num-box"><div class="lbl">${t('onHandLbl')}</div><div class="val">${n(it.onHand)}</div></div>
+          <div class="stock-num-box"><div class="lbl">${t('reservedLbl')}</div><div class="val">${n(it.reserved)}</div></div>
+          <div class="stock-num-box quarantine"><div class="lbl">${t('quarantineLbl')}</div><div class="val">${n(it.quarantine)}</div></div>
+          <div class="stock-num-box damaged"><div class="lbl">${t('damagedLbl')}</div><div class="val">${n(it.damaged)}</div></div>
+          <div class="stock-num-box damaged"><div class="lbl">${t('expiredLbl')}</div><div class="val">${n(it.expired)}</div></div>
+          <div class="stock-num-box available"><div class="lbl">${t('availableLbl')}</div><div class="val">${n(it.available)}</div></div>
+        </div>
+      </div>`).join('');
+  }
+
+  function stockFiltered() {
+    const q = STK.q.trim().toLowerCase();
+    const byName = it => !q || (String(it.nameAR || '') + ' ' + String(it.nameEN || '')).toLowerCase().indexOf(q) !== -1;
+    return {
+      fg: FGS_ITEMS.filter(it => byName(it) && (!STK.dept || it.departmentId === STK.dept)),
+      rm: RMS_ITEMS.filter(it => byName(it) && (!STK.family || it.materialFamily === STK.family))
+    };
+  }
+
+  function renderStockLists() {
+    const f = stockFiltered();
+    document.getElementById('fgsCard').innerHTML = stockCardHtml(f.fg);
+    document.getElementById('rmsCard').innerHTML = stockCardHtml(f.rm);
+    document.getElementById('fgsCount').textContent = t('stkCount')(f.fg.length, FGS_ITEMS.length);
+    document.getElementById('rmsCount').textContent = t('stkCount')(f.rm.length, RMS_ITEMS.length);
+  }
+
+  function renderStock() {
+    const deptName = x => state.lang === 'ar' ? x.nameAR : x.nameEN;
+    document.getElementById('mainArea').innerHTML = `
+      <div class="stk-search"><input type="search" id="stkSearch" placeholder="${uAttr(t('stkSearchPh'))}" value="${uAttr(STK.q)}"></div>
+      <div class="stk-head">
+        <div><span class="ttl">${t('finishedGoodsTitle')}</span><span class="cnt" id="fgsCount"></span></div>
+        <select id="stkDept"><option value="">${t('stkAllDepts')}</option>${FGS_DEPTS.map(x => `<option value="${x.departmentId}" ${x.departmentId === STK.dept ? 'selected' : ''}>${deptName(x)}</option>`).join('')}</select>
+      </div>
+      <div class="card" id="fgsCard"></div>
+      <div class="stk-head">
+        <div><span class="ttl">${t('rawMaterialTitle')}</span><span class="cnt" id="rmsCount"></span></div>
+        <select id="stkFamily"><option value="">${t('stkAllFamilies')}</option>${RMS_FAMILIES.map(f => `<option value="${uAttr(f)}" ${f === STK.family ? 'selected' : ''}>${f}</option>`).join('')}</select>
+      </div>
+      <div class="card" id="rmsCard"></div>`;
+    document.getElementById('stkSearch').addEventListener('input', e => { STK.q = e.target.value; renderStockLists(); });
+    document.getElementById('stkDept').addEventListener('change', e => { STK.dept = e.target.value; renderStockLists(); });
+    document.getElementById('stkFamily').addEventListener('change', e => { STK.family = e.target.value; renderStockLists(); });
+    renderStockLists();
+  }
+
+  // ===================== إحالة لشاشتي التتبّع/التقارير الموجودتين فعليًا =====================
+  function renderRedirectCard(kind) {
+    const btnKey = kind === 'ORDERS' ? 'goToOrdersBtn' : 'goToReportsBtn';
+    const page = kind === 'ORDERS' ? 'distribution_tracking' : 'management';
+    document.getElementById('mainArea').innerHTML = `
+      <div class="card form-card" style="padding:20px; text-align:center;">
+        <div style="font-size:13px; color:var(--ink-soft); margin-bottom:16px; line-height:1.7;">${t('redirectNote')}</div>
+        <button class="submit-btn" id="redirectBtn">${t(btnKey)}</button>
+      </div>
+    `;
+    document.getElementById('redirectBtn').addEventListener('click', () => {
+      window.top.location.href = APP_BASE_URL + '?page=' + page + '&uid=' + encodeURIComponent(CURRENT_USER_ID);
+    });
+  }
+
+  /**
+   * زر الرجوع -- SPEC v1.4: يُوجَّه مؤقتًا لتسجيل الدخول (لا شاشة "تتبع
+   * الطلبات" 4.0 مبنية بعد لتكون الوجهة الطبيعية -- هذه الشاشة 4.0.2 هي
+   * أول شاشة مبنية فعليًا لهذا الدور حتى الآن). سيُحدَّث حين تُبنى 4.0.
+   */
+  document.getElementById('backBtn').addEventListener('click', () => { window.top.location.href = APP_BASE_URL + '?page=production_manager&uid=' + encodeURIComponent(CURRENT_USER_ID); });
+  document.getElementById('pmNavApprovals').addEventListener('click', () => { window.top.location.href = APP_BASE_URL + '?page=production_manager&uid=' + encodeURIComponent(CURRENT_USER_ID); });
+  document.getElementById('pmNavOrders').addEventListener('click', () => { window.top.location.href = APP_BASE_URL + '?page=pm_orders_overview&uid=' + encodeURIComponent(CURRENT_USER_ID); });
+  document.getElementById('pmNavQuarantine').addEventListener('click', () => { window.top.location.href = APP_BASE_URL + '?page=production_manager_quarantine&uid=' + encodeURIComponent(CURRENT_USER_ID); });
+  document.getElementById('langToggle').addEventListener('click', () => {
+    state.lang = state.lang === 'ar' ? 'en' : 'ar';
+    document.documentElement.lang = state.lang;
+    document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+    document.getElementById('langToggle').textContent = state.lang === 'ar' ? 'EN' : 'AR';
+    applyI18n(document.querySelector('header.topbar'));
+    applyI18n(document.querySelector('.subheader'));
+    applyI18n(document.querySelector('.pm-nav-row'));
+    renderTabs();
+    if (state.activeTab === 'STOCK') renderStock();
+    else if (state.activeTab === 'ORDERS') renderRedirectCard('ORDERS');
+    else if (state.activeTab === 'USAGE') { if (US.data) renderUsage(); else loadUsage(); }
+    else renderRedirectCard('REPORTS');
+  });
+  document.getElementById('userMenuBtn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('userDropdown').classList.toggle('open'); });
+  document.addEventListener('click', () => document.getElementById('userDropdown').classList.remove('open'));
+  document.querySelectorAll('[data-toast="notReady"]').forEach(el => {
+    el.addEventListener('click', (e) => { e.stopPropagation(); showToast(t('toastNotReady')); });
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    const btn = document.getElementById('logoutBtn');
+    if (btn.classList.contains('continue-armed')) { window.top.location.href = APP_BASE_URL; return; }
+    document.getElementById('userDropdown').classList.remove('open');
+    btn.disabled = true;
+    const originalContent = btn.textContent;
+    btn.textContent = t('savingText');
+    const finishLogout = onceWithTimeout(() => {
+      btn.disabled = false;
+      btn.classList.add('continue-armed');
+      btn.textContent = '👆 ' + t('continueBtn');
+    }, 8000);
+    google.script.run.withSuccessHandler(finishLogout).withFailureHandler(finishLogout).logout(CURRENT_USER_ID, masarLogoutMarker());
+  });
+
+  let forceHideOverlayFn = () => {};
+  function forceHideBusyOverlay() { forceHideOverlayFn(); }
+  function wrapGoogleScriptRunWithBusyOverlay() {
+    if (typeof google === 'undefined' || !google.script || !google.script.run) return;
+    const realRun = google.script.run;
+    const overlay = document.getElementById('globalBusyOverlay');
+    let busyCount = 0;
+    function showBusy() { busyCount++; overlay.classList.add('show'); }
+    function hideBusy() { busyCount = Math.max(0, busyCount - 1); if (busyCount === 0) overlay.classList.remove('show'); }
+    forceHideOverlayFn = () => { busyCount = 0; overlay.classList.remove('show'); };
+    Object.defineProperty(google.script, 'run', {
+      configurable: true,
+      get() {
+        const handlers = { onSuccess: null, onFailure: null };
+        let proxy;
+        const chain = {
+          withSuccessHandler(fn) { handlers.onSuccess = fn; return proxy; },
+          withFailureHandler(fn) { handlers.onFailure = fn; return proxy; }
+        };
+        proxy = new Proxy(chain, {
+          get(target, prop) {
+            if (prop === 'withSuccessHandler' || prop === 'withFailureHandler') return target[prop];
+            return (...args) => {
+              showBusy();
+              return realRun
+                .withSuccessHandler((...r) => { hideBusy(); if (handlers.onSuccess) handlers.onSuccess(...r); })
+                .withFailureHandler((...r) => { hideBusy(); if (handlers.onFailure) handlers.onFailure(...r); })
+                [prop](...args);
+            };
+          }
+        });
+        return proxy;
+      }
+    });
+  }
+
+  wrapGoogleScriptRunWithBusyOverlay();
+  applyI18n(document.querySelector('header.topbar'));
+  applyI18n(document.querySelector('.subheader'));
+  applyI18n(document.querySelector('.pm-nav-row'));
+  renderTabs();
+  loadActiveTab();
+  masarAutoRefresh({ domains: ['ORDERS', 'PRODUCTION', 'STOCK', 'APPROVALS'], refresh: () => loadActiveTab() });
+</script>
+
+</body>
+</html>

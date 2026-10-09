@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#3D2B1E">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="مسار">
+<link rel="apple-touch-icon" href="icon-180.png">
+<script src="masar-config.js?v=67ea158b"></script>
+<script src="masar-runtime.js?v=67ea158b"></script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALAKER SWEETS — الرحلات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Markazi+Text:wght@600;700&family=Fraunces:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #EE7126; --primary-dark: #C85A18; --primary-tint: #FCE8D8;
+    --secondary: #3D2B1E; --ink: #2B211B; --ink-soft: #6B5D52;
+    --bg: #FAF7F1; --surface: #FFFFFF; --line: #E7DFD2;
+    --success: #4B7A4F; --success-tint: #E7EFE6;
+    --warn: #B23B2E; --warn-tint: #F7E6E2;
+    --pending: #B4802A; --pending-tint: #F5EAD9;
+    --radius-lg: 16px; --radius-md: 12px; --radius-sm: 8px;
+    --shadow-card: 0 1px 2px rgba(43,33,27,0.06), 0 4px 16px rgba(43,33,27,0.05);
+    --font-ar: 'IBM Plex Sans Arabic', sans-serif; --font-en: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { overflow-x: hidden; max-width: 100vw; }
+  html[lang="ar"] body { font-family: var(--font-ar); }
+  html[lang="en"] body { font-family: var(--font-en); }
+  body {
+    background-color: var(--bg);
+    background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 38px, rgba(61,43,30,0.035) 38px, rgba(61,43,30,0.035) 39px);
+    color: var(--ink); min-height: 100vh; -webkit-font-smoothing: antialiased; padding-bottom: 30px;
+  }
+  header.topbar {
+    display: flex; align-items: center; gap: 16px; background: var(--secondary); color: #fff;
+    padding: 10px 20px; position: sticky; top: 0; z-index: 30; box-shadow: 0 2px 10px rgba(0,0,0,0.15); max-width: 100%;
+  }
+  .brand-logo { height: 40px; width: auto; display: block; flex-shrink: 0; }
+  .brand-meta { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; overflow: hidden; }
+  .brand-meta .system-name { font-size: 11px; letter-spacing: 0.14em; color: rgba(255,255,255,0.55); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .brand-meta .role-name { font-size: 15px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .topbar-spacer { flex: 1; min-width: 8px; }
+  .icon-btn {
+    display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #fff; cursor: pointer;
+    font-size: 14px; font-weight: 600; transition: background 0.15s ease; position: relative; flex-shrink: 0;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,0.16); }
+  .user-menu { position: relative; flex-shrink: 0; }
+  .user-dropdown {
+    position: absolute; top: calc(100% + 8px); inset-inline-end: 0; background: var(--surface); color: var(--ink);
+    border: 1px solid var(--line); border-radius: var(--radius-md); box-shadow: var(--shadow-card);
+    min-width: 200px; padding: 6px; display: none; z-index: 40;
+  }
+  .user-dropdown.open { display: block; }
+  .user-dropdown button {
+    display: flex; align-items: center; gap: 10px; width: 100%; text-align: start; background: none; border: none;
+    padding: 10px 12px; border-radius: var(--radius-sm); font-size: 14px; font-family: inherit; color: var(--ink); cursor: pointer;
+  }
+  .user-dropdown button:hover { background: var(--bg); }
+  @media (max-width: 420px) {
+    header.topbar { flex-wrap: wrap; row-gap: 8px; padding: 10px 12px; gap: 8px; }
+    .topbar-spacer { flex: 0 0 100%; height: 0; }
+    .brand-meta .system-name { display: none; }
+  }
+  main { max-width: 880px; margin: 0 auto; padding: 20px 20px 20px; }
+  .greeting-card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-card);
+    padding: 20px 22px; margin-bottom: 18px;
+  }
+  .greeting-card h1 { font-size: 22px; font-weight: 600; color: var(--secondary); }
+  .greeting-card .date-line { color: var(--ink-soft); font-size: 13.5px; margin-top: 4px; }
+  .section-title { font-size: 13px; font-weight: 600; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; padding-inline-start: 4px; }
+
+  .redirect-banner {
+    display: flex; align-items: flex-start; gap: 10px; padding: 14px 16px; border-radius: var(--radius-md);
+    margin-bottom: 18px; font-size: 13px; line-height: 1.6; background: var(--warn-tint); color: #7A2A20; border: 1px solid rgba(178,59,46,0.3);
+  }
+
+  .add-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+    background: var(--primary); color: #fff; border: none; font-family: inherit; font-size: 14px; font-weight: 600;
+    padding: 12px; border-radius: var(--radius-md); cursor: pointer; margin-bottom: 18px;
+  }
+  .add-btn:hover { background: var(--primary-dark); }
+
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); }
+  .trip-card { padding: 16px 18px; margin-bottom: 14px; }
+  .trip-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+  .trip-driver { font-size: 15px; font-weight: 700; color: var(--ink); }
+  .trip-status { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
+  .trip-status.preparing { background: var(--pending-tint); color: var(--pending); }
+  .trip-status.loaded { background: var(--success-tint); color: var(--success); }
+  .trip-spacer { flex: 1; }
+  .trip-id { font-family: var(--font-mono); font-size: 11px; color: var(--ink-soft); }
+
+  .stop-row {
+    display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px dashed var(--line);
+  }
+  .stop-row.highlighted { background: var(--warn-tint); border-radius: var(--radius-sm); padding: 10px; margin: 4px 0; border-top: none; }
+  .stop-num {
+    width: 24px; height: 24px; border-radius: 50%; background: var(--secondary); color: #fff; font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: var(--font-mono);
+  }
+  .stop-main { flex: 1; min-width: 0; }
+  .stop-store { font-size: 13.5px; font-weight: 700; color: var(--ink); }
+  .stop-items { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
+  .stop-item-icon {
+    width: 24px; height: 24px; border-radius: 6px; background: linear-gradient(135deg, #F3E9DC, #EDE1D0);
+    display: flex; align-items: center; justify-content: center; font-size: 12px;
+  }
+  .stop-remove-btn {
+    background: none; border: none; color: var(--warn); cursor: pointer; font-size: 16px; padding: 4px 8px; flex-shrink: 0;
+  }
+
+  /* ---------- Create trip flow ---------- */
+  .form-card { padding: 18px 20px; margin: 16px 0; }
+  .form-card h2 { font-size: 14px; font-weight: 600; color: var(--secondary); display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .field label { font-size: 12.5px; font-weight: 600; color: var(--ink-soft); }
+  .field select {
+    border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 10px 12px;
+    font-family: inherit; font-size: 13.5px; color: var(--ink); background: var(--surface);
+  }
+  .order-check-row {
+    display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px dashed var(--line); cursor: pointer;
+  }
+  .order-check-row:last-child { border-bottom: none; }
+  .order-check-row input[type="checkbox"] { width: 17px; height: 17px; cursor: pointer; }
+  .order-check-main { flex: 1; }
+  .order-check-store { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+  .order-check-sub { font-size: 11px; color: var(--ink-soft); font-family: var(--font-mono); }
+
+  .next-btn, .create-btn {
+    width: 100%; background: var(--secondary); color: #fff; border: none; font-family: inherit; font-size: 14px; font-weight: 600;
+    padding: 12px; border-radius: var(--radius-md); cursor: pointer; margin-top: 6px;
+  }
+  .next-btn:hover, .create-btn:hover { background: #2E2015; }
+  .confirm-armed { background: var(--warn) !important; animation: pulse-confirm 1s ease-in-out infinite; }
+  @keyframes pulse-confirm { 0%, 100% { opacity: 1; } 50% { opacity: 0.75; } }
+  .next-btn:disabled { background: #B7ADA2; cursor: not-allowed; }
+
+  .drag-hint { font-size: 12px; color: var(--ink-soft); text-align: center; margin-bottom: 10px; }
+  .drag-stop {
+    display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid var(--line); border-radius: var(--radius-md);
+    background: var(--bg); margin-bottom: 8px; cursor: grab; transition: box-shadow 0.15s ease, opacity 0.15s ease;
+  }
+  .drag-stop:active { cursor: grabbing; }
+  .drag-stop.dragging { opacity: 0.4; }
+  .drag-stop.drag-over { box-shadow: 0 0 0 2px var(--primary) inset; }
+  .drag-handle { font-size: 16px; color: var(--ink-soft); flex-shrink: 0; }
+  .cancel-create-btn {
+    width: 100%; background: var(--bg); border: 1px solid var(--line); color: var(--ink); font-family: inherit;
+    font-size: 13px; font-weight: 600; padding: 10px; border-radius: var(--radius-sm); cursor: pointer; margin-top: 8px;
+  }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--ink-soft); font-size: 13.5px; }
+
+  .discrepancy-card { padding: 14px 16px; margin-bottom: 12px; border-inline-start: 3px solid var(--warn); }
+  .discrepancy-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+  .discrepancy-store { font-size: 13.5px; font-weight: 700; color: var(--ink); }
+  .discrepancy-order-tag { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-soft); }
+  .discrepancy-driver { font-size: 11.5px; color: var(--ink-soft); }
+  .discrepancy-item { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+  .discrepancy-qty-compare { font-family: var(--font-mono); font-size: 13px; margin-bottom: 6px; }
+  .discrepancy-qty-compare .expected { color: var(--ink-soft); }
+  .discrepancy-qty-compare .actual { color: var(--warn); font-weight: 700; }
+  .discrepancy-note { font-size: 12px; color: var(--ink-soft); margin-bottom: 8px; }
+  .discrepancy-decide-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .discrepancy-decide-row input[type="number"] {
+    width: 72px; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 7px 9px;
+    font-family: var(--font-mono); font-size: 13px; text-align: center; color: var(--ink); background: var(--surface);
+  }
+  .discrepancy-approve-btn, .discrepancy-reject-btn {
+    border: none; font-family: inherit; font-size: 12.5px; font-weight: 600; padding: 8px 14px; border-radius: 999px; cursor: pointer;
+  }
+  .discrepancy-approve-btn { background: var(--success); color: #fff; }
+  .discrepancy-reject-btn { background: transparent; color: var(--warn); border: 1px solid var(--warn); }
+  .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(10px);
+    background: var(--secondary); color: #fff; font-size: 13.5px; padding: 11px 18px; border-radius: 999px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2); opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 60; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  #globalBusyOverlay { position: fixed; inset: 0; z-index: 999; cursor: wait; display: none; background: rgba(0,0,0,0.02); }
+  #globalBusyOverlay.show { display: block; }
+  .continue-armed { color: var(--success) !important; }
+  .refresh-btn { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; border-radius: 999px; background: rgba(255,255,255,0.18); border: 1.5px solid rgba(255,255,255,0.9); color: #fff; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; flex-shrink: 0; white-space: nowrap; transition: background 0.15s ease; }
+  .refresh-btn:hover { background: rgba(255,255,255,0.32); }
+  .refresh-btn:active { transform: scale(0.97); }
+  .refresh-btn.armed { background: #fff; color: var(--secondary); }
+  .refresh-btn.spin .ico { animation: masar-spin 0.8s linear infinite; }
+  @keyframes masar-spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <img src="asset-82d7b1e2.png" alt="ALAKER SWEETS" class="brand-logo">
+  <div class="brand-meta">
+    <span class="system-name">MASAR</span>
+    <span class="role-name" data-i18n="roleName"></span>
+  </div>
+  <div class="topbar-spacer"></div>
+  <button class="icon-btn" id="hubBackBtn" title="القائمة الرئيسية"><span style="display:inline-block; transform: scaleX(-1);">↩</span></button>
+  <button class="icon-btn" id="topBackBtn" title="↩">↩</button>
+  <button class="refresh-btn" id="refreshBtn" type="button" title="تحديث / Refresh"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span class="rf-label">تحديث</span></button>
+  <button class="icon-btn" id="langToggle" title="AR / EN">AR</button>
+  <div class="user-menu">
+    <button class="icon-btn" id="userMenuBtn">⋮</button>
+    <div class="user-dropdown" id="userDropdown">
+      <button data-i18n="changePassword" data-toast="notReady"></button>
+      <button id="logoutBtn" data-i18n="logout"></button>
+    </div>
+  </div>
+</header>
+
+<main id="mainArea"></main>
+
+<div class="toast" id="toast"></div>
+<div id="globalBusyOverlay"></div>
+
+<script>
+  const APP_BASE_URL = MASAR_TPL.appBaseUrl;
+  var TIMEOUT_SCALE = MASAR_TPL.timeoutScale; // مضاعِف مُهَل الانتظار: ١ في الإنتاج، أكبر في DIV (مشروع بارد/شبكة اختبار)
+  // ===== شبكة الاتصال (١٠ أكتوبر ٢٠٢٦) =====
+  // مولَّد من tools/net_snippet.js بواسطة tools/build_client_snippets.js -- لا تعدّله يدويًا داخل الصفحات.
+  // (١) يتتبّع نداءات الحفظ (أي نداء لا يبدأ بـ get/list) ليعرف التحديث التلقائي أن الصفحة حفظت بنفسها.
+  // (٢) بلاغ "تعذّر تنفيذ العملية" المتكرر: بطء بدء Google (أو انقطاع لحظي) كان يُسقط النداء. للقراءات الصرفة فقط (قائمة مولَّدة آليًا من الخادم: دوال لا تكتب هي
+  // ولا ما تستدعيه) تُعاد المحاولة مرة واحدة عند الفشل/الردّ الفارغ، ويُرسَل نداء ثانٍ موازٍ إن تأخّر الأول ٦ ثوانٍ؛ يُسلَّم أول ردّ صالح. الحفظ والإنشاء لا يُكرَّران أبدًا.
+  const MASAR_RAW_RUN_ = (typeof google !== 'undefined' && google.script) ? google.script.run : null;
+  const MASAR_AR_INSTANCES_ = [];
+  const MASAR_PURE_READS_ = { getActiveDriversList:1,getActiveShipments:1,getActiveStoresWithOccupancy:1,getAllDepartments:1,getAllLists:1,getAllProducts:1,getAllRoles:1,getAllSettings:1,getAllStores:1,getAllUsers:1,getChangeTokens:1,getDepartmentStoreOrders:1,getDisposalFormData:1,getDistributionComparisonDetail:1,getDistributionManagerCancelEditRequests:1,getDistributionsReadyToPrepare:1,getFinishedGoodsQuarantineHistory:1,getFinishedGoodsStockBoard:1,getIssueToDepartmentFormData:1,getManagementReports:1,getMyNotifications:1,getMyShipments:1,getMySupplyRequests:1,getOffCatalogPurchaseRequests:1,getOrderDetails:1,getOrderEditStage:1,getOrderProductionApprovalDetail:1,getOrdersAwaitingInvoice:1,getOrdersAwaitingProductionApproval:1,getOrdersReadyForShipment:1,getOrdersReadyToReceive:1,getPendingLoadDiscrepancies:1,getPendingReturnItems:1,getPendingSupplyRequestsForRMS:1,getProductionManagerApprovals:1,getProductionManagerOrderFullDetail:1,getProductionManagerOrdersOverview:1,getPurchasingRawMaterialReports:1,getRawMaterialCatalog:1,getRawMaterialCatalogForRequest:1,getRawMaterialExpiryReport:1,getRawMaterialMovementSummary:1,getRawMaterialProductHistory:1,getRawMaterialQuarantineHistory:1,getRawMaterialShortageNotices:1,getRawMaterialStockBoard:1,getReceiveSurplusFormData:1,getReceivingDetails:1,getReferenceLists:1,getReturnReasons:1,getRolePermissionsMatrix:1,getShipmentPrepareDetail:1,getShortageReasons:1,getStoreDirectRawMaterialOrders:1,getStoreOrderDetail:1,getSuppliers:1,getSuppliersList:1,getTasksCatalog:1,getUnitsAndFamiliesList:1,getVehicleCoordinatorDriverStatus:1,getVehicleCoordinatorSpecialOrders:1,listOrders:1 };
+  (function masarTrackOwnCalls() {
+    try {
+      if (!MASAR_RAW_RUN_) return;
+      Object.defineProperty(google.script, 'run', {
+        configurable: true,
+        get() {
+          const handlers = { onSuccess: null, onFailure: null };
+          let proxy;
+          const chain = {
+            withSuccessHandler(fn) { handlers.onSuccess = fn; return proxy; },
+            withFailureHandler(fn) { handlers.onFailure = fn; return proxy; }
+          };
+          proxy = new Proxy(chain, {
+            get(target, prop) {
+              if (prop === 'withSuccessHandler' || prop === 'withFailureHandler') return target[prop];
+              return (...args) => {
+                // لقطة المعالجات لحظة النداء: غلاف حاجز الانشغال في الصفحات يمسك مرجعًا واحدًا من run فتتشارك النداءات المتزامنة كائن handlers، فلو قُرئ
+                // وقت الرد لاستلم كل رد معالج آخر نداء (بلاغ: "تعذّر فتح إنشاء رحلة" -- نداءا السائقين والجاهزة كانا يتبادلان معالجيهما)
+                const onS = handlers.onSuccess, onF = handlers.onFailure;
+                const name = String(prop);
+                if (Object.prototype.hasOwnProperty.call(MASAR_PURE_READS_, name)) {
+                  let settled = false, attempts = 0, pending = 0, hedge = null;
+                  const finish = (ok, v) => { if (settled) return; settled = true; clearTimeout(hedge); if (ok) { if (onS) onS(v); } else if (onF) onF(v); else { try { console.error(v); } catch (e) { /* تجاهل */ } } };
+                  const launch = () => {
+                    attempts++; pending++;
+                    const bad = v => {
+                      pending--;
+                      if (settled) return;
+                      if (attempts < 2) { setTimeout(launch, 700); return; }   // محاولة ثانية واحدة فقط
+                      if (pending === 0) finish(false, v);                       // الأخيرة فشلت ولا نداء آخر في الطريق
+                    };
+                    MASAR_RAW_RUN_
+                      .withSuccessHandler(r => { if (r === null || r === undefined) { bad(r); } else { pending--; finish(true, r); } })
+                      .withFailureHandler(e => bad(e))
+                      [name](...args);
+                  };
+                  hedge = setTimeout(() => { if (!settled && attempts < 2) launch(); }, 6000);
+                  launch();
+                  return;
+                }
+                const done = () => { if (!/^(get|list)/.test(name)) MASAR_AR_INSTANCES_.forEach(i => { try { i.ownDone(); } catch (e) { /* لا يعطّل النداء */ } }); };
+                return MASAR_RAW_RUN_
+                  .withSuccessHandler((...r) => { done(); if (onS) onS(...r); })
+                  .withFailureHandler((...r) => { done(); if (onF) onF(...r); else { try { console.error(r[0]); } catch (e) { /* تجاهل */ } } })
+                  [prop](...args);
+              };
+            }
+          });
+          return proxy;
+        }
+      });
+    } catch (e) { /* لا تتبّع: يبقى السلوك القديم كما هو */ }
+  })();
+  // يستعمله التحديث التلقائي الصامت: نفس طبقة الاتصال (إعادة المحاولة) لكن بلا غلاف حاجز الانشغال الذي تُركّبه الصفحة لاحقًا فوقها
+  let MASAR_NET_GETTER_ = null;
+  try { MASAR_NET_GETTER_ = Object.getOwnPropertyDescriptor(google.script, 'run').get || null; } catch (e) { MASAR_NET_GETTER_ = null; }
+  // ===== نهاية شبكة الاتصال =====
+  // ===== تحديث تلقائي بالتغيّر (٩ أكتوبر ٢٠٢٦، نُقّح ١٠ أكتوبر) =====
+  // كل ٣٠ ثانية تسأل الصفحة (نداء خفيف بلا قراءة جداول) هل تغيّر شيء في مجالاتها؛ إن تغيّر تُعيد جلب بياناتها مرة واحدة. تتوقف والتبويب مخفيّ، وتستأنف عند
+  // العودة. إن كان المستخدم يكتب أو توجد نافذة مفتوحة أو حقل معدَّل لا تُبدَّل الشاشة تحت يده: يظهر شريط "توجد تحديثات" ينقر عليه حين يشاء.
+  // النداء الخفيف يمرّ عبر مرجع google.script.run الأصلي (قبل غلاف حاجز الانشغال) فلا يحجب الشاشة، ولا يمدّ الجلسة.
+  // تنقيح (بلاغ ميداني: "ساعة رملية كل برهة" و"الشاشة تُعاد بعد كل حفظ"): (١) التحديث التلقائي صامت: لا حاجز انشغال ولا ومضة "جارٍ التحميل"،
+  // ويحفظ موضع التمرير؛ (٢) ما تحفظه هذه الصفحة نفسها (أي نداء لا يبدأ بـ get) لا يُحدِّثها هي: تُعاد قراءة الرمز بعده فيصير خط الأساس الجديد؛ (٣) شارة
+  // صغيرة أسفل الشاشة تُظهر وقت آخر فحص وتومض عند التحديث، ولون أحمر إن تعذّر الفحص.
+  // ينفّذ إعادة جلب بيانات الصفحة بصمت: بلا حاجز انشغال (النداءات داخلها تمرّ بالمرجع الأصلي)، بلا ومضة "جارٍ التحميل"، وبحفظ موضع التمرير
+  function masarRunSilently(fn) {
+    let desc = null, area = null, proto = null;
+    try { desc = Object.getOwnPropertyDescriptor(google.script, 'run'); Object.defineProperty(google.script, 'run', { configurable: true, get() { return MASAR_NET_GETTER_ ? MASAR_NET_GETTER_() : MASAR_RAW_RUN_; } }); } catch (e) { desc = null; }
+    try {
+      area = document.getElementById('mainArea');
+      if (area && typeof Element !== 'undefined') {
+        proto = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
+        Object.defineProperty(area, 'innerHTML', {
+          configurable: true,
+          get() { return proto.get.call(area); },
+          set(v) { const s = String(v); if (/empty-state/.test(s) && !/order-card|<table|<button/.test(s)) return; proto.set.call(area, v); }
+        });
+      }
+    } catch (e) { proto = null; }
+    let keep = null;
+    try {
+      if (area && typeof window !== 'undefined' && typeof MutationObserver !== 'undefined') {
+        const scrollers = [document.scrollingElement, area.parentElement].filter(Boolean).map(el => ({ el: el, top: el.scrollTop }));
+        let moved = false;
+        const mark = () => { moved = true; };
+        ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(ev => window.addEventListener(ev, mark, true));
+        const mo = new MutationObserver(() => { if (!moved) requestAnimationFrame(() => scrollers.forEach(s => { if (s.top > 0 && Math.abs(s.el.scrollTop - s.top) > 4) s.el.scrollTop = s.top; })); });
+        mo.observe(area, { childList: true });
+        keep = () => { try { mo.disconnect(); ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(ev => window.removeEventListener(ev, mark, true)); } catch (e) { /* تجاهل */ } };
+        setTimeout(keep, 9000);
+      }
+    } catch (e) { keep = null; }
+    try { fn(); }
+    finally {
+      if (desc) { try { Object.defineProperty(google.script, 'run', desc); } catch (e) { /* تجاهل */ } }
+      if (proto && area) { try { delete area.innerHTML; } catch (e) { /* تجاهل */ } }
+    }
+  }
+  function masarAutoRefresh(opts) {
+    if (!MASAR_RAW_RUN_ || !opts || typeof opts.refresh !== 'function') return null;
+    const domains = opts.domains || [];
+    const interval = (opts.intervalMs || 30000) + Math.floor(Math.random() * 4000); // تشتيت بسيط كي لا تتزامن شاشات كثيرة
+    let baseline = null, inflight = false, inflightSince = 0, stopped = false, banner = null, pill = null, ownDoneAt = 0, rebaseWanted = false, changes = 0;
+    const uid = () => (typeof CURRENT_USER_ID !== 'undefined' ? CURRENT_USER_ID : (typeof Core !== 'undefined' ? Core.currentUserId : ''));
+    const isAr = () => (document.documentElement.lang || 'ar') !== 'en';
+    function setPill(text, bad) {
+      try {
+        if (!pill) {
+          pill = document.createElement('div');
+          pill.style.cssText = 'position:fixed;right:8px;bottom:6px;z-index:2147482000;font:600 10px sans-serif;color:#fff;padding:2px 8px;border-radius:999px;pointer-events:none;opacity:0.85;';
+          document.body.appendChild(pill);
+        }
+        pill.style.background = bad ? 'rgba(176,42,42,0.9)' : 'rgba(61,43,30,0.55)';
+        pill.textContent = text;
+      } catch (e) { /* الشارة تكميلية */ }
+    }
+    function clock() { try { return new Date().toTimeString().slice(0, 8); } catch (e) { return ''; } }
+    function busy() {
+      try {
+        if (opts.isBusy && opts.isBusy()) return true;
+        const a = document.activeElement;
+        if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && !/^(button|checkbox|radio|submit)$/.test(a.type || '')) return true;
+        if (document.querySelector('.header-modal-overlay.open, [class*="overlay"].open, [class*="modal"].open')) return true;
+        const fields = document.querySelectorAll('main input, main textarea, main select, #mainArea input, #mainArea textarea, #mainArea select');
+        for (let i = 0; i < fields.length; i++) {
+          const f = fields[i];
+          if (f.type === 'checkbox' || f.type === 'radio') { if (f.checked !== f.defaultChecked) return true; }
+          else if (f.type !== 'hidden' && f.type !== 'button' && f.tagName !== 'SELECT' && f.value !== f.defaultValue) return true;
+        }
+      } catch (e) { /* عند الشك نعتبر الشاشة غير مشغولة */ }
+      return false;
+    }
+    function hideBanner() { if (banner) { banner.style.display = 'none'; } }
+    function showBanner() {
+      if (!banner) {
+        banner = document.createElement('button');
+        banner.type = 'button';
+        banner.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:76px;z-index:2147483000;border:none;border-radius:999px;padding:10px 18px;background:#3D2B1E;color:#fff;font:700 13px sans-serif;box-shadow:0 6px 20px rgba(0,0,0,0.3);cursor:pointer;';
+        banner.addEventListener('click', () => doRefresh());
+        document.body.appendChild(banner);
+      }
+      banner.textContent = isAr() ? '🔄 توجد تحديثات جديدة — اضغط للتحديث' : '🔄 New updates — tap to refresh';
+      banner.style.display = 'block';
+    }
+    function doRefresh() {
+      hideBanner();
+      setPill((isAr() ? '✅ تحديث ' : '✅ Updated ') + clock(), false);
+      try { masarRunSilently(opts.refresh); } catch (e) { /* لا يعطّل الصفحة */ }
+    }
+    function handle(r, startedAt) {
+      if (!r || !r.success) {
+        if (r && r.error && r.error.code === 'SESSION_EXPIRED') stopped = true;
+        setPill('⚠ ' + ((r && r.error && r.error.code) || (isAr() ? 'تعذّر الفحص' : 'check failed')), true);
+        return;
+      }
+      setPill((isAr() ? '🔄 آخر فحص ' : '🔄 Checked ') + clock() + (changes ? (isAr() ? ' · تغيّرات ' : ' · changes ') + changes : ''), false);
+      const sig = JSON.stringify(domains.map(d => r.data.tokens[d] || ''));
+      if (rebaseWanted) {
+        // هذه الصفحة حفظت شيئًا بنفسها: الرمز بعد حفظها هو خط الأساس الجديد (لا تُحدَّث هي بما كتبته). ردٌّ بدأ قبل انتهاء حفظها قديم: نعيد السؤال
+        if (startedAt >= ownDoneAt) { rebaseWanted = false; baseline = sig; } else { setTimeout(tick, 300); }
+        return;
+      }
+      if (baseline === null) { baseline = sig; return; }
+      if (sig === baseline) return;
+      baseline = sig; changes++;
+      if (busy()) { showBanner(); return; }
+      doRefresh();
+      // الكتابة قد لا تكون ظهرت للقراءة بعد لحظة الرمز: إن كان التغيّر حديثًا (<٨ ثوانٍ) نُعيد الجلب مرة ثانية بعد استقراره
+      const newest = Math.max.apply(null, domains.map(d => parseFloat(r.data.tokens[d]) || 0));
+      const age = (r.data.serverTime || Date.now()) - newest;
+      if (age < 8000) setTimeout(() => { if (!document.hidden && !busy()) doRefresh(); }, 8500 - Math.max(0, age));
+    }
+    function tick() {
+      if (stopped || document.hidden) return;
+      // نداء ضاع بلا ردّ (شبكة بطيئة/تبويب مجمَّد) كان يُبقي inflight=true فيتوقف التحديث للأبد: بعد ٢٥ ثانية نعدّه مفقودًا ونسأل من جديد
+      if (inflight && Date.now() - inflightSince < 25000) return;
+      inflight = true;
+      const startedAt = Date.now();
+      inflightSince = startedAt;
+      MASAR_RAW_RUN_.withSuccessHandler(r => { inflight = false; handle(r, startedAt); }).withFailureHandler(() => { inflight = false; setPill(isAr() ? '⚠ تعذّر الفحص' : '⚠ check failed', true); }).getChangeTokens(uid(), domains);
+    }
+    function ownDone() { ownDoneAt = Date.now(); rebaseWanted = true; hideBanner(); setTimeout(tick, 500); }
+    MASAR_AR_INSTANCES_.push({ ownDone: ownDone });
+    setInterval(tick, interval);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) { rebaseWanted = false; setTimeout(tick, 400); } });
+    setTimeout(tick, 1500); // يلتقط خط الأساس مبكرًا
+    return { tick: tick };
+  }
+  // تسجيل الخروج (٨ أكتوبر ٢٠٢٦، بلاغ مستخدم: "لا يأخذني دائمًا لشاشة الدخول حتى أضغط زرًا في الصفحة التي بقيت مفتوحة"): المتصفحات (خصوصًا
+  // الهاتف) تحجب التنقّل غير المرتبط بلمسة مباشرة، فكانت الصفحة تبقى ظاهرة بزر "اضغط للمتابعة" مخبّأ داخل قائمة مغلقة. الآن أول ما يُستدعى
+  // logout يُغطّى المحتوى بحاجز كامل الشاشة "تم تسجيل الخروج" بزر كبير ظاهر، مع محاولة تلقائية للانتقال حيث يسمح المتصفح.
+  function masarLogoutMarker() {
+    try {
+      if (document.getElementById('masarLoggedOutOverlay')) return null;
+      var ar = (document.documentElement.lang || 'ar') !== 'en';
+      var o = document.createElement('div');
+      o.id = 'masarLoggedOutOverlay';
+      o.dir = ar ? 'rtl' : 'ltr';
+      o.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:2147483646;background:#3D2B1E;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font:600 19px/1.6 sans-serif;text-align:center;padding:24px;';
+      o.innerHTML = '<div style="font-size:48px">\uD83D\uDD12</div><div>' + (ar ? 'تم تسجيل الخروج' : 'You have been logged out') + '</div>' +
+        '<button type="button" style="border:none;background:#EE7126;color:#fff;font:700 17px sans-serif;padding:15px 34px;border-radius:999px;cursor:pointer;">' + (ar ? 'العودة إلى شاشة الدخول' : 'Back to login') + '</button>';
+      document.body.appendChild(o);
+      var go = function () { try { window.top.location.href = APP_BASE_URL; } catch (e) { window.location.href = APP_BASE_URL; } };
+      o.getElementsByTagName('button')[0].addEventListener('click', go);
+      setTimeout(go, 700);
+    } catch (e) { /* عرض فقط */ }
+    return null;
+  }
+  const CURRENT_USER_ID = MASAR_TPL.currentUserId;
+  document.addEventListener('DOMContentLoaded', () => {
+    const hb = document.getElementById('hubBackBtn');
+    if (hb) hb.addEventListener('click', () => { window.top.location.href = APP_BASE_URL + '?page=distribution_hub&uid=' + encodeURIComponent(CURRENT_USER_ID); });
+  });
+  // DRIVERS/READY_ORDERS أُزيلا -- انتقل منطق إنشاء الرحلة كاملًا لـ distribution_prepare_shipment.html
+  let TRIPS = []; // {shipmentId, driver, status, stops: [{shipmentOrderId, orderId, store, itemCount, delivered}]}
+  let DISCREPANCIES = []; // {approvalId, orderId, storeName, driverName, itemName, unitId, expectedQty, actualQty, note}
+
+  function onceWithTimeout(fn, timeoutMs) {
+    let fired = false;
+    const timer = setTimeout(() => { if (!fired) { fired = true; forceHideBusyOverlay(); fn(); } }, timeoutMs * (typeof TIMEOUT_SCALE === 'number' ? TIMEOUT_SCALE : 1));
+    return (...args) => { if (fired) return; fired = true; clearTimeout(timer); fn(...args); };
+  }
+
+  const highlightOrderId = MASAR_TPL.currentOrderId || null;
+
+  function loadInitialData() {
+    document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="margin-top:16px;">${t('loadingText')}</div>`;
+    // SPEC v1.4 (طلب مباشر: نقل إنشاء الرحلة إلى "تجهيز شحنة") -- هذه
+    // الشاشة الآن عرض خالص للرحلات النشطة فعليًّا (سُلِّمت للسائق)، لا
+    // حاجة لبيانات السائقين أو الطلبيات الجاهزة للشحن هنا بعد الآن.
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(result => {
+        if (!result || !result.success) {
+          document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="margin-top:16px; color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} — ${JSON.stringify(result)}</div>`;
+          return;
+        }
+        TRIPS = result.data.shipments.map(s => ({
+          tripId: s.shipmentId, driver: state.lang === 'ar' ? s.driverNameAR : s.driverNameEN, status: s.status,
+          stops: s.stops.map(st => ({ shipmentOrderId: st.shipmentOrderId, orderId: st.orderId, store: state.lang === 'ar' ? st.storeNameAR : st.storeNameEN, itemCount: st.itemCount, delivered: st.delivered }))
+        }));
+        loadDiscrepancies();
+      }, 8000))
+      .withFailureHandler(() => {
+        document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="margin-top:16px; color:var(--warn);">${t('loadErrorText')}</div>`;
+      })
+      .getActiveShipments(CURRENT_USER_ID);
+  }
+
+  // "الحمولة لا تطابق النظري": بلاغات فرق الكمية المعلَّقة من السائقين، بانتظار قرار مسؤول التوزيع (SPEC v1.4، ٢٢ سبتمبر ٢٠٢٦)
+  function loadDiscrepancies() {
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(result => {
+        DISCREPANCIES = (result && result.success) ? result.data.items.map(it => ({
+          approvalId: it.approvalId, orderId: it.orderId,
+          store: state.lang === 'ar' ? it.storeNameAR : it.storeNameEN,
+          driver: state.lang === 'ar' ? it.driverNameAR : it.driverNameEN,
+          item: state.lang === 'ar' ? it.nameAR : it.nameEN, unitId: it.unitId,
+          expectedQty: it.expectedQty, actualQty: it.actualQty, note: it.note
+        })) : [];
+        renderList();
+      }, 20000))
+      .withFailureHandler(() => { DISCREPANCIES = []; renderList(); })
+      .getPendingLoadDiscrepancies(CURRENT_USER_ID);
+  }
+
+  const dict = {
+    ar: {
+      roleName: 'مسؤول التوزيع',
+      changePassword: '🔑 تغيير كلمة المرور', logout: '↩ تسجيل الخروج',
+      screenTitle: 'الرحلات', dateLine: '',
+      redirectBanner: 'هذه الطلبية ضمن رحلة قيد التحميل — أزلها من هنا أولًا قبل الإلغاء',
+      activeTripsSection: 'الرحلات النشطة', addTripBtn: '+ إنشاء رحلة جديدة',
+      statusPreparing: 'قيد التجهيز', statusLoaded: 'قيد التحميل',
+      emptyTrips: 'لا توجد رحلات نشطة حاليًا',
+      itemsCount: (n) => `${n} صنف`, loadingText: 'جارٍ التحميل...', loadErrorText: 'تعذّر تنفيذ العملية — أعد المحاولة',
+      toastNotReady: 'هذه الميزة ستُبنى في خطوة قادمة', savingText: 'جارٍ الحفظ...', continueBtn: 'اضغط هنا للمتابعة',
+      chooseDriverTitle: 'اختيار السائق والطلبيات',
+      driverLabel: 'السائق', ordersLabel: 'الطلبيات الجاهزة للشحن',
+      nextBtn: 'التالي: ترتيب التوقفات', cancelBtn: 'إلغاء',
+      sequenceTitle: 'ترتيب التوقفات', dragHint: 'اسحب وأفلت لإعادة الترتيب',
+      createBtn: 'إنشاء الرحلة',
+      toastCreated: (driver) => `أُنشئت الرحلة بنجاح لـ${driver}`,
+      toastStopRemoved: (store) => `أُزيلت طلبية ${store} من الرحلة`,
+      toastNeedSelection: 'اختر سائقًا وطلبية واحدة على الأقل',
+      emptyReady: 'لا توجد طلبيات جاهزة للشحن حاليًا',
+      discrepanciesSection: '⚠️ فروقات كمية بانتظار قرارك', discrepancyExpectedLbl: 'النظري', discrepancyActualLbl: 'أبلغ السائق',
+      discrepancyApproveBtn: '✅ اعتماد', discrepancyRejectBtn: '✕ رفض',
+      toastDiscrepancyApproved: (store) => `اعتُمدت الكمية لطلبية ${store}`, toastDiscrepancyRejected: (store) => `رُفض بلاغ طلبية ${store}`
+    },
+    en: {
+      roleName: 'Distribution manager',
+      changePassword: '🔑 Change password', logout: '↩ Log out',
+      screenTitle: 'Trips', dateLine: '',
+      redirectBanner: "This order is part of a trip being loaded — remove it from here first before cancelling",
+      activeTripsSection: 'Active trips', addTripBtn: '+ Create new trip',
+      statusPreparing: 'Preparing', statusLoaded: 'Loading',
+      emptyTrips: 'No active trips right now',
+      itemsCount: (n) => `${n} item${n === 1 ? '' : 's'}`, loadingText: 'Loading...', loadErrorText: 'Could not complete the operation — please try again',
+      toastNotReady: 'This feature is coming up next', savingText: 'Saving...', continueBtn: 'Tap here to continue',
+      chooseDriverTitle: 'Choose driver & orders',
+      driverLabel: 'Driver', ordersLabel: 'Orders ready for shipment',
+      nextBtn: 'Next: order the stops', cancelBtn: 'Cancel',
+      sequenceTitle: 'Order the stops', dragHint: 'Drag and drop to reorder',
+      createBtn: 'Create trip',
+      toastCreated: (driver) => `Trip created successfully for ${driver}`,
+      toastStopRemoved: (store) => `${store}'s order removed from the trip`,
+      toastNeedSelection: 'Choose a driver and at least one order',
+      emptyReady: 'No orders ready for shipment right now',
+      discrepanciesSection: '⚠️ Quantity discrepancies awaiting your decision', discrepancyExpectedLbl: 'Theoretical', discrepancyActualLbl: 'Driver reported',
+      discrepancyApproveBtn: '✅ Approve', discrepancyRejectBtn: '✕ Reject',
+      toastDiscrepancyApproved: (store) => `Quantity approved for ${store}'s order`, toastDiscrepancyRejected: (store) => `Report rejected for ${store}'s order`
+    }
+  };
+
+  const state = { lang: (MASAR_TPL.userLang === 'en' ? 'en' : 'ar') };
+  // لغة المستخدم المحفوظة على الخادم (Users.Language) -- طلب مباشر ٢٥ سبتمبر ٢٠٢٦: تُفتح بها كل الشاشات وتبقى عند التنقّل
+  (function () {
+    if (state.lang === 'en') { document.documentElement.lang = 'en'; document.documentElement.dir = 'ltr'; }
+    const langBtn = document.getElementById('langToggle');
+    if (!langBtn) return;
+    langBtn.textContent = state.lang === 'ar' ? 'EN' : 'AR';
+    langBtn.addEventListener('click', () => setTimeout(() => {
+      try { if (MASAR_TPL.currentUserId) google.script.run.withFailureHandler(() => {}).setUserLanguage(MASAR_TPL.currentUserId, state.lang); } catch (e) { /* لا يعطّل الشاشة */ }
+    }, 0));
+  })();
+  // ---- زر التحيين (طلب مباشر ٢٦ سبتمبر ٢٠٢٦): تحديث ناعم إن وُجد مُحمِّل للصفحة، وإلا إعادة تحميل الصفحة بنفس رابطها ----
+  (function () {
+    const btn = document.getElementById('refreshBtn');
+    if (!btn) return;
+    const CONFIRM = false;
+    const label = btn.querySelector('.rf-label');
+    const idleText = () => (state.lang === 'ar' ? 'تحديث' : 'Refresh');
+    const sureText = () => (state.lang === 'ar' ? 'اضغط للتأكيد' : 'Tap to confirm');
+    const setIdle = () => { btn.classList.remove('armed'); if (label) label.textContent = idleText(); };
+    setIdle();
+    const lt = document.getElementById('langToggle');
+    if (lt) lt.addEventListener('click', () => setTimeout(setIdle, 0));
+    let armed = false, timer = null;
+    const hardReload = () => {
+      try { window.top.location.href = APP_BASE_URL + '?' + MASAR_TPL.reloadQuery; } catch (e) { window.location.reload(); }
+    };
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      if (CONFIRM && !armed) {
+        armed = true; btn.classList.add('armed'); if (label) label.textContent = sureText();
+        clearTimeout(timer); timer = setTimeout(() => { armed = false; setIdle(); }, 2800);
+        return;
+      }
+      clearTimeout(timer); armed = false; setIdle();
+      const soft = () => loadInitialData();
+      if (soft) {
+        btn.classList.add('spin');
+        try { soft(); setTimeout(() => btn.classList.remove('spin'), 1200); return; } catch (e) { btn.classList.remove('spin'); }
+      }
+      hardReload();
+    });
+  })();
+  function t(key) { return (dict[state.lang] && dict[state.lang][key]) || key; }
+
+  function applyI18n(container) {
+    container.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (dict[state.lang][key] !== undefined) el.textContent = dict[state.lang][key];
+    });
+  }
+
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => el.classList.remove('show'), 2600);
+  }
+
+  function renderList() {
+    state.view = 'LIST';
+    const now = new Date();
+    const locale = state.lang === 'ar' ? 'ar-QA-u-nu-latn' : 'en-US';
+    const fmt = new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+    const redirectHtml = highlightOrderId ? `<div class="redirect-banner">🚚 ${t('redirectBanner')}</div>` : '';
+
+    const discrepanciesHtml = DISCREPANCIES.length ? `
+      <div class="section-title">${t('discrepanciesSection')} (${DISCREPANCIES.length})</div>
+      <div id="discrepanciesList">${DISCREPANCIES.map(d => `
+        <div class="card discrepancy-card" data-approval="${d.approvalId}">
+          <div class="discrepancy-top">
+            <span class="discrepancy-store">${d.store}</span>
+            <span class="discrepancy-order-tag">${d.orderId}</span>
+            <span class="discrepancy-driver">🚗 ${d.driver}</span>
+          </div>
+          <div class="discrepancy-item">${d.item}</div>
+          <div class="discrepancy-qty-compare">
+            <span class="expected">${t('discrepancyExpectedLbl')}: ${d.expectedQty}</span> →
+            <span class="actual">${t('discrepancyActualLbl')}: ${d.actualQty}</span> ${d.unitId}
+          </div>
+          ${d.note ? `<div class="discrepancy-note">📝 ${d.note}</div>` : ''}
+          <div class="discrepancy-decide-row">
+            <input type="number" class="disc-final-qty" min="0" step="0.5" value="${d.actualQty}">
+            <span class="item-unit">${d.unitId}</span>
+            <button class="discrepancy-approve-btn" type="button" data-disc-approve="${d.approvalId}" data-disc-store="${d.store}">${t('discrepancyApproveBtn')}</button>
+            <button class="discrepancy-reject-btn" type="button" data-disc-reject="${d.approvalId}" data-disc-store="${d.store}">${t('discrepancyRejectBtn')}</button>
+          </div>
+        </div>`).join('')}</div>` : '';
+
+    document.getElementById('mainArea').innerHTML = `
+      <div class="greeting-card">
+        <h1 data-i18n="screenTitle"></h1>
+        <div class="date-line">${fmt.format(now)}</div>
+      </div>
+      ${redirectHtml}
+      ${discrepanciesHtml}
+      <div class="section-title" data-i18n="activeTripsSection"></div>
+      <div id="tripsList"></div>
+    `;
+    applyI18n(document.getElementById('mainArea'));
+    wireDiscrepancyActions();
+
+    const list = document.getElementById('tripsList');
+    if (!TRIPS.length) { list.innerHTML = `<div class="card empty-state">${t('emptyTrips')}</div>`; return; }
+
+    list.innerHTML = TRIPS.map(trip => `
+      <div class="card trip-card">
+        <div class="trip-top">
+          <span class="trip-driver">🚗 ${trip.driver}</span>
+          <span class="trip-status ${trip.status.toLowerCase()}">${trip.status === 'LOADED' ? t('statusLoaded') : t('statusPreparing')}</span>
+          <span class="trip-spacer"></span>
+          <span class="trip-id">${trip.tripId}</span>
+        </div>
+        ${trip.stops.map((stop, idx) => `
+          <div class="stop-row ${stop.orderId === highlightOrderId ? 'highlighted' : ''}" data-trip="${trip.tripId}" data-stop="${stop.orderId}">
+            <div class="stop-num">${idx + 1}</div>
+            <div class="stop-main">
+              <div class="stop-store">${stop.store} <span style="font-family:var(--font-mono); font-size:10.5px; color:var(--ink-soft);">${stop.orderId}</span></div>
+                <div class="stop-items">${t('itemsCount')(stop.itemCount)}</div>
+            </div>
+            ${!stop.delivered ? `<button class="stop-remove-btn" data-remove-shipment-order="${stop.shipmentOrderId}" data-remove-store="${stop.store}">✕</button>` : ''}
+          </div>`).join('')}
+      </div>`).join('');
+
+    list.querySelectorAll('[data-remove-shipment-order]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const shipmentOrderId = btn.getAttribute('data-remove-shipment-order');
+        const storeName = btn.getAttribute('data-remove-store');
+        btn.disabled = true;
+        google.script.run
+          .withSuccessHandler(onceWithTimeout(result => {
+            if (result && !result.success) { btn.disabled = false; showToast(t('loadErrorText')); return; }
+            showToast(t('toastStopRemoved')(storeName));
+            const wasHighlighted = highlightOrderId && btn.closest('.stop-row').getAttribute('data-stop') === highlightOrderId;
+            if (wasHighlighted) { window.top.location.href = APP_BASE_URL + '?page=distribution_shipments&uid=' + encodeURIComponent(CURRENT_USER_ID); return; }
+            loadInitialData();
+          }, 8000))
+          .withFailureHandler(() => { btn.disabled = false; showToast(t('loadErrorText')); })
+          .removeOrderFromShipment(CURRENT_USER_ID, shipmentOrderId);
+      });
+    });
+  }
+
+  /**
+   * وضبط بلاغ فرق كمية (SPEC v1.4، ٢٢ سبتمبر ٢٠٢٦): خانة الكمية تبدأ بما أبلغه السائق -- تركها كما هي عند
+   * "اعتماد" ترسل APPROVED، وتعديلها ترسل MODIFIED بالقيمة الجديدة. "رفض" لا يحتاج الخانة إطلاقًا.
+   */
+  function wireDiscrepancyActions() {
+    document.querySelectorAll('[data-disc-approve]').forEach(btn => {
+      let armed = false, timer = null;
+      const original = btn.textContent;
+      btn.addEventListener('click', () => {
+        if (btn.disabled) return;
+        if (!armed) {
+          armed = true;
+          btn.classList.add('confirm-armed');
+          btn.textContent = '👆 ' + t('continueBtn');
+          timer = setTimeout(() => { armed = false; btn.classList.remove('confirm-armed'); btn.textContent = original; }, 2800);
+          return;
+        }
+        clearTimeout(timer);
+        const approvalId = btn.getAttribute('data-disc-approve');
+        const storeName = btn.getAttribute('data-disc-store');
+        const card = btn.closest('.discrepancy-card');
+        const disc = DISCREPANCIES.find(d => d.approvalId === approvalId);
+        const input = card.querySelector('.disc-final-qty');
+        const parsed = parseFloat(input.value);
+        const finalQty = !isNaN(parsed) ? parsed : disc.actualQty;
+        const decision = finalQty === disc.actualQty ? 'APPROVED' : 'MODIFIED';
+        btn.disabled = true; card.querySelector('.discrepancy-reject-btn').disabled = true;
+        btn.textContent = t('savingText');
+        google.script.run
+          .withSuccessHandler(onceWithTimeout(result => {
+            if (!result || !result.success) {
+              btn.disabled = false; card.querySelector('.discrepancy-reject-btn').disabled = false;
+              btn.classList.remove('confirm-armed'); armed = false; btn.textContent = original;
+              showToast(failText(result)); return;
+            }
+            showToast(t('toastDiscrepancyApproved')(storeName));
+            // إعادة جلب كاملة (لا تحديث محلي فقط): الاعتماد قد يُقفل التوقف/الرحلة (حالة السائق تتغيَّر أيضًا)
+            loadInitialData();
+          }, 20000))
+          .withFailureHandler(() => {
+            btn.disabled = false; card.querySelector('.discrepancy-reject-btn').disabled = false;
+            btn.classList.remove('confirm-armed'); armed = false; btn.textContent = original;
+            showToast(t('loadErrorText'));
+          })
+          .decideLoadDiscrepancy(CURRENT_USER_ID, approvalId, decision, finalQty, '');
+      });
+    });
+    document.querySelectorAll('[data-disc-reject]').forEach(btn => {
+      let armed = false, timer = null;
+      const original = btn.textContent;
+      btn.addEventListener('click', () => {
+        if (btn.disabled) return;
+        if (!armed) {
+          armed = true;
+          btn.classList.add('confirm-armed');
+          btn.textContent = '👆 ' + t('continueBtn');
+          timer = setTimeout(() => { armed = false; btn.classList.remove('confirm-armed'); btn.textContent = original; }, 2800);
+          return;
+        }
+        clearTimeout(timer);
+        const approvalId = btn.getAttribute('data-disc-reject');
+        const storeName = btn.getAttribute('data-disc-store');
+        const card = btn.closest('.discrepancy-card');
+        btn.disabled = true; card.querySelector('.discrepancy-approve-btn').disabled = true;
+        btn.textContent = t('savingText');
+        google.script.run
+          .withSuccessHandler(onceWithTimeout(result => {
+            if (!result || !result.success) {
+              btn.disabled = false; card.querySelector('.discrepancy-approve-btn').disabled = false;
+              btn.classList.remove('confirm-armed'); armed = false; btn.textContent = original;
+              showToast(failText(result)); return;
+            }
+            showToast(t('toastDiscrepancyRejected')(storeName));
+            loadInitialData();
+          }, 20000))
+          .withFailureHandler(() => {
+            btn.disabled = false; card.querySelector('.discrepancy-approve-btn').disabled = false;
+            btn.classList.remove('confirm-armed'); armed = false; btn.textContent = original;
+            showToast(t('loadErrorText'));
+          })
+          .decideLoadDiscrepancy(CURRENT_USER_ID, approvalId, 'REJECTED', '', '');
+      });
+    });
+  }
+
+  function failText(result) {
+    const code = result && result.error && result.error.code ? result.error.code : '';
+    return t('loadErrorText') + (code ? ' (' + code + ')' : '');
+  }
+
+  // رجوع للمحور الرئيسي لمسؤول التوزيع (window.top: انظر KNOWN_ISSUES.md #2)
+  document.getElementById('topBackBtn').addEventListener('click', () => {
+    window.top.location.href = APP_BASE_URL + '?page=distribution_hub&uid=' + encodeURIComponent(CURRENT_USER_ID);
+  });
+  document.getElementById('langToggle').addEventListener('click', () => {
+    state.lang = state.lang === 'ar' ? 'en' : 'ar';
+    document.documentElement.lang = state.lang;
+    document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+    document.getElementById('langToggle').textContent = state.lang === 'ar' ? 'EN' : 'AR';
+    applyI18n(document.querySelector('header.topbar'));
+    renderList();
+  });
+  document.getElementById('userMenuBtn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('userDropdown').classList.toggle('open'); });
+  document.addEventListener('click', () => document.getElementById('userDropdown').classList.remove('open'));
+  document.querySelectorAll('[data-toast="notReady"]').forEach(el => {
+    el.addEventListener('click', (e) => { e.stopPropagation(); showToast(t('toastNotReady')); });
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    const btn = document.getElementById('logoutBtn');
+    if (btn.classList.contains('continue-armed')) { window.top.location.href = APP_BASE_URL; return; }
+    document.getElementById('userDropdown').classList.remove('open');
+    btn.disabled = true;
+    const originalContent = btn.textContent;
+    btn.textContent = t('savingText');
+    const finishLogout = onceWithTimeout(() => {
+      btn.disabled = false;
+      btn.classList.add('continue-armed');
+      btn.textContent = '👆 ' + t('continueBtn');
+    }, 8000);
+    google.script.run.withSuccessHandler(finishLogout).withFailureHandler(finishLogout).logout(CURRENT_USER_ID, masarLogoutMarker());
+  });
+
+  let forceHideOverlayFn = () => {};
+  function forceHideBusyOverlay() { forceHideOverlayFn(); }
+  function wrapGoogleScriptRunWithBusyOverlay() {
+    if (typeof google === 'undefined' || !google.script || !google.script.run) return;
+    const realRun = google.script.run;
+    const overlay = document.getElementById('globalBusyOverlay');
+    let busyCount = 0;
+    function showBusy() { busyCount++; overlay.classList.add('show'); }
+    function hideBusy() { busyCount = Math.max(0, busyCount - 1); if (busyCount === 0) overlay.classList.remove('show'); }
+    forceHideOverlayFn = () => { busyCount = 0; overlay.classList.remove('show'); };
+    Object.defineProperty(google.script, 'run', {
+      configurable: true,
+      get() {
+        const handlers = { onSuccess: null, onFailure: null };
+        let proxy;
+        const chain = {
+          withSuccessHandler(fn) { handlers.onSuccess = fn; return proxy; },
+          withFailureHandler(fn) { handlers.onFailure = fn; return proxy; }
+        };
+        proxy = new Proxy(chain, {
+          get(target, prop) {
+            if (prop === 'withSuccessHandler' || prop === 'withFailureHandler') return target[prop];
+            return (...args) => {
+              showBusy();
+              return realRun
+                .withSuccessHandler((...r) => { hideBusy(); if (handlers.onSuccess) handlers.onSuccess(...r); })
+                .withFailureHandler((...r) => { hideBusy(); if (handlers.onFailure) handlers.onFailure(...r); })
+                [prop](...args);
+            };
+          }
+        });
+        return proxy;
+      }
+    });
+  }
+
+  wrapGoogleScriptRunWithBusyOverlay();
+  applyI18n(document.querySelector('header.topbar'));
+  loadInitialData();
+  masarAutoRefresh({ domains: ['SHIPMENTS', 'ORDERS'], refresh: () => loadInitialData() });
+</script>
+
+</body>
+</html>

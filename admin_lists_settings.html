@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#3D2B1E">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="مسار">
+<link rel="apple-touch-icon" href="icon-180.png">
+<script src="masar-config.js?v=67ea158b"></script>
+<script src="masar-runtime.js?v=67ea158b"></script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALAKER SWEETS — القوائم والإعدادات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Markazi+Text:wght@600;700&family=Fraunces:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+
+:root {
+  /* SPEC v1.4 -- إعادة تصميم بصري مقصودة، نفس لوحة الكاشير تمامًا لاتساق
+     الهوية بين الأدمن والكاشير (انظر split_cashier.py للتفصيل الكامل). */
+  --primary: #C1791F; --primary-dark: #9C5F15; --primary-tint: #F5E4CC;
+  --secondary: #35231A; --ink: #2A1F17; --ink-soft: #71594A;
+  --bg: #FBF6EC; --surface: #FFFFFF; --line: #E8DDC8;
+  --success: #6B8F5C; --success-tint: #E9EEE3;
+  --warn: #B23B2E; --warn-tint: #F7E6E2;
+  --pending: #A8842A; --pending-tint: #F2E9D3;
+  --locked: #8A7A6B; --locked-tint: #ECE7E0;
+  --accent-rose: #C97B85; --accent-rose-tint: #F5E4E6;
+  --radius-lg: 16px; --radius-md: 12px; --radius-sm: 8px;
+  --shadow-card: 0 1px 2px rgba(43,33,27,0.06), 0 4px 16px rgba(43,33,27,0.05);
+  --font-ar: 'IBM Plex Sans Arabic', sans-serif; --font-en: 'IBM Plex Sans', sans-serif;
+  --font-display-ar: 'Markazi Text', serif; --font-display-en: 'Fraunces', serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { overflow-x: hidden; max-width: 100vw; }
+html[lang="ar"] body { font-family: var(--font-ar); }
+html[lang="en"] body { font-family: var(--font-en); }
+html[lang="ar"] .display { font-family: var(--font-display-ar); }
+html[lang="en"] .display { font-family: var(--font-display-en); }
+body {
+  background-color: var(--bg);
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 38px, rgba(61,43,30,0.035) 38px, rgba(61,43,30,0.035) 39px);
+  color: var(--ink); min-height: 100vh; -webkit-font-smoothing: antialiased; padding-bottom: 30px;
+}
+header.topbar {
+  display: flex; align-items: center; gap: 16px; background: var(--secondary); color: #fff;
+  padding: 10px 20px; position: sticky; top: 0; z-index: 30; box-shadow: 0 2px 10px rgba(0,0,0,0.15); max-width: 100%;
+}
+.brand-logo { height: 40px; width: auto; display: block; flex-shrink: 0; }
+.brand-meta { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; overflow: hidden; }
+.brand-meta .system-name { font-family: var(--font-display-en); font-size: 12px; letter-spacing: 0.02em; color: rgba(255,255,255,0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.brand-meta .role-name { font-size: 16px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html[lang="ar"] .brand-meta .role-name { font-family: var(--font-display-ar); }
+html[lang="en"] .brand-meta .role-name { font-family: var(--font-display-en); }
+.topbar-spacer { flex: 1; min-width: 8px; }
+.icon-btn {
+  display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #fff; cursor: pointer;
+  font-size: 14px; font-weight: 600; transition: background 0.15s ease; position: relative; flex-shrink: 0;
+}
+.icon-btn:hover { background: rgba(255,255,255,0.16); }
+.user-menu { position: relative; flex-shrink: 0; }
+.user-dropdown {
+  position: absolute; top: calc(100% + 8px); inset-inline-end: 0; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line); border-radius: var(--radius-md); box-shadow: var(--shadow-card);
+  min-width: 200px; padding: 6px; display: none; z-index: 40;
+}
+.user-dropdown.open { display: block; }
+.user-dropdown button {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: start; background: none; border: none;
+  padding: 10px 12px; border-radius: var(--radius-sm); font-size: 14px; font-family: inherit; color: var(--ink); cursor: pointer;
+}
+.user-dropdown button:hover { background: var(--bg); }
+@media (max-width: 420px) {
+  header.topbar { flex-wrap: wrap; row-gap: 8px; padding: 10px 12px; gap: 8px; }
+  .topbar-spacer { flex: 0 0 100%; height: 0; }
+  .brand-meta .system-name { display: none; }
+}
+.subheader { display: flex; align-items: center; gap: 12px; max-width: 880px; margin: 0 auto; padding: 16px 20px 4px; }
+.back-btn {
+  display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--line); color: var(--secondary); cursor: pointer; font-size: 16px;
+  flex-shrink: 0; box-shadow: var(--shadow-card);
+}
+html[dir="rtl"] .back-btn .arrow { transform: scaleX(-1); display: inline-block; }
+.subheader h1 { font-size: 20px; font-weight: 600; color: var(--secondary); flex: 1; }
+html[lang="ar"] .subheader h1 { font-family: var(--font-display-ar); font-size: 22px; }
+html[lang="en"] .subheader h1 { font-family: var(--font-display-en); }
+main { max-width: 880px; margin: 0 auto; padding: 12px 20px 20px; }
+
+/* SPEC v1.4 -- حاجز حقيقي على مستوى الصفحة كاملة أثناء أي عملية غير متزامنة
+   (نفس تصحيح الكاشير -- انظر wrapGoogleScriptRunWithBusyOverlay() بالأسفل) */
+#globalBusyOverlay {
+  position: fixed; inset: 0; z-index: 999; cursor: wait; display: none;
+  background: rgba(0,0,0,0.02);
+}
+#globalBusyOverlay.show { display: block; }
+
+/* SPEC v1.4 -- shared header-account modal (change password / logout confirm),
+   common to every admin page since the header itself is shared */
+.header-modal-overlay { position: fixed; inset: 0; background: rgba(43,33,27,0.45); display: none; align-items: center; justify-content: center; z-index: 90; padding: 20px; }
+.header-modal-overlay.open { display: flex; }
+.header-modal-box { background: var(--surface); border-radius: var(--radius-lg); padding: 22px; max-width: 360px; width: 100%; box-shadow: var(--shadow-card); }
+.header-modal-box h3 { font-size: 15px; font-weight: 700; color: var(--secondary); margin-bottom: 14px; }
+.header-modal-box .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.header-modal-box .field label { font-size: 12px; font-weight: 600; color: var(--ink-soft); }
+.header-modal-box .field input { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 9px 11px; font-family: inherit; font-size: 13px; }
+.header-modal-box .error-banner { display: none; background: var(--warn-tint); color: var(--warn); border: 1px solid rgba(178,59,46,0.3); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 12px; margin-bottom: 10px; }
+.header-modal-box .error-banner.show { display: block; }
+.header-modal-actions { display: flex; gap: 8px; margin-top: 6px; }
+.header-modal-actions button { flex: 1; font-family: inherit; font-size: 13px; font-weight: 600; padding: 10px; border-radius: var(--radius-sm); cursor: pointer; border: none; }
+.header-modal-cancel { background: var(--bg); color: var(--ink); }
+.header-modal-save { background: var(--secondary); color: #fff; }
+.header-modal-save:disabled { background: #B7ADA2; cursor: not-allowed; }
+
+  .refresh-btn { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; border-radius: 999px; background: rgba(255,255,255,0.18); border: 1.5px solid rgba(255,255,255,0.9); color: #fff; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; flex-shrink: 0; white-space: nowrap; transition: background 0.15s ease; }
+  .refresh-btn:hover { background: rgba(255,255,255,0.32); }
+  .refresh-btn:active { transform: scale(0.97); }
+  .refresh-btn.armed { background: #fff; color: var(--secondary); }
+  .refresh-btn.spin .ico { animation: masar-spin 0.8s linear infinite; }
+  @keyframes masar-spin { to { transform: rotate(360deg); } }
+</style>
+<style>
+/* ===== lists-settings ===== */
+#view-lists-settings main { max-width: 880px; margin: 0 auto; padding: 12px 20px 20px; }#view-lists-settings .tabs { display: flex; gap: 8px; margin-bottom: 16px; }#view-lists-settings .tab {
+    flex: 1; text-align: center; font-size: 13.5px; font-weight: 600; color: var(--ink-soft); background: var(--surface);
+    border: 1px solid var(--line); padding: 10px 12px; border-radius: 999px; cursor: pointer; font-family: inherit;
+  }#view-lists-settings .tab.active { background: var(--secondary); color: #fff; border-color: var(--secondary); }#view-lists-settings .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); }#view-lists-settings .form-card { padding: 20px 22px; margin-bottom: 16px; }#view-lists-settings .form-card h2 { font-size: 14.5px; font-weight: 600; color: var(--ink-soft); margin-bottom: 14px; }/* Lists tab */#view-lists-settings .list-select { width: 100%; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 10px 12px; font-family: inherit; font-size: 13.5px; margin-bottom: 16px; background: var(--surface); }#view-lists-settings .add-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+    background: var(--primary); color: #fff; border: none; font-family: inherit; font-size: 14px; font-weight: 600;
+    padding: 12px; border-radius: var(--radius-md); cursor: pointer; margin-bottom: 16px;
+  }#view-lists-settings .add-btn:hover { background: var(--primary-dark); }#view-lists-settings .item-row { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px dashed var(--line); }#view-lists-settings .item-row:last-child { border-bottom: none; }#view-lists-settings .item-row.inactive { opacity: 0.55; }#view-lists-settings .item-order { font-family: var(--font-mono); font-size: 12px; color: var(--ink-soft); width: 20px; text-align: center; flex-shrink: 0; }#view-lists-settings .item-name { flex: 1; font-size: 13.5px; font-weight: 600; color: var(--ink); }#view-lists-settings .item-toggle { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 999px; cursor: pointer; border: 1px solid; font-family: inherit; }#view-lists-settings .item-toggle.active-state { background: var(--success-tint); border-color: var(--success); color: var(--success); }#view-lists-settings .item-toggle.inactive-state { background: var(--bg); border-color: var(--line); color: var(--ink-soft); }/* Settings tab */#view-lists-settings .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }#view-lists-settings .field label { font-size: 12.5px; font-weight: 600; color: var(--ink-soft); }#view-lists-settings .field input, #view-lists-settings .field select {
+    border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 10px 12px;
+    font-family: inherit; font-size: 13.5px; color: var(--ink); background: var(--surface);
+  }#view-lists-settings .field input:focus, #view-lists-settings .field select:focus { outline: 2px solid var(--primary); outline-offset: 1px; }#view-lists-settings .field-row { display: flex; gap: 10px; }#view-lists-settings .field-row .field { flex: 1; }#view-lists-settings .logo-upload-row { display: flex; align-items: center; gap: 10px; }#view-lists-settings .logo-preview { width: 44px; height: 44px; object-fit: contain; border-radius: var(--radius-sm); border: 1px solid var(--line); background: #fff; }#view-lists-settings .logo-btn {
+    display: inline-flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--line);
+    border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px; font-weight: 600; color: var(--ink);
+    cursor: pointer; font-family: inherit;
+  }#view-lists-settings .logo-btn.attached { border-color: var(--success); color: var(--success); background: var(--success-tint); }#view-lists-settings .save-settings-btn {
+    width: 100%; background: var(--secondary); color: #fff; border: none; font-family: inherit; font-size: 14px;
+    font-weight: 600; padding: 13px; border-radius: var(--radius-md); cursor: pointer; margin-top: 6px;
+  }#view-lists-settings .save-settings-btn:hover { background: #2E2015; }/* Modal */#view-lists-settings .modal-overlay { position: fixed; inset: 0; background: rgba(43,33,27,0.45); display: none; align-items: flex-start; justify-content: center; z-index: 80; padding: 20px; overflow-y: auto; }#view-lists-settings .modal-overlay.open { display: flex; }#view-lists-settings .modal-box { background: var(--surface); border-radius: var(--radius-lg); padding: 22px; max-width: 420px; width: 100%; box-shadow: var(--shadow-card); margin: 20px 0; }#view-lists-settings .modal-box h3 { font-size: 16px; font-weight: 700; color: var(--secondary); margin-bottom: 16px; }#view-lists-settings .modal-actions { display: flex; gap: 10px; margin-top: 6px; }#view-lists-settings .modal-actions button { flex: 1; font-family: inherit; font-size: 13.5px; font-weight: 600; padding: 11px; border-radius: var(--radius-sm); cursor: pointer; }#view-lists-settings .modal-cancel-btn { background: var(--bg); border: 1px solid var(--line); color: var(--ink); }#view-lists-settings .modal-save-btn { background: var(--secondary); border: none; color: #fff; }#view-lists-settings .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(10px);
+    background: var(--secondary); color: #fff; font-size: 13.5px; padding: 11px 18px; border-radius: 999px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2); opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 90; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis;
+  }#view-lists-settings .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#view-lists-settings .confirm-armed { background: var(--warn) !important; animation: pulse-confirm 1s ease-in-out infinite; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <img src="asset-82d7b1e2.png" alt="ALAKER SWEETS" class="brand-logo">
+  <div class="brand-meta">
+    <span class="system-name">MASAR</span>
+    <span class="role-name" data-i18n="roleName"></span>
+  </div>
+  <div class="topbar-spacer"></div>
+  <button class="refresh-btn" id="refreshBtn" type="button" title="تحديث / Refresh"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span class="rf-label">تحديث</span></button>
+  <button class="icon-btn" id="langToggle" title="AR / EN">AR</button>
+  <div class="user-menu">
+    <button class="icon-btn" id="userMenuBtn">⋮</button>
+    <div class="user-dropdown" id="userDropdown">
+      <button data-i18n="changePassword" data-toast="notReady"></button>
+      <button data-i18n="logout" data-toast="notReady"></button>
+    </div>
+  </div>
+</header>
+
+<div class="header-modal-overlay" id="changePasswordOverlay">
+  <div class="header-modal-box">
+    <h3 id="cp-title"></h3>
+    <div class="error-banner" id="cp-errorBanner"></div>
+    <div class="field"><label id="cp-oldLabel"></label><input type="password" id="cp-fOldPassword"></div>
+    <div class="field"><label id="cp-newLabel"></label><input type="password" id="cp-fNewPassword"></div>
+    <div class="header-modal-actions">
+      <button class="header-modal-cancel" id="cp-cancelBtn"></button>
+      <button class="header-modal-save" id="cp-saveBtn"></button>
+    </div>
+  </div>
+</div>
+
+<div id="view-lists-settings">
+<div class="subheader">
+  <button class="back-btn" id="ls-backBtn"><span class="arrow">←</span></button>
+  <h1 data-i18n="screenTitle"></h1>
+</div>
+
+<main>
+  <div class="tabs">
+    <button class="tab active" data-tab="LISTS" id="ls-tabLists" data-i18n="tabLists"></button>
+    <button class="tab" data-tab="SETTINGS" id="ls-tabSettings" data-i18n="tabSettings"></button>
+  </div>
+  <div id="ls-tabContent"></div>
+</main>
+
+<div class="modal-overlay" id="ls-itemModal">
+  <div class="modal-box">
+    <h3 data-i18n="newItemTitle"></h3>
+    <div class="field"><label data-i18n="valueAr"></label><input type="text" id="ls-fValueAr"></div>
+    <div class="field"><label data-i18n="valueEn"></label><input type="text" id="ls-fValueEn"></div>
+    <div class="modal-actions">
+      <button class="modal-cancel-btn" id="ls-itemCancelBtn" data-i18n="cancelBtn"></button>
+      <button class="modal-save-btn" id="ls-itemSaveBtn" data-i18n="saveBtn"></button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="globalBusyOverlay"></div>
+
+<script>
+  // ===== شبكة الاتصال (١٠ أكتوبر ٢٠٢٦) =====
+  // مولَّد من tools/net_snippet.js بواسطة tools/build_client_snippets.js -- لا تعدّله يدويًا داخل الصفحات.
+  // (١) يتتبّع نداءات الحفظ (أي نداء لا يبدأ بـ get/list) ليعرف التحديث التلقائي أن الصفحة حفظت بنفسها.
+  // (٢) بلاغ "تعذّر تنفيذ العملية" المتكرر: بطء بدء Google (أو انقطاع لحظي) كان يُسقط النداء. للقراءات الصرفة فقط (قائمة مولَّدة آليًا من الخادم: دوال لا تكتب هي
+  // ولا ما تستدعيه) تُعاد المحاولة مرة واحدة عند الفشل/الردّ الفارغ، ويُرسَل نداء ثانٍ موازٍ إن تأخّر الأول ٦ ثوانٍ؛ يُسلَّم أول ردّ صالح. الحفظ والإنشاء لا يُكرَّران أبدًا.
+  const MASAR_RAW_RUN_ = (typeof google !== 'undefined' && google.script) ? google.script.run : null;
+  const MASAR_AR_INSTANCES_ = [];
+  const MASAR_PURE_READS_ = { getActiveDriversList:1,getActiveShipments:1,getActiveStoresWithOccupancy:1,getAllDepartments:1,getAllLists:1,getAllProducts:1,getAllRoles:1,getAllSettings:1,getAllStores:1,getAllUsers:1,getChangeTokens:1,getDepartmentStoreOrders:1,getDisposalFormData:1,getDistributionComparisonDetail:1,getDistributionManagerCancelEditRequests:1,getDistributionsReadyToPrepare:1,getFinishedGoodsQuarantineHistory:1,getFinishedGoodsStockBoard:1,getIssueToDepartmentFormData:1,getManagementReports:1,getMyNotifications:1,getMyShipments:1,getMySupplyRequests:1,getOffCatalogPurchaseRequests:1,getOrderDetails:1,getOrderEditStage:1,getOrderProductionApprovalDetail:1,getOrdersAwaitingInvoice:1,getOrdersAwaitingProductionApproval:1,getOrdersReadyForShipment:1,getOrdersReadyToReceive:1,getPendingLoadDiscrepancies:1,getPendingReturnItems:1,getPendingSupplyRequestsForRMS:1,getProductionManagerApprovals:1,getProductionManagerOrderFullDetail:1,getProductionManagerOrdersOverview:1,getPurchasingRawMaterialReports:1,getRawMaterialCatalog:1,getRawMaterialCatalogForRequest:1,getRawMaterialExpiryReport:1,getRawMaterialMovementSummary:1,getRawMaterialProductHistory:1,getRawMaterialQuarantineHistory:1,getRawMaterialShortageNotices:1,getRawMaterialStockBoard:1,getReceiveSurplusFormData:1,getReceivingDetails:1,getReferenceLists:1,getReturnReasons:1,getRolePermissionsMatrix:1,getShipmentPrepareDetail:1,getShortageReasons:1,getStoreDirectRawMaterialOrders:1,getStoreOrderDetail:1,getSuppliers:1,getSuppliersList:1,getTasksCatalog:1,getUnitsAndFamiliesList:1,getVehicleCoordinatorDriverStatus:1,getVehicleCoordinatorSpecialOrders:1,listOrders:1 };
+  (function masarTrackOwnCalls() {
+    try {
+      if (!MASAR_RAW_RUN_) return;
+      Object.defineProperty(google.script, 'run', {
+        configurable: true,
+        get() {
+          const handlers = { onSuccess: null, onFailure: null };
+          let proxy;
+          const chain = {
+            withSuccessHandler(fn) { handlers.onSuccess = fn; return proxy; },
+            withFailureHandler(fn) { handlers.onFailure = fn; return proxy; }
+          };
+          proxy = new Proxy(chain, {
+            get(target, prop) {
+              if (prop === 'withSuccessHandler' || prop === 'withFailureHandler') return target[prop];
+              return (...args) => {
+                // لقطة المعالجات لحظة النداء: غلاف حاجز الانشغال في الصفحات يمسك مرجعًا واحدًا من run فتتشارك النداءات المتزامنة كائن handlers، فلو قُرئ
+                // وقت الرد لاستلم كل رد معالج آخر نداء (بلاغ: "تعذّر فتح إنشاء رحلة" -- نداءا السائقين والجاهزة كانا يتبادلان معالجيهما)
+                const onS = handlers.onSuccess, onF = handlers.onFailure;
+                const name = String(prop);
+                if (Object.prototype.hasOwnProperty.call(MASAR_PURE_READS_, name)) {
+                  let settled = false, attempts = 0, pending = 0, hedge = null;
+                  const finish = (ok, v) => { if (settled) return; settled = true; clearTimeout(hedge); if (ok) { if (onS) onS(v); } else if (onF) onF(v); else { try { console.error(v); } catch (e) { /* تجاهل */ } } };
+                  const launch = () => {
+                    attempts++; pending++;
+                    const bad = v => {
+                      pending--;
+                      if (settled) return;
+                      if (attempts < 2) { setTimeout(launch, 700); return; }   // محاولة ثانية واحدة فقط
+                      if (pending === 0) finish(false, v);                       // الأخيرة فشلت ولا نداء آخر في الطريق
+                    };
+                    MASAR_RAW_RUN_
+                      .withSuccessHandler(r => { if (r === null || r === undefined) { bad(r); } else { pending--; finish(true, r); } })
+                      .withFailureHandler(e => bad(e))
+                      [name](...args);
+                  };
+                  hedge = setTimeout(() => { if (!settled && attempts < 2) launch(); }, 6000);
+                  launch();
+                  return;
+                }
+                const done = () => { if (!/^(get|list)/.test(name)) MASAR_AR_INSTANCES_.forEach(i => { try { i.ownDone(); } catch (e) { /* لا يعطّل النداء */ } }); };
+                return MASAR_RAW_RUN_
+                  .withSuccessHandler((...r) => { done(); if (onS) onS(...r); })
+                  .withFailureHandler((...r) => { done(); if (onF) onF(...r); else { try { console.error(r[0]); } catch (e) { /* تجاهل */ } } })
+                  [prop](...args);
+              };
+            }
+          });
+          return proxy;
+        }
+      });
+    } catch (e) { /* لا تتبّع: يبقى السلوك القديم كما هو */ }
+  })();
+  // يستعمله التحديث التلقائي الصامت: نفس طبقة الاتصال (إعادة المحاولة) لكن بلا غلاف حاجز الانشغال الذي تُركّبه الصفحة لاحقًا فوقها
+  let MASAR_NET_GETTER_ = null;
+  try { MASAR_NET_GETTER_ = Object.getOwnPropertyDescriptor(google.script, 'run').get || null; } catch (e) { MASAR_NET_GETTER_ = null; }
+  // ===== نهاية شبكة الاتصال =====
+
+const Core = (() => {
+  // SPEC v1.4 -- Apps Script redirects the whole tab to a separate
+  // googleusercontent.com sandbox domain when serving content, so a
+  // relative '?page=xxx' resolves against THAT domain, not the real
+  // deployment URL. APP_BASE_URL is injected server-side (WebApp.gs
+  // doGet(), HtmlTemplate) so every cross-page link here is absolute.
+  const DRIVE_ORIGIN_ = 'https:' + String.fromCharCode(47, 47) + 'drive.google.com'; // لا شرطتان مائلتان متتاليتان حرفيًا داخل نص في <script>: خلل خدمة صفحات Google يُفرغ الصفحة (انظر tests/static_check.js)
+  const APP_BASE_URL = MASAR_TPL.appBaseUrl;
+  var TIMEOUT_SCALE = MASAR_TPL.timeoutScale; // مضاعِف مُهَل الانتظار: ١ في الإنتاج، أكبر في DIV (مشروع بارد/شبكة اختبار)
+  // تسجيل الخروج (٨ أكتوبر ٢٠٢٦، بلاغ مستخدم: "لا يأخذني دائمًا لشاشة الدخول حتى أضغط زرًا في الصفحة التي بقيت مفتوحة"): المتصفحات (خصوصًا
+  // الهاتف) تحجب التنقّل غير المرتبط بلمسة مباشرة، فكانت الصفحة تبقى ظاهرة بزر "اضغط للمتابعة" مخبّأ داخل قائمة مغلقة. الآن أول ما يُستدعى
+  // logout يُغطّى المحتوى بحاجز كامل الشاشة "تم تسجيل الخروج" بزر كبير ظاهر، مع محاولة تلقائية للانتقال حيث يسمح المتصفح.
+  function masarLogoutMarker() {
+    try {
+      if (document.getElementById('masarLoggedOutOverlay')) return null;
+      var ar = (document.documentElement.lang || 'ar') !== 'en';
+      var o = document.createElement('div');
+      o.id = 'masarLoggedOutOverlay';
+      o.dir = ar ? 'rtl' : 'ltr';
+      o.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:2147483646;background:#3D2B1E;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font:600 19px/1.6 sans-serif;text-align:center;padding:24px;';
+      o.innerHTML = '<div style="font-size:48px">\uD83D\uDD12</div><div>' + (ar ? 'تم تسجيل الخروج' : 'You have been logged out') + '</div>' +
+        '<button type="button" style="border:none;background:#EE7126;color:#fff;font:700 17px sans-serif;padding:15px 34px;border-radius:999px;cursor:pointer;">' + (ar ? 'العودة إلى شاشة الدخول' : 'Back to login') + '</button>';
+      document.body.appendChild(o);
+      var go = function () { try { window.top.location.href = APP_BASE_URL; } catch (e) { window.location.href = APP_BASE_URL; } };
+      o.getElementsByTagName('button')[0].addEventListener('click', go);
+      setTimeout(go, 700);
+    } catch (e) { /* عرض فقط */ }
+    return null;
+  }
+
+  // SPEC v1.4 -- every page load is a fresh doGet() call with no memory of
+  // who logged in; CURRENT_USER_ID is threaded in via the ?uid= URL
+  // parameter (see WebApp.gs doGet() for the full rationale and the
+  // honest security note about session validation). Every view module
+  // below reads this as Core.currentUserId for its google.script.run calls.
+  const CURRENT_USER_ID = MASAR_TPL.currentUserId;
+
+  const commonDict = {
+    ar: {
+      toastNotBuilt: 'هذه الميزة قيد الإنشاء', roleName: 'الأدمن',
+      changePassword: '🔑 تغيير كلمة المرور', logout: '↩ تسجيل الخروج',
+      changePasswordTitle: 'تغيير كلمة المرور', oldPasswordLbl: 'كلمة المرور الحالية', newPasswordLbl: 'كلمة المرور الجديدة',
+      cancelBtn: 'إلغاء', saveBtn: 'حفظ',
+      changePasswordMissing: 'الرجاء إدخال كلمتَي المرور معًا', changePasswordSuccess: 'تم تغيير كلمة المرور بنجاح',
+      loadErrorText: 'تعذّر تنفيذ العملية — أعد المحاولة'
+    },
+    en: {
+      toastNotBuilt: 'This feature is in progress', roleName: 'Admin',
+      changePassword: '🔑 Change password', logout: '↩ Log out',
+      changePasswordTitle: 'Change password', oldPasswordLbl: 'Current password', newPasswordLbl: 'New password',
+      cancelBtn: 'Cancel', saveBtn: 'Save',
+      changePasswordMissing: 'Please enter both passwords', changePasswordSuccess: 'Password changed successfully',
+      loadErrorText: 'Could not complete the operation — please try again'
+    }
+  };
+  const state = { lang: (MASAR_TPL.userLang === 'en' ? 'en' : 'ar') };
+  // لغة المستخدم المحفوظة على الخادم (Users.Language) -- طلب مباشر ٢٥ سبتمبر ٢٠٢٦: تُفتح بها كل الشاشات وتبقى عند التنقّل
+  (function () {
+    if (state.lang === 'en') { document.documentElement.lang = 'en'; document.documentElement.dir = 'ltr'; }
+    const langBtn = document.getElementById('langToggle');
+    if (!langBtn) return;
+    langBtn.textContent = state.lang === 'ar' ? 'EN' : 'AR';
+    langBtn.addEventListener('click', () => setTimeout(() => {
+      try { if (MASAR_TPL.currentUserId) google.script.run.withFailureHandler(() => {}).setUserLanguage(MASAR_TPL.currentUserId, state.lang); } catch (e) { /* لا يعطّل الشاشة */ }
+    }, 0));
+  })();
+  // ---- زر التحيين (طلب مباشر ٢٦ سبتمبر ٢٠٢٦): تحديث ناعم إن وُجد مُحمِّل للصفحة، وإلا إعادة تحميل الصفحة بنفس رابطها ----
+  (function () {
+    const btn = document.getElementById('refreshBtn');
+    if (!btn) return;
+    const CONFIRM = true;
+    const label = btn.querySelector('.rf-label');
+    const idleText = () => (state.lang === 'ar' ? 'تحديث' : 'Refresh');
+    const sureText = () => (state.lang === 'ar' ? 'اضغط للتأكيد' : 'Tap to confirm');
+    const setIdle = () => { btn.classList.remove('armed'); if (label) label.textContent = idleText(); };
+    setIdle();
+    const lt = document.getElementById('langToggle');
+    if (lt) lt.addEventListener('click', () => setTimeout(setIdle, 0));
+    let armed = false, timer = null;
+    const hardReload = () => {
+      try { window.top.location.href = APP_BASE_URL + '?' + MASAR_TPL.reloadQuery; } catch (e) { window.location.reload(); }
+    };
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      if (CONFIRM && !armed) {
+        armed = true; btn.classList.add('armed'); if (label) label.textContent = sureText();
+        clearTimeout(timer); timer = setTimeout(() => { armed = false; setIdle(); }, 2800);
+        return;
+      }
+      clearTimeout(timer); armed = false; setIdle();
+      const soft = null;
+      if (soft) {
+        btn.classList.add('spin');
+        try { soft(); setTimeout(() => btn.classList.remove('spin'), 1200); return; } catch (e) { btn.classList.remove('spin'); }
+      }
+      hardReload();
+    });
+  })();
+  const UID_SUFFIX = '&uid=' + encodeURIComponent(CURRENT_USER_ID);
+  const PAGE_MAP = {
+    dashboard: APP_BASE_URL + '?page=admin' + UID_SUFFIX, settings: APP_BASE_URL + '?page=admin_settings' + UID_SUFFIX,
+    'users-roles': APP_BASE_URL + '?page=admin_users' + UID_SUFFIX, 'stores-depts': APP_BASE_URL + '?page=admin_stores' + UID_SUFFIX,
+    products: APP_BASE_URL + '?page=admin_products' + UID_SUFFIX, 'lists-settings': APP_BASE_URL + '?page=admin_lists' + UID_SUFFIX
+  };
+
+  function t(key) { return (commonDict[state.lang] && commonDict[state.lang][key]) || key; }
+
+  function applyI18n(container, dict) {
+    if (!container) return;
+    container.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      const val = dict[state.lang] && dict[state.lang][key];
+      if (val !== undefined) el.textContent = val;
+    });
+  }
+
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => el.classList.remove('show'), 2400);
+  }
+
+  // SPEC v1.4 -- the one real behavioral difference from the merged SPA's
+  // Core: this is now a full page load (Apps Script serves each admin
+  // screen as its own doGet() route -- see WebApp.gs), not an in-page
+  // view swap. Any unsaved in-page state is intentionally lost on
+  // navigation here, same as any ordinary multi-page site.
+  //
+  // window.top (not window) is required: Apps Script wraps served content
+  // in several nested sandboxed iframes (sandboxFrame > userCodeAppPanel >
+  // userHtmlFrame). Setting window.location from inside the innermost
+  // frame only navigates that frame's own address space -- it never
+  // reaches doGet() again. window.top targets the actual browser tab.
+  //
+  // This is a DIRECT click handler (back buttons, list cards) with no
+  // async gap before it, so -- unlike login.html's post-google.script.run
+  // redirect -- it counts as a fresh user gesture and browsers allow it
+  // immediately; no "continue button" step needed here.
+  function showView(name) {
+    window.top.location.href = PAGE_MAP[name] || (APP_BASE_URL + '?page=admin' + UID_SUFFIX);
+  }
+
+  function wireHeader() {
+    document.getElementById('langToggle').addEventListener('click', () => {
+      state.lang = state.lang === 'ar' ? 'en' : 'ar';
+      document.documentElement.lang = state.lang;
+      document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+      document.getElementById('langToggle').textContent = state.lang === 'ar' ? 'EN' : 'AR';
+      applyI18n(document.querySelector('header.topbar'), commonDict);
+      applyI18n(document.getElementById('view-lists-settings'), ListsSettingsView.dict);
+      ListsSettingsView.render();
+    });
+    const userMenuBtn = document.getElementById('userMenuBtn');
+    const userDropdown = document.getElementById('userDropdown');
+    userMenuBtn.addEventListener('click', (e) => { e.stopPropagation(); userDropdown.classList.toggle('open'); });
+    document.addEventListener('click', () => userDropdown.classList.remove('open'));
+
+    // SPEC v1.4 -- these two buttons existed since the original demo but
+    // were never actually wired to anything (data-toast="notReady" was
+    // referenced nowhere in any Core.js version) -- found while reviewing
+    // direct user feedback on the connected screens. Both AuthService.gs
+    // functions were already fully implemented; only the wiring was missing.
+    const dropdownButtons = userDropdown.querySelectorAll('button');
+    dropdownButtons[0].addEventListener('click', () => {
+      userDropdown.classList.remove('open');
+      openChangePasswordModal();
+    });
+    dropdownButtons[1].addEventListener('click', () => {
+      userDropdown.classList.remove('open');
+      dropdownButtons[1].disabled = true;
+      // ملاحظة: الحاجز المرئي أثناء هذا النداء يأتي تلقائيًا الآن من
+      // wrapGoogleScriptRunWithBusyOverlay() -- لا حاجة لإدارة مؤشر يدويًا هنا.
+      google.script.run
+        .withSuccessHandler(() => { window.top.location.href = APP_BASE_URL; })
+        .withFailureHandler(() => { window.top.location.href = APP_BASE_URL; }) // فشل استدعاء logout لا يمنع الخروج فعليًا من الواجهة
+        .logout(CURRENT_USER_ID, masarLogoutMarker());
+    });
+
+    wireChangePasswordModal();
+  }
+
+  function openChangePasswordModal() {
+    document.getElementById('cp-title').textContent = t('changePasswordTitle');
+    document.getElementById('cp-oldLabel').textContent = t('oldPasswordLbl');
+    document.getElementById('cp-newLabel').textContent = t('newPasswordLbl');
+    document.getElementById('cp-cancelBtn').textContent = t('cancelBtn');
+    document.getElementById('cp-saveBtn').textContent = t('saveBtn');
+    document.getElementById('cp-fOldPassword').value = '';
+    document.getElementById('cp-fNewPassword').value = '';
+    document.getElementById('cp-errorBanner').classList.remove('show');
+    document.getElementById('changePasswordOverlay').classList.add('open');
+  }
+
+  function wireChangePasswordModal() {
+    document.getElementById('cp-cancelBtn').addEventListener('click', () => {
+      document.getElementById('changePasswordOverlay').classList.remove('open');
+    });
+    document.getElementById('cp-saveBtn').addEventListener('click', () => {
+      const oldPassword = document.getElementById('cp-fOldPassword').value;
+      const newPassword = document.getElementById('cp-fNewPassword').value;
+      const errBanner = document.getElementById('cp-errorBanner');
+      if (!oldPassword || !newPassword) {
+        errBanner.textContent = t('changePasswordMissing');
+        errBanner.classList.add('show');
+        return;
+      }
+      const btn = document.getElementById('cp-saveBtn');
+      btn.disabled = true;
+      google.script.run
+        .withSuccessHandler(result => {
+          btn.disabled = false;
+          if (!result || !result.success) {
+            errBanner.textContent = state.lang === 'ar' ? (result && result.error ? result.error.messageAR : t('loadErrorText')) : (result && result.error ? result.error.messageEN : t('loadErrorText'));
+            errBanner.classList.add('show');
+            return;
+          }
+          document.getElementById('changePasswordOverlay').classList.remove('open');
+          showToast(t('changePasswordSuccess'));
+        })
+        .withFailureHandler(() => {
+          btn.disabled = false;
+          errBanner.textContent = t('loadErrorText');
+          errBanner.classList.add('show');
+        })
+        .changePassword(CURRENT_USER_ID, oldPassword, newPassword);
+    });
+  }
+
+  function register() {} // no-op here -- single-view pages don't need a registry
+
+  /**
+   * wrapGoogleScriptRunWithBusyOverlay() -- SPEC v1.4 (نفس تصحيح الكاشير):
+   * يستبدل google.script.run بنسخة مُغلَّفة عبر Proxy تُظهر/تُخفي حاجزًا
+   * حقيقيًا على مستوى الصفحة كاملة تلقائيًا حول كل نداء -- بلا أي تعديل
+   * على نقاط الاستدعاء في أي شاشة أدمن. عدّاد (busyCount) يدعم نداءات
+   * متزامنة متعددة بشكل صحيح.
+   */
+  function wrapGoogleScriptRunWithBusyOverlay() {
+    if (typeof google === 'undefined' || !google.script || !google.script.run) return; // بيئة اختبار محلية بلا Apps Script حقيقي
+    const realRun = google.script.run;
+    const overlay = document.getElementById('globalBusyOverlay');
+    let busyCount = 0;
+    function showBusy() { busyCount++; overlay.classList.add('show'); }
+    function hideBusy() { busyCount = Math.max(0, busyCount - 1); if (busyCount === 0) overlay.classList.remove('show'); }
+    function makeChainable(chainObj) {
+      return new Proxy({}, {
+        get(_, prop) {
+          if (prop === 'withSuccessHandler') {
+            return (fn) => makeChainable(chainObj.withSuccessHandler((...args) => { hideBusy(); fn(...args); }));
+          }
+          if (prop === 'withFailureHandler') {
+            return (fn) => makeChainable(chainObj.withFailureHandler((...args) => { hideBusy(); fn(...args); }));
+          }
+          return (...args) => { showBusy(); return chainObj[prop](...args); };
+        }
+      });
+    }
+    google.script.run = makeChainable(realRun);
+  }
+
+  function start() {
+    wrapGoogleScriptRunWithBusyOverlay();
+    wireHeader();
+    applyI18n(document.querySelector('header.topbar'), commonDict);
+    applyI18n(document.getElementById('view-lists-settings'), ListsSettingsView.dict);
+    ListsSettingsView.render();
+  }
+
+  return { register, showView, showToast, state, t, start, applyI18n, currentUserId: CURRENT_USER_ID };
+})();
+
+</script>
+
+<script>
+const ListsSettingsView = (function () {
+  const root = document.getElementById('view-lists-settings');
+
+  // SPEC v1.4 -- LISTS/SETTINGS start empty and are filled by getAllLists()/
+  // getAllSettings() (AdminService.gs) once the view renders. The six
+  // ListCode keys and their Arabic/English display labels are the one
+  // thing that still lives client-side (dict below) -- Lists.ListCode
+  // values are a fixed enum (DATABASE.md A8), not admin-editable data.
+  const LIST_CODES = ['SHORTAGE_REASON', 'RETURN_REASON', 'PRODUCT_CONDITION', 'DIFFERENCE_REASON', 'ORDER_TYPE', 'UNIT', 'MATERIAL_FAMILY'];
+  const LISTS = {};
+  LIST_CODES.forEach(code => { LISTS[code] = { items: [] }; });
+
+  const SETTINGS = {};
+
+  const dict = {
+    ar: {
+      roleName: 'الأدمن',
+      changePassword: '🔑 تغيير كلمة المرور', logout: '↩ تسجيل الخروج',
+      screenTitle: 'القوائم وإعدادات النظام',
+      tabLists: 'القوائم', tabSettings: 'إعدادات النظام',
+      SHORTAGE_REASON: 'أسباب النقص (إنتاج)', RETURN_REASON: 'أسباب الإرجاع', PRODUCT_CONDITION: 'حالة الصنف',
+      DIFFERENCE_REASON: 'أسباب فرق الاستلام', ORDER_TYPE: 'نوع الطلبية', UNIT: 'وحدات القياس', MATERIAL_FAMILY: 'تصنيف عائلة المادة',
+      addItem: '+ إضافة عنصر جديد', newItemTitle: 'عنصر جديد',
+      valueAr: 'القيمة (عربي)', valueEn: 'القيمة (إنجليزي)',
+      cancelBtn: 'إلغاء', saveBtn: 'حفظ',
+      activeState: 'نشط', inactiveState: 'معطَّل',
+      factoryName: 'اسم المصنع', logoLabel: 'شعار المصنع', logoAttach: 'إرفاق شعار', logoAttached: 'شعار مرفق ✓', logoReplace: 'تغيير الشعار',
+      toastLogoTooLarge: 'حجم الملف كبير جدًا — الحد الأقصى 2 ميجابايت', toastLogoUploaded: '✅ رُفع الشعار وحُفظ بنجاح',
+      defaultLanguage: 'اللغة الافتراضية', invoiceLanguage: 'لغة الفواتير',
+      currency: 'العملة', dateFormat: 'صيغة التاريخ', timeZone: 'المنطقة الزمنية',
+      sessionDuration: 'مدة الجلسة (بالدقائق)',
+      saveSettingsBtn: 'حفظ إعدادات النظام',
+      toastItemAdded: 'أُضيف العنصر بنجاح', toastItemToggled: 'حُدِّثت حالة العنصر',
+      toastSettingsSaved: 'حُفظت إعدادات النظام بنجاح',
+      loadingText: 'جارٍ التحميل...', loadErrorText: 'تعذّر تحميل البيانات — أعد المحاولة'
+    },
+    en: {
+      roleName: 'Admin',
+      changePassword: '🔑 Change password', logout: '↩ Log out',
+      screenTitle: 'Lists & system settings',
+      tabLists: 'Lists', tabSettings: 'System settings',
+      SHORTAGE_REASON: 'Shortage reasons (production)', RETURN_REASON: 'Return reasons', PRODUCT_CONDITION: 'Item condition',
+      DIFFERENCE_REASON: 'Receiving-difference reasons', ORDER_TYPE: 'Order type', UNIT: 'Units of measure', MATERIAL_FAMILY: 'Material family',
+      addItem: '+ Add new item', newItemTitle: 'New item',
+      valueAr: 'Value (Arabic)', valueEn: 'Value (English)',
+      cancelBtn: 'Cancel', saveBtn: 'Save',
+      activeState: 'Active', inactiveState: 'Inactive',
+      factoryName: 'Factory name', logoLabel: 'Factory logo', logoAttach: 'Attach logo', logoAttached: 'Logo attached ✓', logoReplace: 'Replace logo',
+      toastLogoTooLarge: 'File is too large — 2MB maximum', toastLogoUploaded: '✅ Logo uploaded and saved successfully',
+      defaultLanguage: 'Default language', invoiceLanguage: 'Invoice language',
+      currency: 'Currency', dateFormat: 'Date format', timeZone: 'Time zone',
+      sessionDuration: 'Session duration (minutes)',
+      saveSettingsBtn: 'Save system settings',
+      toastItemAdded: 'Item added successfully', toastItemToggled: "Item's status updated",
+      toastSettingsSaved: 'System settings saved successfully',
+      loadingText: 'Loading...', loadErrorText: 'Could not load data — please try again'
+    }
+  };
+
+  const state = { activeTab: 'LISTS', activeList: 'SHORTAGE_REASON' };
+  function t(key) { const v = dict[Core.state.lang] && dict[Core.state.lang][key]; return v !== undefined ? v : Core.t(key); }
+  function itemLabel(it) { return Core.state.lang === 'ar' ? it.valueAR : it.valueEN; }
+
+  function renderListsTab() {
+    const wrap = root.querySelector('#ls-tabContent');
+    wrap.innerHTML = `
+      <select class="list-select" id="ls-listSelect"></select>
+      <button class="add-btn" id="ls-addItemBtn">${t('addItem')}</button>
+      <div class="card" id="ls-itemsList"></div>
+    `;
+    const sel = root.querySelector('#ls-listSelect');
+    sel.innerHTML = Object.keys(LISTS).map(code => `<option value="${code}" ${code === state.activeList ? 'selected' : ''}>${t(code)}</option>`).join('');
+    sel.addEventListener('change', () => { state.activeList = sel.value; renderItemsList(); });
+    root.querySelector('#ls-addItemBtn').addEventListener('click', openItemModal);
+    renderItemsList();
+  }
+
+  function renderItemsList() {
+    const list = root.querySelector('#ls-itemsList');
+    const items = LISTS[state.activeList].items.slice().sort((a, b) => a.displayOrder - b.displayOrder);
+    list.innerHTML = items.map(it => `
+      <div class="item-row ${it.active ? '' : 'inactive'}">
+        <span class="item-order">${it.displayOrder}</span>
+        <span class="item-name">${itemLabel(it)}</span>
+        <button class="item-toggle ${it.active ? 'active-state' : 'inactive-state'}" data-toggle="${it.listItemId}">${it.active ? t('activeState') : t('inactiveState')}</button>
+      </div>`).join('');
+    list.querySelectorAll('[data-toggle]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const listItemId = btn.getAttribute('data-toggle');
+        btn.disabled = true;
+        google.script.run
+          .withSuccessHandler(result => {
+            btn.disabled = false;
+            if (!result || !result.success) { Core.showToast(t('loadErrorText')); return; }
+            const item = items.find(i => i.listItemId === listItemId);
+            if (item) item.active = result.data.active;
+            Core.showToast(t('toastItemToggled'));
+            renderItemsList();
+          })
+          .withFailureHandler(() => { btn.disabled = false; Core.showToast(t('loadErrorText')); })
+          .toggleListItemActive(Core.currentUserId, listItemId);
+      });
+    });
+  }
+
+  function openItemModal() {
+    root.querySelector('#ls-fValueAr').value = '';
+    root.querySelector('#ls-fValueEn').value = '';
+    const saveBtn = root.querySelector('#ls-itemSaveBtn');
+    if (saveBtn._resetArmed) saveBtn._resetArmed();
+    root.querySelector('#ls-itemModal').classList.add('open');
+  }
+  root.querySelector('#ls-itemCancelBtn').addEventListener('click', () => root.querySelector('#ls-itemModal').classList.remove('open'));
+  (function () {
+    const btn = root.querySelector('#ls-itemSaveBtn');
+    let armed = false;
+    let timer = null;
+    btn._resetArmed = function () {
+      armed = false;
+      clearTimeout(timer);
+      btn.classList.remove('confirm-armed');
+      btn.textContent = t('saveBtn');
+    };
+    btn.addEventListener('click', () => {
+      const ar = root.querySelector('#ls-fValueAr').value.trim();
+      if (!ar) return;
+      if (!armed) {
+        armed = true;
+        btn.classList.add('confirm-armed');
+        btn.textContent = Core.state.lang === 'ar' ? '👆 اضغط مرة أخرى للتأكيد' : '👆 Tap again to confirm';
+        timer = setTimeout(() => { armed = false; btn.classList.remove('confirm-armed'); btn.textContent = t('saveBtn'); }, 2800);
+        return;
+      }
+      clearTimeout(timer);
+      armed = false;
+      btn.classList.remove('confirm-armed');
+      btn.textContent = t('saveBtn');
+      const en = root.querySelector('#ls-fValueEn').value.trim();
+      const items = LISTS[state.activeList].items;
+      btn.disabled = true;
+      google.script.run
+        .withSuccessHandler(result => {
+          btn.disabled = false;
+          if (!result || !result.success) { Core.showToast(t('loadErrorText')); return; }
+          items.push({
+            listItemId: result.data.listItemId, listCode: state.activeList, itemCode: '',
+            valueAR: ar, valueEN: en, displayOrder: items.length + 1, active: true
+          });
+          root.querySelector('#ls-itemModal').classList.remove('open');
+          Core.showToast(t('toastItemAdded'));
+          renderItemsList();
+        })
+        .withFailureHandler(() => { btn.disabled = false; Core.showToast(t('loadErrorText')); })
+        .createListItem(Core.currentUserId, {
+          listCode: state.activeList, itemCode: '', valueAR: ar, valueEN: en, displayOrder: items.length + 1
+        });
+    });
+  })();
+
+  function renderSettingsTab() {
+    const wrap = root.querySelector('#ls-tabContent');
+    wrap.innerHTML = `
+      <div class="card form-card">
+        <h2>🏭</h2>
+        <div class="field"><label>${t('factoryName')}</label><input type="text" id="ls-sFactoryName" value="${SETTINGS.FactoryName}"></div>
+        <div class="field">
+          <label>${t('logoLabel')}</label>
+          <div class="logo-upload-row">
+            ${SETTINGS.LogoFileID ? `<img class="logo-preview" id="ls-logoPreview" src="${DRIVE_ORIGIN_}/thumbnail?id=${SETTINGS.LogoFileID}&sz=w200" alt="logo">` : ''}
+            <button class="logo-btn ${SETTINGS.LogoFileID ? 'attached' : ''}" id="ls-logoBtn" type="button">🖼️ <span id="ls-logoBtnLabel">${SETTINGS.LogoFileID ? t('logoReplace') : t('logoAttach')}</span></button>
+            <input type="file" id="ls-logoFileInput" accept="image/png,image/jpeg,image/svg+xml" style="display:none;">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>${t('defaultLanguage')}</label>
+            <select id="ls-sDefaultLang"><option value="ar" ${SETTINGS.DefaultLanguage === 'ar' ? 'selected' : ''}>العربية</option><option value="en" ${SETTINGS.DefaultLanguage === 'en' ? 'selected' : ''}>English</option></select>
+          </div>
+          <div class="field"><label>${t('invoiceLanguage')}</label>
+            <select id="ls-sInvoiceLang"><option value="ar" ${SETTINGS.InvoiceLanguage === 'ar' ? 'selected' : ''}>العربية</option><option value="en" ${SETTINGS.InvoiceLanguage === 'en' ? 'selected' : ''}>English</option></select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>${t('currency')}</label><input type="text" id="ls-sCurrency" value="${SETTINGS.Currency}"></div>
+          <div class="field"><label>${t('dateFormat')}</label><input type="text" id="ls-sDateFormat" value="${SETTINGS.DateFormat}"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>${t('timeZone')}</label><input type="text" id="ls-sTimeZone" value="${SETTINGS.TimeZone}"></div>
+          <div class="field"><label>${t('sessionDuration')}</label><input type="number" id="ls-sSessionDuration" value="${SETTINGS.SessionDurationMinutes}"></div>
+        </div>
+        <button class="save-settings-btn" id="ls-saveSettingsBtn">${t('saveSettingsBtn')}</button>
+      </div>
+    `;
+    root.querySelector('#ls-logoBtn').addEventListener('click', () => {
+      root.querySelector('#ls-logoFileInput').click();
+    });
+    root.querySelector('#ls-logoFileInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 2 * 1024 * 1024) { Core.showToast(t('toastLogoTooLarge')); return; }
+      const btn = root.querySelector('#ls-logoBtn');
+      const original = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<span>${t('loadingText')}</span>`;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64Data = reader.result.split(',')[1]; // إزالة الترويسة "data:image/png;base64,"
+        google.script.run
+          .withSuccessHandler(result => {
+            btn.disabled = false;
+            if (!result || !result.success) { btn.innerHTML = original; Core.showToast(t('loadErrorText')); return; }
+            SETTINGS.LogoFileID = result.data.logoFileId;
+            Core.showToast(t('toastLogoUploaded'));
+            renderSettingsTab();
+          })
+          .withFailureHandler(() => { btn.disabled = false; btn.innerHTML = original; Core.showToast(t('loadErrorText')); })
+          .uploadFactoryLogo(Core.currentUserId, base64Data, file.type, file.name);
+      };
+      reader.onerror = () => { btn.disabled = false; btn.innerHTML = original; Core.showToast(t('loadErrorText')); };
+      reader.readAsDataURL(file);
+    });
+    root.querySelector('#ls-saveSettingsBtn').addEventListener('click', () => {
+      const newValues = {
+        FactoryName: root.querySelector('#ls-sFactoryName').value,
+        DefaultLanguage: root.querySelector('#ls-sDefaultLang').value,
+        InvoiceLanguage: root.querySelector('#ls-sInvoiceLang').value,
+        Currency: root.querySelector('#ls-sCurrency').value,
+        DateFormat: root.querySelector('#ls-sDateFormat').value,
+        TimeZone: root.querySelector('#ls-sTimeZone').value,
+        SessionDurationMinutes: root.querySelector('#ls-sSessionDuration').value
+      };
+      const keys = Object.keys(newValues);
+      const btn = root.querySelector('#ls-saveSettingsBtn');
+      btn.disabled = true;
+      let completed = 0, hadError = false;
+      keys.forEach(key => {
+        google.script.run
+          .withSuccessHandler(result => {
+            completed++;
+            if (!result || !result.success) hadError = true;
+            else SETTINGS[key] = newValues[key];
+            if (completed === keys.length) {
+              btn.disabled = false;
+              Core.showToast(hadError ? t('loadErrorText') : t('toastSettingsSaved'));
+            }
+          })
+          .withFailureHandler(() => {
+            completed++; hadError = true;
+            if (completed === keys.length) { btn.disabled = false; Core.showToast(t('loadErrorText')); }
+          })
+          .updateSetting(Core.currentUserId, key, newValues[key]);
+      });
+    });
+  }
+
+  function renderTabs() {
+    root.querySelectorAll('.tab').forEach(el => el.classList.toggle('active', el.getAttribute('data-tab') === state.activeTab));
+    if (state.activeTab === 'LISTS') renderListsTab(); else renderSettingsTab();
+  }
+  root.querySelectorAll('.tab').forEach(el => {
+    el.addEventListener('click', () => { state.activeTab = el.getAttribute('data-tab'); renderTabs(); });
+  });
+
+  root.querySelector('#ls-backBtn').addEventListener('click', () => Core.showView('settings'));
+
+  /**
+   * render() -- SPEC v1.4: fetches getAllLists()/getAllSettings() (both, in
+   * parallel) before showing anything real; renderTabs() (and everything
+   * downstream) now only runs once live data has actually arrived.
+   */
+  function render() {
+    const wrap = root.querySelector('#ls-tabContent');
+    wrap.innerHTML = `<div class="card" style="padding:20px; text-align:center; color:var(--ink-soft);">${t('loadingText')}</div>`;
+
+    let listsDone = false, settingsDone = false, hadError = false;
+    function checkBothDone() {
+      if (!listsDone || !settingsDone) return;
+      if (hadError) {
+        wrap.innerHTML = `<div class="card" style="padding:20px; text-align:center; color:var(--warn);">${t('loadErrorText')}</div>`;
+        return;
+      }
+      renderTabs();
+    }
+
+    google.script.run
+      .withSuccessHandler(result => {
+        listsDone = true;
+        if (!result || !result.success) { hadError = true; checkBothDone(); return; }
+        LIST_CODES.forEach(code => { LISTS[code].items = []; });
+        result.data.items.forEach(it => { if (LISTS[it.listCode]) LISTS[it.listCode].items.push(it); });
+        checkBothDone();
+      })
+      .withFailureHandler(() => { listsDone = true; hadError = true; checkBothDone(); })
+      .getAllLists(Core.currentUserId);
+
+    google.script.run
+      .withSuccessHandler(result => {
+        settingsDone = true;
+        if (!result || !result.success) { hadError = true; checkBothDone(); return; }
+        Object.assign(SETTINGS, result.data.settings);
+        checkBothDone();
+      })
+      .withFailureHandler(() => { settingsDone = true; hadError = true; checkBothDone(); })
+      .getAllSettings(Core.currentUserId);
+  }
+
+  return { dict, render };
+})();
+Core.register('lists-settings', ListsSettingsView);
+
+</script>
+<script>
+  Core.start();
+</script>
+
+</body>
+</html>

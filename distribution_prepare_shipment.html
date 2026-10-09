@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#3D2B1E">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="مسار">
+<link rel="apple-touch-icon" href="icon-180.png">
+<script src="masar-config.js?v=67ea158b"></script>
+<script src="masar-runtime.js?v=67ea158b"></script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALAKER SWEETS — تجهيز الشحنة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Markazi+Text:wght@600;700&family=Fraunces:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #EE7126; --primary-dark: #C85A18; --primary-tint: #FCE8D8;
+    --secondary: #3D2B1E; --ink: #2B211B; --ink-soft: #6B5D52;
+    --bg: #FAF7F1; --surface: #FFFFFF; --line: #E7DFD2;
+    --success: #4B7A4F; --success-tint: #E7EFE6;
+    --warn: #B23B2E; --warn-tint: #F7E6E2;
+    --pending: #B4802A; --pending-tint: #F5EAD9;
+    --radius-lg: 16px; --radius-md: 12px; --radius-sm: 8px;
+    --shadow-card: 0 1px 2px rgba(43,33,27,0.06), 0 4px 16px rgba(43,33,27,0.05);
+    --font-ar: 'IBM Plex Sans Arabic', sans-serif; --font-en: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { overflow-x: hidden; max-width: 100vw; }
+  html[lang="ar"] body { font-family: var(--font-ar); }
+  html[lang="en"] body { font-family: var(--font-en); }
+  body {
+    background-color: var(--bg);
+    background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 38px, rgba(61,43,30,0.035) 38px, rgba(61,43,30,0.035) 39px);
+    color: var(--ink); min-height: 100vh; -webkit-font-smoothing: antialiased; padding-bottom: 130px;
+  }
+  header.topbar {
+    display: flex; align-items: center; gap: 16px; background: var(--secondary); color: #fff;
+    padding: 10px 20px; position: sticky; top: 0; z-index: 30; box-shadow: 0 2px 10px rgba(0,0,0,0.15); max-width: 100%;
+  }
+  .brand-logo { height: 40px; width: auto; display: block; flex-shrink: 0; }
+  .brand-meta { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; overflow: hidden; }
+  .brand-meta .system-name { font-size: 11px; letter-spacing: 0.14em; color: rgba(255,255,255,0.55); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .brand-meta .role-name { font-size: 15px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .topbar-spacer { flex: 1; min-width: 8px; }
+  .icon-btn {
+    display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #fff; cursor: pointer;
+    font-size: 14px; font-weight: 600; transition: background 0.15s ease; position: relative; flex-shrink: 0;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,0.16); }
+  .user-menu { position: relative; flex-shrink: 0; }
+  .user-dropdown {
+    position: absolute; top: calc(100% + 8px); inset-inline-end: 0; background: var(--surface); color: var(--ink);
+    border: 1px solid var(--line); border-radius: var(--radius-md); box-shadow: var(--shadow-card);
+    min-width: 200px; padding: 6px; display: none; z-index: 40;
+  }
+  .user-dropdown.open { display: block; }
+  .user-dropdown button {
+    display: flex; align-items: center; gap: 10px; width: 100%; text-align: start; background: none; border: none;
+    padding: 10px 12px; border-radius: var(--radius-sm); font-size: 14px; font-family: inherit; color: var(--ink); cursor: pointer;
+  }
+  .user-dropdown button:hover { background: var(--bg); }
+  @media (max-width: 420px) {
+    header.topbar { flex-wrap: wrap; row-gap: 8px; padding: 10px 12px; gap: 8px; }
+    .topbar-spacer { flex: 0 0 100%; height: 0; }
+    .brand-meta .system-name { display: none; }
+  }
+  main { max-width: 880px; margin: 0 auto; padding: 20px 20px 20px; }
+  .greeting-card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-card);
+    padding: 20px 22px; margin-bottom: 18px;
+  }
+  .greeting-card h1 { font-size: 22px; font-weight: 600; color: var(--secondary); }
+  .greeting-card .date-line { color: var(--ink-soft); font-size: 13.5px; margin-top: 4px; }
+
+  .order-card {
+    width: 100%; display: flex; align-items: center; gap: 14px; text-align: start; font-family: inherit; color: inherit;
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card); padding: 16px 18px; margin-bottom: 12px; cursor: pointer; transition: box-shadow 0.12s ease;
+  }
+  .order-card:hover { box-shadow: 0 6px 20px rgba(43,33,27,0.1); }
+  .order-icon {
+    width: 46px; height: 46px; border-radius: var(--radius-md); flex-shrink: 0; background: var(--primary-tint);
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+  }
+  .order-main { flex: 1; min-width: 0; }
+  .order-top { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+  .order-store { font-size: 15px; font-weight: 700; color: var(--ink); }
+  .order-id-tag { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-soft); }
+  .prod-mgr-tag { font-size: 10.5px; font-weight: 700; color: var(--pending); background: var(--pending-tint); padding: 2px 8px; border-radius: 999px; }
+  .order-sub { font-size: 12.5px; color: var(--ink-soft); }
+  .chevron { color: var(--ink-soft); font-size: 15px; flex-shrink: 0; }
+  html[dir="rtl"] .chevron { transform: scaleX(-1); display: inline-block; }
+  .empty-state { text-align: center; padding: 50px 20px; color: var(--ink-soft); }
+  .empty-state .big { font-size: 36px; margin-bottom: 12px; }
+
+  /* ---------- Detail ---------- */
+  .subheader { display: flex; align-items: center; gap: 12px; max-width: 880px; margin: 0 auto; padding: 0 0 4px; }
+  .back-btn {
+    display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 10px;
+    background: var(--surface); border: 1px solid var(--line); color: var(--secondary); cursor: pointer; font-size: 16px;
+    flex-shrink: 0; box-shadow: var(--shadow-card);
+  }
+  html[dir="rtl"] .back-btn .arrow { transform: scaleX(-1); display: inline-block; }
+  .subheader h1 { font-size: 19px; font-weight: 600; color: var(--secondary); flex: 1; }
+  .meta-badge {
+    font-size: 12.5px; font-weight: 600; color: var(--primary-dark); background: var(--primary-tint);
+    border: 1px solid rgba(238,113,38,0.35); padding: 5px 11px; border-radius: 999px; white-space: nowrap; font-family: var(--font-mono);
+  }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); }
+  .form-card { padding: 18px 20px; margin: 16px 0; overflow: hidden; }
+  .form-card h2 { font-size: 14px; font-weight: 600; color: var(--secondary); display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+
+  .banner {
+    display: flex; align-items: flex-start; gap: 10px; padding: 14px 16px; border-radius: var(--radius-md);
+    margin-bottom: 16px; font-size: 13px; line-height: 1.6; background: var(--primary-tint); color: var(--primary-dark);
+    border: 1px solid rgba(238,113,38,0.3);
+  }
+
+  .final-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px dashed var(--line); }
+  .final-row:last-child { border-bottom: none; }
+  .item-thumb {
+    width: 42px; height: 42px; border-radius: var(--radius-sm); flex-shrink: 0;
+    background: linear-gradient(135deg, #F3E9DC, #EDE1D0); display: flex; align-items: center; justify-content: center; font-size: 18px;
+  }
+  .item-main { flex: 1; min-width: 0; }
+  .item-name { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+  .item-ref { font-size: 11px; color: var(--ink-soft); font-family: var(--font-mono); margin-top: 2px; }
+  .item-source { font-size: 11px; color: var(--primary-dark); font-weight: 600; margin-top: 2px; }
+  .item-status-badge { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 999px; margin-top: 4px; }
+  .item-status-badge.unfulfilled { background: var(--warn-tint); color: var(--warn); }
+  .item-status-badge.partial { background: var(--pending-tint); color: var(--pending); }
+  .prod-mgr-note { font-size: 10.5px; color: var(--pending); margin-top: 2px; }
+  .qty-stepper { display: flex; align-items: center; border: 1px solid var(--line); border-radius: var(--radius-sm); overflow: hidden; }
+  .qty-stepper button { width: 28px; height: 28px; border: none; background: var(--bg); color: var(--secondary); font-size: 15px; font-weight: 700; cursor: pointer; }
+  .qty-stepper button:hover { background: var(--primary-tint); }
+  .qty-stepper input {
+    width: 52px; border: none; text-align: center; font-family: var(--font-mono); font-size: 13px;
+    font-weight: 700; color: var(--primary-dark); background: var(--surface);
+  }
+  .item-unit { font-size: 11px; color: var(--ink-soft); font-weight: 600; min-width: 28px; }
+
+  .sticky-bar-wrap { position: fixed; bottom: 0; left: 0; right: 0; z-index: 25; }
+  .scallop {
+    height: 11px; background-image: radial-gradient(circle at 10px 0, transparent 9px, var(--bg) 9.5px);
+    background-size: 20px 11px; background-repeat: repeat-x;
+  }
+  .sticky-bar { background: var(--surface); border-top: 1px solid var(--line); box-shadow: 0 -6px 20px rgba(43,33,27,0.08); padding: 12px 20px 16px; }
+  .sticky-bar-inner { max-width: 880px; margin: 0 auto; }
+  .btn-prepare {
+    width: 100%; background: var(--secondary); color: #fff; border: none; font-family: inherit; font-size: 15px; font-weight: 600;
+    padding: 13px; border-radius: var(--radius-md); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-prepare:hover { background: #2E2015; }
+  .confirm-armed { background: var(--warn) !important; animation: pulse-confirm 1s ease-in-out infinite; }
+  @keyframes pulse-confirm { 0%, 100% { opacity: 1; } 50% { opacity: 0.75; } }
+  /* SPEC v1.4 -- منقولة من distribution_shipments.html (نقل تدفّق إنشاء الرحلة) */
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .field label { font-size: 12.5px; font-weight: 600; color: var(--ink-soft); }
+  .field select {
+    border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 10px 12px;
+    font-family: inherit; font-size: 13.5px; color: var(--ink); background: var(--surface);
+  }
+  .order-check-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px dashed var(--line); cursor: pointer; }
+  .order-check-row:last-child { border-bottom: none; }
+  .order-check-row input[type="checkbox"] { width: 17px; height: 17px; cursor: pointer; }
+  .order-check-main { flex: 1; }
+  .order-check-store { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+  .order-check-sub { font-size: 11px; color: var(--ink-soft); font-family: var(--font-mono); }
+  .next-btn, .create-btn {
+    width: 100%; background: var(--secondary); color: #fff; border: none; font-family: inherit; font-size: 14px; font-weight: 600;
+    padding: 12px; border-radius: var(--radius-md); cursor: pointer; margin-top: 6px;
+  }
+  .next-btn:disabled { background: #B7ADA2; cursor: not-allowed; }
+  .drag-hint { font-size: 12px; color: var(--ink-soft); text-align: center; margin-bottom: 10px; }
+  .drag-stop {
+    display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid var(--line); border-radius: var(--radius-md);
+    background: var(--bg); margin-bottom: 8px; cursor: grab; transition: box-shadow 0.15s ease, opacity 0.15s ease;
+  }
+  .drag-stop:active { cursor: grabbing; }
+  .drag-stop.dragging { opacity: 0.4; }
+  .drag-stop.drag-over { box-shadow: 0 0 0 2px var(--primary) inset; }
+  .drag-handle { font-size: 16px; color: var(--ink-soft); flex-shrink: 0; }
+  .stop-num {
+    width: 24px; height: 24px; border-radius: 50%; background: var(--secondary); color: #fff; font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: var(--font-mono);
+  }
+  .stop-main { flex: 1; min-width: 0; }
+  .stop-store { font-size: 13.5px; font-weight: 700; color: var(--ink); }
+  .stop-items { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
+  .cancel-create-btn {
+    width: 100%; background: var(--bg); border: 1px solid var(--line); color: var(--ink); font-family: inherit;
+    font-size: 13px; font-weight: 600; padding: 10px; border-radius: var(--radius-sm); cursor: pointer; margin-top: 8px;
+  }
+
+  /* ===== تبويبا الشاشة: تجهيز الطلبيات | إنشاء رحلة جديدة (٨ أكتوبر ٢٠٢٦) ===== */
+  .main-tabs { display: flex; gap: 8px; margin-bottom: 16px; background: #EFE8DC; padding: 5px; border-radius: 14px; }
+  .main-tab {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; border: none; background: transparent; cursor: pointer;
+    font-family: inherit; font-size: 14.5px; font-weight: 700; color: var(--ink-soft); padding: 12px 8px; border-radius: 10px; transition: background .15s ease, color .15s ease;
+  }
+  .main-tab.active { background: var(--surface); color: var(--secondary); box-shadow: 0 1px 4px rgba(43,33,27,0.12); }
+  .main-tab .cnt { min-width: 24px; height: 24px; padding: 0 7px; border-radius: 999px; background: #D8CDBB; color: var(--secondary); font-size: 12.5px; font-family: var(--font-mono); display: inline-flex; align-items: center; justify-content: center; }
+  .main-tab.active .cnt { background: var(--primary); color: #fff; }
+  .main-tab .cnt.zero { opacity: .55; }
+  /* ===== إنشاء رحلة جديدة -- إعادة تصميم (٨ أكتوبر ٢٠٢٦) ===== */
+  .trip-head { display: flex; align-items: center; gap: 10px; }
+  .trip-head h1 { font-size: 20px; font-weight: 700; color: var(--secondary); flex: 1; }
+  .stepper { display: flex; align-items: center; gap: 8px; margin: 14px 2px 4px; font-size: 12.5px; color: var(--ink-soft); }
+  .stepper .step { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+  .stepper .step .n { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--line); display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-family: var(--font-mono); background: var(--surface); }
+  .stepper .step.active { color: var(--secondary); }
+  .stepper .step.active .n { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .stepper .step.done .n { background: var(--success); border-color: var(--success); color: #fff; }
+  .stepper .bar { flex: 1; height: 2px; background: var(--line); border-radius: 2px; max-width: 60px; }
+  .trip-section { margin: 18px 0 8px; font-size: 12.5px; font-weight: 700; color: var(--ink-soft); letter-spacing: .02em; display: flex; align-items: center; gap: 8px; }
+  .trip-section .count { margin-inline-start: auto; font-weight: 600; background: var(--primary-tint); color: var(--primary-dark); padding: 2px 10px; border-radius: 999px; }
+  .driver-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .driver-card {
+    display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: var(--radius-md);
+    background: var(--surface); cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 600; color: var(--ink); text-align: start;
+    transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+  }
+  .driver-card:hover { border-color: var(--primary); }
+  .driver-card .avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--primary-tint); color: var(--primary-dark); display: inline-flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+  .driver-card.selected { border-color: var(--primary); background: var(--primary-tint); box-shadow: 0 0 0 3px rgba(238,113,38,0.15); }
+  .driver-card.selected .avatar { background: var(--primary); color: #fff; }
+  .order-pick {
+    display: flex; align-items: center; gap: 12px; padding: 13px 14px; border: 1.5px solid var(--line); border-radius: var(--radius-md);
+    background: var(--surface); margin-bottom: 10px; cursor: pointer; transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+  }
+  .order-pick:hover { border-color: var(--primary); }
+  .order-pick input { position: absolute; opacity: 0; pointer-events: none; }
+  .order-pick .tick { width: 24px; height: 24px; border-radius: 7px; border: 2px solid #CFC4B5; display: inline-flex; align-items: center; justify-content: center; color: transparent; font-size: 15px; font-weight: 800; flex-shrink: 0; background: #fff; transition: all .15s ease; }
+  .order-pick.selected { border-color: var(--primary); background: var(--primary-tint); box-shadow: 0 0 0 3px rgba(238,113,38,0.12); }
+  .order-pick.selected .tick { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .order-pick .main { flex: 1; min-width: 0; }
+  .order-pick .store { font-size: 15px; font-weight: 700; color: var(--ink); }
+  .order-pick .meta { display: flex; gap: 8px; align-items: center; margin-top: 4px; flex-wrap: wrap; }
+  .order-pick .oid { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-soft); background: var(--bg); border: 1px solid var(--line); padding: 1px 8px; border-radius: 6px; }
+  .order-pick .chip { font-size: 11.5px; font-weight: 600; color: var(--secondary); background: #F3EEE6; padding: 1px 9px; border-radius: 999px; }
+  .trip-actions { display: flex; gap: 10px; margin-top: 16px; }
+  .trip-actions .next-btn, .trip-actions .create-btn { flex: 2; margin-top: 0; }
+  .trip-actions .cancel-create-btn { flex: 1; margin-top: 0; }
+  .create-btn { background: var(--primary); }
+  .create-btn:hover { background: var(--primary-dark); }
+  .next-btn { background: var(--primary); }
+  .next-btn:hover:not(:disabled) { background: var(--primary-dark); }
+  .drag-stop { background: var(--surface); border-width: 1.5px; box-shadow: 0 1px 2px rgba(43,33,27,0.04); }
+  .drag-stop .oid { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-soft); }
+  .stop-num { width: 28px; height: 28px; font-size: 13px; background: var(--primary); }
+  .reorder { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+  .reorder button { width: 34px; height: 26px; border: 1px solid var(--line); background: var(--bg); border-radius: 7px; cursor: pointer; font-size: 12px; color: var(--secondary); }
+  .reorder button:disabled { opacity: .35; cursor: default; }
+  .summary-line { margin: 14px 2px 0; font-size: 12.5px; color: var(--ink-soft); }
+  .summary-line b { color: var(--secondary); }
+
+  .toast {
+    position: fixed; bottom: 118px; left: 50%; transform: translateX(-50%) translateY(10px);
+    background: var(--secondary); color: #fff; font-size: 13.5px; padding: 11px 18px; border-radius: 999px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2); opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 60; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  #globalBusyOverlay { position: fixed; inset: 0; z-index: 999; cursor: wait; display: none; background: rgba(0,0,0,0.02); }
+  #globalBusyOverlay.show { display: block; }
+  .continue-armed { color: var(--success) !important; }
+  .refresh-btn { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; border-radius: 999px; background: rgba(255,255,255,0.18); border: 1.5px solid rgba(255,255,255,0.9); color: #fff; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; flex-shrink: 0; white-space: nowrap; transition: background 0.15s ease; }
+  .refresh-btn:hover { background: rgba(255,255,255,0.32); }
+  .refresh-btn:active { transform: scale(0.97); }
+  .refresh-btn.armed { background: #fff; color: var(--secondary); }
+  .refresh-btn.spin .ico { animation: masar-spin 0.8s linear infinite; }
+  @keyframes masar-spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <img src="asset-82d7b1e2.png" alt="ALAKER SWEETS" class="brand-logo">
+  <div class="brand-meta">
+    <span class="system-name">MASAR</span>
+    <span class="role-name" data-i18n="roleName"></span>
+  </div>
+  <div class="topbar-spacer"></div>
+  <button class="icon-btn" id="hubBackBtn" title="القائمة الرئيسية"><span style="display:inline-block; transform: scaleX(-1);">↩</span></button>
+  <button class="icon-btn" id="topBackBtn" title="↩">↩</button>
+  <button class="refresh-btn" id="refreshBtn" type="button" title="تحديث / Refresh"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span class="rf-label">تحديث</span></button>
+  <button class="icon-btn" id="langToggle" title="AR / EN">AR</button>
+  <div class="user-menu">
+    <button class="icon-btn" id="userMenuBtn">⋮</button>
+    <div class="user-dropdown" id="userDropdown">
+      <button data-i18n="changePassword" data-toast="notReady"></button>
+      <button id="logoutBtn" data-i18n="logout"></button>
+    </div>
+  </div>
+</header>
+
+<main id="mainArea"></main>
+
+<div class="toast" id="toast"></div>
+<div id="globalBusyOverlay"></div>
+
+<script>
+  // Orders that already passed 4.1 (Distributions.Status=APPROVED): الخور
+  // matched directly there; مشيرب's shortage is shown here as if already
+  // resolved by the production manager (FinalDecisionQty=14, accepting the
+  // shortfall) -- the production-manager screen that produces this decision
+  // isn't built yet, so this is simulated to demonstrate FinalDecisionQty
+  // meaningfully differing from ExecutedQty.
+  const APP_BASE_URL = MASAR_TPL.appBaseUrl;
+  var TIMEOUT_SCALE = MASAR_TPL.timeoutScale; // مضاعِف مُهَل الانتظار: ١ في الإنتاج، أكبر في DIV (مشروع بارد/شبكة اختبار)
+  // ===== شبكة الاتصال (١٠ أكتوبر ٢٠٢٦) =====
+  // مولَّد من tools/net_snippet.js بواسطة tools/build_client_snippets.js -- لا تعدّله يدويًا داخل الصفحات.
+  // (١) يتتبّع نداءات الحفظ (أي نداء لا يبدأ بـ get/list) ليعرف التحديث التلقائي أن الصفحة حفظت بنفسها.
+  // (٢) بلاغ "تعذّر تنفيذ العملية" المتكرر: بطء بدء Google (أو انقطاع لحظي) كان يُسقط النداء. للقراءات الصرفة فقط (قائمة مولَّدة آليًا من الخادم: دوال لا تكتب هي
+  // ولا ما تستدعيه) تُعاد المحاولة مرة واحدة عند الفشل/الردّ الفارغ، ويُرسَل نداء ثانٍ موازٍ إن تأخّر الأول ٦ ثوانٍ؛ يُسلَّم أول ردّ صالح. الحفظ والإنشاء لا يُكرَّران أبدًا.
+  const MASAR_RAW_RUN_ = (typeof google !== 'undefined' && google.script) ? google.script.run : null;
+  const MASAR_AR_INSTANCES_ = [];
+  const MASAR_PURE_READS_ = { getActiveDriversList:1,getActiveShipments:1,getActiveStoresWithOccupancy:1,getAllDepartments:1,getAllLists:1,getAllProducts:1,getAllRoles:1,getAllSettings:1,getAllStores:1,getAllUsers:1,getChangeTokens:1,getDepartmentStoreOrders:1,getDisposalFormData:1,getDistributionComparisonDetail:1,getDistributionManagerCancelEditRequests:1,getDistributionsReadyToPrepare:1,getFinishedGoodsQuarantineHistory:1,getFinishedGoodsStockBoard:1,getIssueToDepartmentFormData:1,getManagementReports:1,getMyNotifications:1,getMyShipments:1,getMySupplyRequests:1,getOffCatalogPurchaseRequests:1,getOrderDetails:1,getOrderEditStage:1,getOrderProductionApprovalDetail:1,getOrdersAwaitingInvoice:1,getOrdersAwaitingProductionApproval:1,getOrdersReadyForShipment:1,getOrdersReadyToReceive:1,getPendingLoadDiscrepancies:1,getPendingReturnItems:1,getPendingSupplyRequestsForRMS:1,getProductionManagerApprovals:1,getProductionManagerOrderFullDetail:1,getProductionManagerOrdersOverview:1,getPurchasingRawMaterialReports:1,getRawMaterialCatalog:1,getRawMaterialCatalogForRequest:1,getRawMaterialExpiryReport:1,getRawMaterialMovementSummary:1,getRawMaterialProductHistory:1,getRawMaterialQuarantineHistory:1,getRawMaterialShortageNotices:1,getRawMaterialStockBoard:1,getReceiveSurplusFormData:1,getReceivingDetails:1,getReferenceLists:1,getReturnReasons:1,getRolePermissionsMatrix:1,getShipmentPrepareDetail:1,getShortageReasons:1,getStoreDirectRawMaterialOrders:1,getStoreOrderDetail:1,getSuppliers:1,getSuppliersList:1,getTasksCatalog:1,getUnitsAndFamiliesList:1,getVehicleCoordinatorDriverStatus:1,getVehicleCoordinatorSpecialOrders:1,listOrders:1 };
+  (function masarTrackOwnCalls() {
+    try {
+      if (!MASAR_RAW_RUN_) return;
+      Object.defineProperty(google.script, 'run', {
+        configurable: true,
+        get() {
+          const handlers = { onSuccess: null, onFailure: null };
+          let proxy;
+          const chain = {
+            withSuccessHandler(fn) { handlers.onSuccess = fn; return proxy; },
+            withFailureHandler(fn) { handlers.onFailure = fn; return proxy; }
+          };
+          proxy = new Proxy(chain, {
+            get(target, prop) {
+              if (prop === 'withSuccessHandler' || prop === 'withFailureHandler') return target[prop];
+              return (...args) => {
+                // لقطة المعالجات لحظة النداء: غلاف حاجز الانشغال في الصفحات يمسك مرجعًا واحدًا من run فتتشارك النداءات المتزامنة كائن handlers، فلو قُرئ
+                // وقت الرد لاستلم كل رد معالج آخر نداء (بلاغ: "تعذّر فتح إنشاء رحلة" -- نداءا السائقين والجاهزة كانا يتبادلان معالجيهما)
+                const onS = handlers.onSuccess, onF = handlers.onFailure;
+                const name = String(prop);
+                if (Object.prototype.hasOwnProperty.call(MASAR_PURE_READS_, name)) {
+                  let settled = false, attempts = 0, pending = 0, hedge = null;
+                  const finish = (ok, v) => { if (settled) return; settled = true; clearTimeout(hedge); if (ok) { if (onS) onS(v); } else if (onF) onF(v); else { try { console.error(v); } catch (e) { /* تجاهل */ } } };
+                  const launch = () => {
+                    attempts++; pending++;
+                    const bad = v => {
+                      pending--;
+                      if (settled) return;
+                      if (attempts < 2) { setTimeout(launch, 700); return; }   // محاولة ثانية واحدة فقط
+                      if (pending === 0) finish(false, v);                       // الأخيرة فشلت ولا نداء آخر في الطريق
+                    };
+                    MASAR_RAW_RUN_
+                      .withSuccessHandler(r => { if (r === null || r === undefined) { bad(r); } else { pending--; finish(true, r); } })
+                      .withFailureHandler(e => bad(e))
+                      [name](...args);
+                  };
+                  hedge = setTimeout(() => { if (!settled && attempts < 2) launch(); }, 6000);
+                  launch();
+                  return;
+                }
+                const done = () => { if (!/^(get|list)/.test(name)) MASAR_AR_INSTANCES_.forEach(i => { try { i.ownDone(); } catch (e) { /* لا يعطّل النداء */ } }); };
+                return MASAR_RAW_RUN_
+                  .withSuccessHandler((...r) => { done(); if (onS) onS(...r); })
+                  .withFailureHandler((...r) => { done(); if (onF) onF(...r); else { try { console.error(r[0]); } catch (e) { /* تجاهل */ } } })
+                  [prop](...args);
+              };
+            }
+          });
+          return proxy;
+        }
+      });
+    } catch (e) { /* لا تتبّع: يبقى السلوك القديم كما هو */ }
+  })();
+  // يستعمله التحديث التلقائي الصامت: نفس طبقة الاتصال (إعادة المحاولة) لكن بلا غلاف حاجز الانشغال الذي تُركّبه الصفحة لاحقًا فوقها
+  let MASAR_NET_GETTER_ = null;
+  try { MASAR_NET_GETTER_ = Object.getOwnPropertyDescriptor(google.script, 'run').get || null; } catch (e) { MASAR_NET_GETTER_ = null; }
+  // ===== نهاية شبكة الاتصال =====
+  // ===== تحديث تلقائي بالتغيّر (٩ أكتوبر ٢٠٢٦، نُقّح ١٠ أكتوبر) =====
+  // كل ٣٠ ثانية تسأل الصفحة (نداء خفيف بلا قراءة جداول) هل تغيّر شيء في مجالاتها؛ إن تغيّر تُعيد جلب بياناتها مرة واحدة. تتوقف والتبويب مخفيّ، وتستأنف عند
+  // العودة. إن كان المستخدم يكتب أو توجد نافذة مفتوحة أو حقل معدَّل لا تُبدَّل الشاشة تحت يده: يظهر شريط "توجد تحديثات" ينقر عليه حين يشاء.
+  // النداء الخفيف يمرّ عبر مرجع google.script.run الأصلي (قبل غلاف حاجز الانشغال) فلا يحجب الشاشة، ولا يمدّ الجلسة.
+  // تنقيح (بلاغ ميداني: "ساعة رملية كل برهة" و"الشاشة تُعاد بعد كل حفظ"): (١) التحديث التلقائي صامت: لا حاجز انشغال ولا ومضة "جارٍ التحميل"،
+  // ويحفظ موضع التمرير؛ (٢) ما تحفظه هذه الصفحة نفسها (أي نداء لا يبدأ بـ get) لا يُحدِّثها هي: تُعاد قراءة الرمز بعده فيصير خط الأساس الجديد؛ (٣) شارة
+  // صغيرة أسفل الشاشة تُظهر وقت آخر فحص وتومض عند التحديث، ولون أحمر إن تعذّر الفحص.
+  // ينفّذ إعادة جلب بيانات الصفحة بصمت: بلا حاجز انشغال (النداءات داخلها تمرّ بالمرجع الأصلي)، بلا ومضة "جارٍ التحميل"، وبحفظ موضع التمرير
+  function masarRunSilently(fn) {
+    let desc = null, area = null, proto = null;
+    try { desc = Object.getOwnPropertyDescriptor(google.script, 'run'); Object.defineProperty(google.script, 'run', { configurable: true, get() { return MASAR_NET_GETTER_ ? MASAR_NET_GETTER_() : MASAR_RAW_RUN_; } }); } catch (e) { desc = null; }
+    try {
+      area = document.getElementById('mainArea');
+      if (area && typeof Element !== 'undefined') {
+        proto = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
+        Object.defineProperty(area, 'innerHTML', {
+          configurable: true,
+          get() { return proto.get.call(area); },
+          set(v) { const s = String(v); if (/empty-state/.test(s) && !/order-card|<table|<button/.test(s)) return; proto.set.call(area, v); }
+        });
+      }
+    } catch (e) { proto = null; }
+    let keep = null;
+    try {
+      if (area && typeof window !== 'undefined' && typeof MutationObserver !== 'undefined') {
+        const scrollers = [document.scrollingElement, area.parentElement].filter(Boolean).map(el => ({ el: el, top: el.scrollTop }));
+        let moved = false;
+        const mark = () => { moved = true; };
+        ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(ev => window.addEventListener(ev, mark, true));
+        const mo = new MutationObserver(() => { if (!moved) requestAnimationFrame(() => scrollers.forEach(s => { if (s.top > 0 && Math.abs(s.el.scrollTop - s.top) > 4) s.el.scrollTop = s.top; })); });
+        mo.observe(area, { childList: true });
+        keep = () => { try { mo.disconnect(); ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(ev => window.removeEventListener(ev, mark, true)); } catch (e) { /* تجاهل */ } };
+        setTimeout(keep, 9000);
+      }
+    } catch (e) { keep = null; }
+    try { fn(); }
+    finally {
+      if (desc) { try { Object.defineProperty(google.script, 'run', desc); } catch (e) { /* تجاهل */ } }
+      if (proto && area) { try { delete area.innerHTML; } catch (e) { /* تجاهل */ } }
+    }
+  }
+  function masarAutoRefresh(opts) {
+    if (!MASAR_RAW_RUN_ || !opts || typeof opts.refresh !== 'function') return null;
+    const domains = opts.domains || [];
+    const interval = (opts.intervalMs || 30000) + Math.floor(Math.random() * 4000); // تشتيت بسيط كي لا تتزامن شاشات كثيرة
+    let baseline = null, inflight = false, inflightSince = 0, stopped = false, banner = null, pill = null, ownDoneAt = 0, rebaseWanted = false, changes = 0;
+    const uid = () => (typeof CURRENT_USER_ID !== 'undefined' ? CURRENT_USER_ID : (typeof Core !== 'undefined' ? Core.currentUserId : ''));
+    const isAr = () => (document.documentElement.lang || 'ar') !== 'en';
+    function setPill(text, bad) {
+      try {
+        if (!pill) {
+          pill = document.createElement('div');
+          pill.style.cssText = 'position:fixed;right:8px;bottom:6px;z-index:2147482000;font:600 10px sans-serif;color:#fff;padding:2px 8px;border-radius:999px;pointer-events:none;opacity:0.85;';
+          document.body.appendChild(pill);
+        }
+        pill.style.background = bad ? 'rgba(176,42,42,0.9)' : 'rgba(61,43,30,0.55)';
+        pill.textContent = text;
+      } catch (e) { /* الشارة تكميلية */ }
+    }
+    function clock() { try { return new Date().toTimeString().slice(0, 8); } catch (e) { return ''; } }
+    function busy() {
+      try {
+        if (opts.isBusy && opts.isBusy()) return true;
+        const a = document.activeElement;
+        if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && !/^(button|checkbox|radio|submit)$/.test(a.type || '')) return true;
+        if (document.querySelector('.header-modal-overlay.open, [class*="overlay"].open, [class*="modal"].open')) return true;
+        const fields = document.querySelectorAll('main input, main textarea, main select, #mainArea input, #mainArea textarea, #mainArea select');
+        for (let i = 0; i < fields.length; i++) {
+          const f = fields[i];
+          if (f.type === 'checkbox' || f.type === 'radio') { if (f.checked !== f.defaultChecked) return true; }
+          else if (f.type !== 'hidden' && f.type !== 'button' && f.tagName !== 'SELECT' && f.value !== f.defaultValue) return true;
+        }
+      } catch (e) { /* عند الشك نعتبر الشاشة غير مشغولة */ }
+      return false;
+    }
+    function hideBanner() { if (banner) { banner.style.display = 'none'; } }
+    function showBanner() {
+      if (!banner) {
+        banner = document.createElement('button');
+        banner.type = 'button';
+        banner.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:76px;z-index:2147483000;border:none;border-radius:999px;padding:10px 18px;background:#3D2B1E;color:#fff;font:700 13px sans-serif;box-shadow:0 6px 20px rgba(0,0,0,0.3);cursor:pointer;';
+        banner.addEventListener('click', () => doRefresh());
+        document.body.appendChild(banner);
+      }
+      banner.textContent = isAr() ? '🔄 توجد تحديثات جديدة — اضغط للتحديث' : '🔄 New updates — tap to refresh';
+      banner.style.display = 'block';
+    }
+    function doRefresh() {
+      hideBanner();
+      setPill((isAr() ? '✅ تحديث ' : '✅ Updated ') + clock(), false);
+      try { masarRunSilently(opts.refresh); } catch (e) { /* لا يعطّل الصفحة */ }
+    }
+    function handle(r, startedAt) {
+      if (!r || !r.success) {
+        if (r && r.error && r.error.code === 'SESSION_EXPIRED') stopped = true;
+        setPill('⚠ ' + ((r && r.error && r.error.code) || (isAr() ? 'تعذّر الفحص' : 'check failed')), true);
+        return;
+      }
+      setPill((isAr() ? '🔄 آخر فحص ' : '🔄 Checked ') + clock() + (changes ? (isAr() ? ' · تغيّرات ' : ' · changes ') + changes : ''), false);
+      const sig = JSON.stringify(domains.map(d => r.data.tokens[d] || ''));
+      if (rebaseWanted) {
+        // هذه الصفحة حفظت شيئًا بنفسها: الرمز بعد حفظها هو خط الأساس الجديد (لا تُحدَّث هي بما كتبته). ردٌّ بدأ قبل انتهاء حفظها قديم: نعيد السؤال
+        if (startedAt >= ownDoneAt) { rebaseWanted = false; baseline = sig; } else { setTimeout(tick, 300); }
+        return;
+      }
+      if (baseline === null) { baseline = sig; return; }
+      if (sig === baseline) return;
+      baseline = sig; changes++;
+      if (busy()) { showBanner(); return; }
+      doRefresh();
+      // الكتابة قد لا تكون ظهرت للقراءة بعد لحظة الرمز: إن كان التغيّر حديثًا (<٨ ثوانٍ) نُعيد الجلب مرة ثانية بعد استقراره
+      const newest = Math.max.apply(null, domains.map(d => parseFloat(r.data.tokens[d]) || 0));
+      const age = (r.data.serverTime || Date.now()) - newest;
+      if (age < 8000) setTimeout(() => { if (!document.hidden && !busy()) doRefresh(); }, 8500 - Math.max(0, age));
+    }
+    function tick() {
+      if (stopped || document.hidden) return;
+      // نداء ضاع بلا ردّ (شبكة بطيئة/تبويب مجمَّد) كان يُبقي inflight=true فيتوقف التحديث للأبد: بعد ٢٥ ثانية نعدّه مفقودًا ونسأل من جديد
+      if (inflight && Date.now() - inflightSince < 25000) return;
+      inflight = true;
+      const startedAt = Date.now();
+      inflightSince = startedAt;
+      MASAR_RAW_RUN_.withSuccessHandler(r => { inflight = false; handle(r, startedAt); }).withFailureHandler(() => { inflight = false; setPill(isAr() ? '⚠ تعذّر الفحص' : '⚠ check failed', true); }).getChangeTokens(uid(), domains);
+    }
+    function ownDone() { ownDoneAt = Date.now(); rebaseWanted = true; hideBanner(); setTimeout(tick, 500); }
+    MASAR_AR_INSTANCES_.push({ ownDone: ownDone });
+    setInterval(tick, interval);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) { rebaseWanted = false; setTimeout(tick, 400); } });
+    setTimeout(tick, 1500); // يلتقط خط الأساس مبكرًا
+    return { tick: tick };
+  }
+  // تسجيل الخروج (٨ أكتوبر ٢٠٢٦، بلاغ مستخدم: "لا يأخذني دائمًا لشاشة الدخول حتى أضغط زرًا في الصفحة التي بقيت مفتوحة"): المتصفحات (خصوصًا
+  // الهاتف) تحجب التنقّل غير المرتبط بلمسة مباشرة، فكانت الصفحة تبقى ظاهرة بزر "اضغط للمتابعة" مخبّأ داخل قائمة مغلقة. الآن أول ما يُستدعى
+  // logout يُغطّى المحتوى بحاجز كامل الشاشة "تم تسجيل الخروج" بزر كبير ظاهر، مع محاولة تلقائية للانتقال حيث يسمح المتصفح.
+  function masarLogoutMarker() {
+    try {
+      if (document.getElementById('masarLoggedOutOverlay')) return null;
+      var ar = (document.documentElement.lang || 'ar') !== 'en';
+      var o = document.createElement('div');
+      o.id = 'masarLoggedOutOverlay';
+      o.dir = ar ? 'rtl' : 'ltr';
+      o.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:2147483646;background:#3D2B1E;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font:600 19px/1.6 sans-serif;text-align:center;padding:24px;';
+      o.innerHTML = '<div style="font-size:48px">\uD83D\uDD12</div><div>' + (ar ? 'تم تسجيل الخروج' : 'You have been logged out') + '</div>' +
+        '<button type="button" style="border:none;background:#EE7126;color:#fff;font:700 17px sans-serif;padding:15px 34px;border-radius:999px;cursor:pointer;">' + (ar ? 'العودة إلى شاشة الدخول' : 'Back to login') + '</button>';
+      document.body.appendChild(o);
+      var go = function () { try { window.top.location.href = APP_BASE_URL; } catch (e) { window.location.href = APP_BASE_URL; } };
+      o.getElementsByTagName('button')[0].addEventListener('click', go);
+      setTimeout(go, 700);
+    } catch (e) { /* عرض فقط */ }
+    return null;
+  }
+  const CURRENT_USER_ID = MASAR_TPL.currentUserId;
+  document.addEventListener('DOMContentLoaded', () => {
+    const hb = document.getElementById('hubBackBtn');
+    if (hb) hb.addEventListener('click', () => { window.top.location.href = APP_BASE_URL + '?page=distribution_hub&uid=' + encodeURIComponent(CURRENT_USER_ID); });
+  });
+  let ORDERS = []; // {orderId, store, itemCount, fromProductionManager, distributionId, prepared}
+  // SPEC v1.4 (جديدة، طلب مباشر: نقل إنشاء الرحلة من "الشحنات النشطة" إلى
+  // هنا -- منطقيًّا هذا مكانها الصحيح: هنا تظهر الطلبيات الجاهزة فعليًّا
+  // للشحن، فمن هنا يجب اختيار أيها يُجمَع في رحلة، لا من شاشة منفصلة).
+  let DRIVERS = [];
+  let READY_FOR_SHIPMENT_ORDERS = [];
+  let tripState = { view: 'LIST', selectedOrders: [], sequencedStops: [], chosenDriver: null, draggedIdx: null };
+  let currentDetail = null;
+
+  const dict = {
+    ar: {
+      roleName: 'مسؤول التوزيع',
+      changePassword: '🔑 تغيير كلمة المرور', logout: '↩ تسجيل الخروج',
+      screenTitle: 'تجهيز الشحنة', dateLine: '',
+      sectionTitle: 'طلبيات مستلمة — جاهزة لتجهيز الشحنة',
+      itemsCount: (n) => `${n} صنف`,
+      typeNormal: 'طلبية عادية', typeSpecial: 'طلبية خاصة',
+      fromProdMgr: 'بقرار مدير الإنتاج',
+      itemsSection: 'الكميات النهائية للشحن',
+      executedRef: 'المُنفَّذ فعليًا', requestedRef: 'المطلوب',
+      statusUnfulfilled: 'تعذَّر توفيره بالكامل', statusPartial: 'سُلِّم جزئيًا',
+      resolvedNote: 'كمية نهائية بقرار مدير الإنتاج (عجز سابق)',
+      banner: 'راجع الكمية النهائية لكل صنف قبل تجهيز الشحنة — هذه آخر فرصة للتعديل قبل إنشاء الرحلة.',
+      prepareBtn: 'تجهيز الشحنة',
+      toastPrepared: (store) => `جُهِّزت شحنة ${store} — أصبحت جاهزة لإنشاء رحلة`,
+      emptyList: 'لا توجد طلبيات مستلمة بانتظار التجهيز. تظهر هنا الطلبية بعد "استلام ومقارنة" واعتماد التوزيع من الصفحة الرئيسية.',
+      loadingText: 'جارٍ التحميل...', loadErrorText: 'تعذّر تنفيذ العملية — أعد المحاولة',
+      toastNotReady: 'هذه الميزة ستُبنى في خطوة قادمة', savingText: 'جارٍ الحفظ...', continueBtn: 'اضغط هنا للمتابعة',
+      tabPrepare: 'تجهيز الطلبيات',
+      createTripTitle: 'إنشاء رحلة جديدة', chooseDriverTitle: 'اختيار السائق والطلبيات',
+      step1: 'السائق والطلبيات', step2: 'ترتيب التوقفات', pickDriver: 'اختر السائق', pickOrders: 'اختر الطلبيات الجاهزة للشحن', selectedOf: (a, b) => `${a} من ${b}`,
+      nextCount: (n) => `التالي: ترتيب التوقفات (${n})`, tripSummary: (d, n) => `السائق: ${d} — ${n} توقف`, moveUp: 'أعلى', moveDown: 'أسفل',
+      driverLabel: 'السائق', ordersLabel: 'الطلبيات الجاهزة للشحن',
+      nextBtn: 'التالي: ترتيب التوقفات', cancelBtn: 'إلغاء',
+      sequenceTitle: 'ترتيب التوقفات', dragHint: 'اسحب وأفلت لإعادة الترتيب', createBtn: 'إنشاء الرحلة',
+      toastCreated: (driver) => `أُنشئت الرحلة بنجاح لـ${driver}`,
+      toastNeedSelection: 'اختر سائقًا وطلبية واحدة على الأقل', emptyReady: 'لا توجد طلبيات جاهزة للشحن حاليًا',
+    },
+    en: {
+      roleName: 'Distribution manager',
+      changePassword: '🔑 Change password', logout: '↩ Log out',
+      screenTitle: 'Prepare shipment', dateLine: '',
+      sectionTitle: 'Received orders — ready for shipment preparation',
+      itemsCount: (n) => `${n} item${n === 1 ? '' : 's'}`,
+      typeNormal: 'Regular order', typeSpecial: 'Special order',
+      fromProdMgr: "By production manager's decision",
+      itemsSection: 'Final quantities for shipment',
+      executedRef: 'Actually executed', requestedRef: 'Requested',
+      statusUnfulfilled: 'Could not be fulfilled', statusPartial: 'Partially delivered',
+      resolvedNote: "Final quantity per production manager's decision (prior shortage)",
+      banner: "Review the final quantity for each item before preparing the shipment — this is the last chance to adjust before creating the trip.",
+      prepareBtn: 'Prepare shipment',
+      toastPrepared: (store) => `${store}'s shipment prepared — ready to create a trip`,
+      emptyList: 'No received orders awaiting preparation. An order appears here after "Receive & compare" and distribution approval from the home page.',
+      loadingText: 'Loading...', loadErrorText: 'Could not complete the operation — please try again',
+      toastNotReady: 'This feature is coming up next', savingText: 'Saving...', continueBtn: 'Tap here to continue',
+      tabPrepare: 'Prepare orders',
+      createTripTitle: 'Create new trip', chooseDriverTitle: 'Choose driver & orders',
+      step1: 'Driver & orders', step2: 'Order the stops', pickDriver: 'Choose the driver', pickOrders: 'Choose the orders ready for shipment', selectedOf: (a, b) => `${a} of ${b}`,
+      nextCount: (n) => `Next: order the stops (${n})`, tripSummary: (d, n) => `Driver: ${d} — ${n} stop${n === 1 ? '' : 's'}`, moveUp: 'Up', moveDown: 'Down',
+      driverLabel: 'Driver', ordersLabel: 'Orders ready for shipment',
+      nextBtn: 'Next: order the stops', cancelBtn: 'Cancel',
+      sequenceTitle: 'Order the stops', dragHint: 'Drag and drop to reorder', createBtn: 'Create trip',
+      toastCreated: (driver) => `Trip created successfully for ${driver}`,
+      toastNeedSelection: 'Choose a driver and at least one order', emptyReady: 'No orders ready for shipment right now',
+    }
+  };
+
+  const state = { lang: (MASAR_TPL.userLang === 'en' ? 'en' : 'ar') };
+  // لغة المستخدم المحفوظة على الخادم (Users.Language) -- طلب مباشر ٢٥ سبتمبر ٢٠٢٦: تُفتح بها كل الشاشات وتبقى عند التنقّل
+  (function () {
+    if (state.lang === 'en') { document.documentElement.lang = 'en'; document.documentElement.dir = 'ltr'; }
+    const langBtn = document.getElementById('langToggle');
+    if (!langBtn) return;
+    langBtn.textContent = state.lang === 'ar' ? 'EN' : 'AR';
+    langBtn.addEventListener('click', () => setTimeout(() => {
+      try { if (MASAR_TPL.currentUserId) google.script.run.withFailureHandler(() => {}).setUserLanguage(MASAR_TPL.currentUserId, state.lang); } catch (e) { /* لا يعطّل الشاشة */ }
+    }, 0));
+  })();
+  // ---- زر التحيين (طلب مباشر ٢٦ سبتمبر ٢٠٢٦): تحديث ناعم إن وُجد مُحمِّل للصفحة، وإلا إعادة تحميل الصفحة بنفس رابطها ----
+  (function () {
+    const btn = document.getElementById('refreshBtn');
+    if (!btn) return;
+    const CONFIRM = true;
+    const label = btn.querySelector('.rf-label');
+    const idleText = () => (state.lang === 'ar' ? 'تحديث' : 'Refresh');
+    const sureText = () => (state.lang === 'ar' ? 'اضغط للتأكيد' : 'Tap to confirm');
+    const setIdle = () => { btn.classList.remove('armed'); if (label) label.textContent = idleText(); };
+    setIdle();
+    const lt = document.getElementById('langToggle');
+    if (lt) lt.addEventListener('click', () => setTimeout(setIdle, 0));
+    let armed = false, timer = null;
+    const hardReload = () => {
+      try { window.top.location.href = APP_BASE_URL + '?' + MASAR_TPL.reloadQuery; } catch (e) { window.location.reload(); }
+    };
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      if (CONFIRM && !armed) {
+        armed = true; btn.classList.add('armed'); if (label) label.textContent = sureText();
+        clearTimeout(timer); timer = setTimeout(() => { armed = false; setIdle(); }, 2800);
+        return;
+      }
+      clearTimeout(timer); armed = false; setIdle();
+      const soft = () => loadOrders();
+      if (soft) {
+        btn.classList.add('spin');
+        try { soft(); setTimeout(() => btn.classList.remove('spin'), 1200); return; } catch (e) { btn.classList.remove('spin'); }
+      }
+      hardReload();
+    });
+  })();
+  function t(key) { return (dict[state.lang] && dict[state.lang][key]) || key; }
+  function itemName(it) { return state.lang === 'ar' ? it.nameAr : it.nameEn; }
+  function itemUnit(it) { return it.unit; }
+  function round1(n) { return Math.round(n * 100) / 100; }
+
+  function applyI18n(container) {
+    container.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (dict[state.lang][key] !== undefined) el.textContent = dict[state.lang][key];
+    });
+  }
+
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => el.classList.remove('show'), 2600);
+  }
+
+  function onceWithTimeout(fn, timeoutMs) {
+    let fired = false;
+    const timer = setTimeout(() => { if (!fired) { fired = true; forceHideBusyOverlay(); fn(); } }, timeoutMs * (typeof TIMEOUT_SCALE === 'number' ? TIMEOUT_SCALE : 1));
+    return (...args) => { if (fired) return; fired = true; clearTimeout(timer); fn(...args); };
+  }
+
+  function loadOrders() {
+    document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="margin-top:16px;">${t('loadingText')}</div>`;
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(result => {
+        if (!result || !result.success) {
+          const detail = result ? JSON.stringify(result) : '';
+          document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="margin-top:16px; color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} — ${detail}</div>`;
+          return;
+        }
+        ORDERS = result.data.orders.map(o => ({
+          orderId: o.orderId, store: state.lang === 'ar' ? o.storeNameAR : o.storeNameEN,
+          itemCount: o.itemCount, fromProductionManager: o.fromProductionManager, distributionId: o.distributionId, prepared: false,
+          orderType: o.orderType, createdAt: o.createdAt || ''
+        }));
+        renderList();
+        // عدّاد تبويب "إنشاء رحلة جديدة": نداء صامت لا يعطّل القائمة
+        google.script.run
+          .withSuccessHandler(r => {
+            if (!r || !r.success) return;
+            TRIP_READY_COUNT = r.data.orders.length;
+            document.querySelectorAll('[data-trip-count]').forEach(el => { el.textContent = TRIP_READY_COUNT; el.classList.toggle('zero', !TRIP_READY_COUNT); });
+          })
+          .withFailureHandler(() => {})
+          .getOrdersReadyForShipment(CURRENT_USER_ID);
+      }, 8000))
+      .withFailureHandler(error => {
+        let detail = ''; try { detail = (error && error.message) ? error.message : JSON.stringify(error); } catch (e) { detail = String(error); }
+        document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="margin-top:16px; color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} (FAIL) — ${detail}</div>`;
+      })
+      .getDistributionsReadyToPrepare(CURRENT_USER_ID);
+  }
+
+  /**
+   * loadTripData() -- SPEC v1.4 (جديدة): تُحمَّل كسولًا فقط عند دخول تدفّق
+   * "إنشاء رحلة" (لا مع كل تحميل للقائمة الرئيسية -- معظم الزيارات لهذه
+   * الشاشة لا تحتاج هذه البيانات إطلاقًا).
+   */
+  function loadTripData(onReady) {
+    document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="margin-top:16px;">${t('loadingText')}</div>`;
+    let driversResult = null, readyResult = null;
+    function checkDone() {
+      if (driversResult === null || readyResult === null) return;
+      if (!driversResult.success || !readyResult.success) {
+        const failed = !driversResult.success ? driversResult : readyResult;
+        document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="margin-top:16px; color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} — ${JSON.stringify(failed)}</div>`;
+        return;
+      }
+      DRIVERS = driversResult.data.drivers;
+      TRIP_READY_COUNT = readyResult.data.orders.length;
+      READY_FOR_SHIPMENT_ORDERS = readyResult.data.orders.map(o => ({ orderId: o.orderId, store: state.lang === 'ar' ? o.storeNameAR : o.storeNameEN, itemCount: o.itemCount }));
+      onReady();
+    }
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(r => { driversResult = r || { success: false }; checkDone(); }, 8000))
+      .withFailureHandler(() => { driversResult = { success: false }; checkDone(); })
+      .getActiveDriversList(CURRENT_USER_ID);
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(r => { readyResult = r || { success: false }; checkDone(); }, 8000))
+      .withFailureHandler(() => { readyResult = { success: false }; checkDone(); })
+      .getOrdersReadyForShipment(CURRENT_USER_ID);
+  }
+
+  function stepperHtml(active) {
+    return `<div class="stepper">
+      <span class="step ${active === 1 ? 'active' : 'done'}"><span class="n">${active === 1 ? '1' : '✓'}</span>${t('step1')}</span>
+      <span class="bar"></span>
+      <span class="step ${active === 2 ? 'active' : ''}"><span class="n">2</span>${t('step2')}</span>
+    </div>`;
+  }
+
+  function renderChooseDriverOrders() {
+    tripState.view = 'CHOOSE';
+    tripState.selectedOrders = [];
+    if (!tripState.chosenDriver || !DRIVERS.some(d => d.userId === tripState.chosenDriver)) tripState.chosenDriver = DRIVERS[0] ? DRIVERS[0].userId : null;
+    document.getElementById('mainArea').innerHTML = `
+      ${pageHeadHtml()}
+      ${mainTabsHtml('trip')}
+      ${stepperHtml(1)}
+      <div class="trip-section">🚗 ${t('pickDriver')}</div>
+      <input type="hidden" id="driverSelect" value="${tripState.chosenDriver || ''}">
+      <div class="driver-grid" id="driverGrid">${DRIVERS.map(d => {
+        const name = state.lang === 'ar' ? d.nameAR : d.nameEN;
+        return `<button type="button" class="driver-card ${d.userId === tripState.chosenDriver ? 'selected' : ''}" data-driver="${d.userId}"><span class="avatar">${(name || '?').trim().charAt(0)}</span><span>${name}</span></button>`;
+      }).join('')}</div>
+      <div class="trip-section">📦 ${t('pickOrders')}<span class="count" id="selCount">${t('selectedOf')(0, READY_FOR_SHIPMENT_ORDERS.length)}</span></div>
+      <div id="ordersCheckList"></div>
+      <div class="trip-actions">
+        <button class="next-btn" id="tripNextBtn" disabled>${t('nextBtn')}</button>
+        <button class="cancel-create-btn" id="tripCancelChooseBtn">${t('cancelBtn')}</button>
+      </div>
+    `;
+    applyI18n(document.getElementById('mainArea'));
+    wireMainTabs();
+    document.querySelectorAll('#driverGrid .driver-card').forEach(btn => {
+      btn.addEventListener('click', () => {
+        tripState.chosenDriver = btn.getAttribute('data-driver');
+        document.getElementById('driverSelect').value = tripState.chosenDriver;
+        document.querySelectorAll('#driverGrid .driver-card').forEach(x => x.classList.toggle('selected', x === btn));
+      });
+    });
+    const checkList = document.getElementById('ordersCheckList');
+    if (!READY_FOR_SHIPMENT_ORDERS.length) {
+      checkList.innerHTML = `<div class="card empty-state" style="padding:22px;">${t('emptyReady')}</div>`;
+    } else {
+      checkList.innerHTML = READY_FOR_SHIPMENT_ORDERS.map(o => `
+        <label class="order-pick" data-order="${o.orderId}">
+          <input type="checkbox" value="${o.orderId}">
+          <span class="tick">✓</span>
+          <div class="main">
+            <div class="store">${o.store}</div>
+            <div class="meta"><span class="oid">${o.orderId}</span><span class="chip">${t('itemsCount')(o.itemCount)}</span></div>
+          </div>
+        </label>`).join('');
+    }
+    checkList.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        cb.closest('.order-pick').classList.toggle('selected', cb.checked);
+        tripState.selectedOrders = Array.from(checkList.querySelectorAll('input:checked')).map(c => c.value);
+        const n = tripState.selectedOrders.length;
+        document.getElementById('tripNextBtn').disabled = n === 0;
+        document.getElementById('tripNextBtn').textContent = n ? t('nextCount')(n) : t('nextBtn');
+        document.getElementById('selCount').textContent = t('selectedOf')(n, READY_FOR_SHIPMENT_ORDERS.length);
+      });
+    });
+    document.getElementById('tripNextBtn').addEventListener('click', () => {
+      if (tripState.selectedOrders.length) renderTripSequence();
+    });
+    document.getElementById('tripCancelChooseBtn').addEventListener('click', renderList);
+  }
+
+  function renderTripSequence() {
+    tripState.view = 'SEQUENCE';
+    tripState.sequencedStops = tripState.selectedOrders.map(id => READY_FOR_SHIPMENT_ORDERS.find(o => o.orderId === id));
+    const driver = (document.getElementById('driverSelect') && document.getElementById('driverSelect').value) || tripState.chosenDriver || (DRIVERS[0] ? DRIVERS[0].userId : null);
+    tripState.chosenDriver = driver;
+
+    const drvObj = DRIVERS.find(d => d.userId === driver);
+    const drvName = drvObj ? (state.lang === 'ar' ? drvObj.nameAR : drvObj.nameEN) : driver;
+    document.getElementById('mainArea').innerHTML = `
+      ${pageHeadHtml()}
+      ${mainTabsHtml('trip')}
+      ${stepperHtml(2)}
+      <div class="trip-section">🔀 ${t('sequenceTitle')}</div>
+      <div class="drag-hint" style="text-align:start; margin-bottom:12px;">${t('dragHint')}</div>
+      <div id="tripDragList"></div>
+      <div class="summary-line">${t('tripSummary')('<b>' + drvName + '</b>', tripState.sequencedStops.length)}</div>
+      <div class="trip-actions">
+        <button class="create-btn" id="createTripBtn">${t('createBtn')}</button>
+        <button class="cancel-create-btn" id="tripCancelSeqBtn">${t('cancelBtn')}</button>
+      </div>
+    `;
+    applyI18n(document.getElementById('mainArea'));
+    wireMainTabs();
+    renderTripDragList();
+
+    (function () {
+      const btn = document.getElementById('createTripBtn');
+      let armed = false;
+      let timer = null;
+      const original = btn.innerHTML;
+      btn.addEventListener('click', () => {
+        if (btn.disabled) return;
+        if (!armed) {
+          armed = true;
+          btn.classList.add('confirm-armed');
+          btn.innerHTML = state.lang === 'ar' ? '👆 اضغط مرة أخرى للتأكيد' : '👆 Tap again to confirm';
+          timer = setTimeout(() => { armed = false; btn.classList.remove('confirm-armed'); btn.innerHTML = original; }, 2800);
+        } else {
+          clearTimeout(timer);
+          btn.disabled = true;
+          btn.innerHTML = `<span>${t('savingText')}</span>`;
+          const driverObj = DRIVERS.find(d => d.userId === tripState.chosenDriver);
+          const driverLabel = driverObj ? (state.lang === 'ar' ? driverObj.nameAR : driverObj.nameEN) : tripState.chosenDriver;
+          const orderIds = tripState.sequencedStops.map(s => s.orderId);
+          const stopSequence = tripState.sequencedStops.map((s, idx) => idx + 1);
+          google.script.run
+            .withSuccessHandler(onceWithTimeout(result => {
+              btn.disabled = false;
+              if (result && !result.success) { btn.innerHTML = original; showToast(t('loadErrorText')); return; }
+              showToast(t('toastCreated')(driverLabel));
+              loadOrders();
+            }, 8000))
+            .withFailureHandler(() => { btn.disabled = false; btn.innerHTML = original; showToast(t('loadErrorText')); })
+            .createShipment(CURRENT_USER_ID, tripState.chosenDriver, orderIds, stopSequence);
+        }
+      });
+    })();
+    document.getElementById('tripCancelSeqBtn').addEventListener('click', renderList);
+  }
+
+  function renderTripDragList() {
+    const wrap = document.getElementById('tripDragList');
+    wrap.innerHTML = tripState.sequencedStops.map((s, idx) => `
+      <div class="drag-stop" draggable="true" data-idx="${idx}">
+        <span class="drag-handle">⠿</span>
+        <div class="stop-num">${idx + 1}</div>
+        <div class="stop-main">
+          <div class="stop-store">${s.store}</div>
+          <div class="stop-items"><span class="oid">${s.orderId}</span><span class="chip" style="font-size:11.5px; background:#F3EEE6; border-radius:999px; padding:1px 9px; font-weight:600;">${t('itemsCount')(s.itemCount)}</span></div>
+        </div>
+        <div class="reorder">
+          <button type="button" data-move="up" data-idx="${idx}" ${idx === 0 ? 'disabled' : ''} aria-label="${t('moveUp')}">▲</button>
+          <button type="button" data-move="down" data-idx="${idx}" ${idx === tripState.sequencedStops.length - 1 ? 'disabled' : ''} aria-label="${t('moveDown')}">▼</button>
+        </div>
+      </div>`).join('');
+    // الشاشات اللمسية لا تدعم السحب والإفلات غالبًا -- أزرار ▲▼ تؤدي الغرض نفسه
+    wrap.querySelectorAll('[data-move]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const i = parseInt(btn.getAttribute('data-idx'));
+        const j = btn.getAttribute('data-move') === 'up' ? i - 1 : i + 1;
+        if (j < 0 || j >= tripState.sequencedStops.length) return;
+        const moved = tripState.sequencedStops.splice(i, 1)[0];
+        tripState.sequencedStops.splice(j, 0, moved);
+        renderTripDragList();
+      });
+    });
+
+    const items = wrap.querySelectorAll('.drag-stop');
+    items.forEach(el => {
+      el.addEventListener('dragstart', (e) => {
+        tripState.draggedIdx = parseInt(el.getAttribute('data-idx'));
+        el.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      el.addEventListener('dragend', () => { el.classList.remove('dragging'); items.forEach(i => i.classList.remove('drag-over')); });
+      el.addEventListener('dragover', (e) => { e.preventDefault(); el.classList.add('drag-over'); });
+      el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+      el.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const targetIdx = parseInt(el.getAttribute('data-idx'));
+        if (tripState.draggedIdx === null || tripState.draggedIdx === targetIdx) return;
+        const moved = tripState.sequencedStops.splice(tripState.draggedIdx, 1)[0];
+        tripState.sequencedStops.splice(targetIdx, 0, moved);
+        tripState.draggedIdx = null;
+        renderTripDragList();
+      });
+    });
+  }
+
+  function fmtOrderDate(iso) {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return new Intl.DateTimeFormat(state.lang === 'ar' ? 'ar-QA-u-nu-latn' : 'en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(d);
+  }
+
+  let TRIP_READY_COUNT = null;
+
+  function pageHeadHtml() {
+    const locale = state.lang === 'ar' ? 'ar-QA-u-nu-latn' : 'en-US';
+    const fmt = new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    return `<div class="greeting-card"><h1 data-i18n="screenTitle"></h1><div class="date-line">${fmt.format(new Date())}</div></div>`;
+  }
+
+  function mainTabsHtml(active) {
+    const prepCount = ORDERS.filter(o => !o.prepared).length;
+    const tripCount = TRIP_READY_COUNT === null ? '' : TRIP_READY_COUNT;
+    return `<div class="main-tabs" role="tablist">
+      <button type="button" class="main-tab ${active === 'prepare' ? 'active' : ''}" data-maintab="prepare" role="tab">📦 ${t('tabPrepare')}<span class="cnt ${prepCount ? '' : 'zero'}">${prepCount}</span></button>
+      <button type="button" class="main-tab ${active === 'trip' ? 'active' : ''}" data-maintab="trip" role="tab">🚚 ${t('createTripTitle')}<span class="cnt ${tripCount ? '' : 'zero'}" data-trip-count>${tripCount === '' ? '…' : tripCount}</span></button>
+    </div>`;
+  }
+
+  function wireMainTabs() {
+    document.querySelectorAll('[data-maintab]').forEach(el => {
+      el.addEventListener('click', () => {
+        const target = el.getAttribute('data-maintab');
+        if (el.classList.contains('active')) return;
+        if (target === 'trip') loadTripData(renderChooseDriverOrders); else loadOrders();
+      });
+    });
+  }
+
+  function renderList() {
+    const now = new Date();
+    const locale = state.lang === 'ar' ? 'ar-QA-u-nu-latn' : 'en-US';
+    const fmt = new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+    document.getElementById('mainArea').innerHTML = `
+      ${pageHeadHtml()}
+      ${mainTabsHtml('prepare')}
+      <div style="font-size:13px; font-weight:600; color:var(--ink-soft); margin-bottom:10px;" data-i18n="sectionTitle"></div>
+      <div id="ordersList"></div>
+    `;
+    applyI18n(document.getElementById('mainArea'));
+    wireMainTabs();
+
+    const list = document.getElementById('ordersList');
+    const pending = ORDERS.filter(o => !o.prepared);
+    if (!pending.length) { list.innerHTML = `<div class="card empty-state"><div class="big">📦</div>${t('emptyList')}</div>`; return; }
+
+    list.innerHTML = pending.map(o => `
+      <button class="order-card" type="button" data-order="${o.orderId}">
+        <div class="order-icon">📦</div>
+        <div class="order-main">
+          <div class="order-top">
+            <span class="order-store">${o.store}</span>
+            <span class="order-id-tag">${o.orderId}</span>
+            ${o.fromProductionManager ? `<span class="prod-mgr-tag">${t('fromProdMgr')}</span>` : ''}
+          </div>
+          <div class="order-sub">${o.orderType === 'SPECIAL' ? t('typeSpecial') : t('typeNormal')} · ${t('itemsCount')(o.itemCount)}${o.createdAt ? ' · ' + fmtOrderDate(o.createdAt) : ''}</div>
+        </div>
+        <span class="chevron">›</span>
+      </button>`).join('');
+    list.querySelectorAll('[data-order]').forEach(el => {
+      el.addEventListener('click', () => renderDetail(el.getAttribute('data-order')));
+    });
+  }
+
+  function renderDetail(orderId) {
+    const order = ORDERS.find(o => o.orderId === orderId);
+    if (!order) return;
+    document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="margin-top:16px;">${t('loadingText')}</div>`;
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(result => {
+        if (!result || !result.success) {
+          const detail = result ? JSON.stringify(result) : '';
+          document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="margin-top:16px; color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} — ${detail}</div>`;
+          return;
+        }
+        currentDetail = result.data;
+        renderDetailContent(order);
+      }, 8000))
+      .withFailureHandler(error => {
+        let detail = ''; try { detail = (error && error.message) ? error.message : JSON.stringify(error); } catch (e) { detail = String(error); }
+        document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="margin-top:16px; color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} (FAIL) — ${detail}</div>`;
+      })
+      .getShipmentPrepareDetail(CURRENT_USER_ID, order.distributionId);
+  }
+
+  function renderDetailContent(order) {
+    const d = currentDetail;
+    document.getElementById('mainArea').innerHTML = `
+      <div class="subheader">
+        <button class="back-btn" id="detailBackBtn"><span class="arrow">←</span></button>
+        <h1>${order.store}</h1>
+        <span class="meta-badge">${order.orderId}</span>
+      </div>
+      <div class="banner">${t('banner')}</div>
+      <div class="card form-card">
+        <h2>📦 ${t('itemsSection')}</h2>
+        <div id="finalItemsList"></div>
+      </div>
+    `;
+    document.getElementById('detailBackBtn').addEventListener('click', () => { currentDetail = null; renderList(); });
+    renderFinalItems(d);
+
+    document.getElementById('mainArea').insertAdjacentHTML('beforeend', `
+      <div class="sticky-bar-wrap">
+        <div class="scallop"></div>
+        <div class="sticky-bar">
+          <div class="sticky-bar-inner">
+            <button class="btn-prepare" id="prepareBtn"><span>📦</span><span>${t('prepareBtn')}</span></button>
+          </div>
+        </div>
+      </div>
+    `);
+    (function () {
+      const btn = document.getElementById('prepareBtn');
+      let armed = false;
+      let timer = null;
+      let readyToLeave = false;
+      const original = btn.innerHTML;
+      btn.addEventListener('click', () => {
+        if (btn.disabled) return;
+        if (readyToLeave) { currentDetail = null; loadOrders(); return; }
+        if (!armed) {
+          armed = true;
+          btn.classList.add('confirm-armed');
+          btn.innerHTML = state.lang === 'ar' ? '👆 اضغط مرة أخرى للتأكيد' : '👆 Tap again to confirm';
+          timer = setTimeout(() => { armed = false; btn.classList.remove('confirm-armed'); btn.innerHTML = original; }, 2800);
+        } else {
+          clearTimeout(timer);
+          btn.disabled = true;
+          btn.innerHTML = `<span>${t('savingText')}</span>`;
+          const finalQuantities = d.items.map(it => ({ orderItemId: it.orderItemId, qty: it.finalQty }));
+          google.script.run
+            .withSuccessHandler(onceWithTimeout(result => {
+              if (result && !result.success) { btn.disabled = false; btn.innerHTML = original; showToast(t('loadErrorText')); return; }
+              showToast(t('toastPrepared')(order.store));
+              readyToLeave = true;
+              btn.disabled = false;
+              btn.innerHTML = `<span>👆 ${t('continueBtn')}</span>`;
+            }, 8000))
+            .withFailureHandler(() => { btn.disabled = false; btn.innerHTML = original; showToast(t('loadErrorText')); })
+            .prepareShipment(CURRENT_USER_ID, d.distributionId, finalQuantities);
+        }
+      });
+    })();
+  }
+
+  function renderFinalItems(d) {
+    const wrap = document.getElementById('finalItemsList');
+    // SPEC v1.4 (جديدة، طلب مباشر): اسم الجهة المصدر (قسم/مخزن) أسفل الصنف
+    // مباشرة (البيانات مرتَّبة بها أصلًا من الخادم)، وشارة واضحة لأي صنف
+    // لم يُسلَّم كاملًا أو تعذَّر تجهيزه بالكامل.
+    wrap.innerHTML = d.items.map((it, idx) => {
+      const sourceName = state.lang === 'ar' ? it.sourceNameAR : it.sourceNameEN;
+      const statusBadge = it.itemStatus === 'UNFULFILLED' ? `<span class="item-status-badge unfulfilled">⛔ ${t('statusUnfulfilled')}</span>`
+        : it.itemStatus === 'PARTIAL' ? `<span class="item-status-badge partial">⚠️ ${t('statusPartial')}</span>` : '';
+      return `
+      <div class="final-row" data-idx="${idx}">
+        <div class="item-thumb">📦</div>
+        <div class="item-main">
+          <div class="item-name">${state.lang === 'ar' ? it.nameAR : it.nameEN}</div>
+          ${sourceName ? `<div class="item-source">${sourceName}</div>` : ''}
+          <div class="item-ref">${t('executedRef')}: ${it.finalQty} ${it.unitId} / ${t('requestedRef')}: ${it.requestedQty}</div>
+          ${statusBadge}
+          ${d.fromProductionManager ? `<div class="prod-mgr-note">🏭 ${t('resolvedNote')}</div>` : ''}
+        </div>
+        <div class="qty-stepper">
+          <button class="fq-dec" aria-label="-">−</button>
+          <input type="number" class="fq-input" value="${it.finalQty}" min="0" step="0.5">
+          <button class="fq-inc" aria-label="+">+</button>
+        </div>
+        <span class="item-unit">${it.unitId}</span>
+      </div>`;
+    }).join('');
+
+    wrap.querySelectorAll('.final-row').forEach(row => {
+      const idx = parseInt(row.getAttribute('data-idx'));
+      const it = d.items[idx];
+      const input = row.querySelector('.fq-input');
+      const setQty = (val) => { it.finalQty = Math.max(0, round1(val)); input.value = it.finalQty; };
+      row.querySelector('.fq-inc').addEventListener('click', () => setQty(it.finalQty + 0.5));
+      row.querySelector('.fq-dec').addEventListener('click', () => setQty(Math.max(0, it.finalQty - 0.5)));
+      input.addEventListener('change', () => {
+        // SPEC v1.4 (إصلاح نفس النمط الخطير المُكتشَف في اعتماد الإنتاج):
+        // حدث change بلا رقم صالح فعليًا كان يُصفِّر كمية الشحنة النهائية
+        // صامتًا -- الآن يبقى على القيمة الحالية بدل صفر عند أي قيمة غير صالحة.
+        const parsed = parseFloat(input.value);
+        setQty(!isNaN(parsed) ? parsed : it.finalQty);
+      });
+    });
+  }
+
+  // رجوع للمحور الرئيسي لمسؤول التوزيع (window.top: انظر KNOWN_ISSUES.md #2)
+  document.getElementById('topBackBtn').addEventListener('click', () => {
+    window.top.location.href = APP_BASE_URL + '?page=distribution_hub&uid=' + encodeURIComponent(CURRENT_USER_ID);
+  });
+  document.getElementById('langToggle').addEventListener('click', () => {
+    state.lang = state.lang === 'ar' ? 'en' : 'ar';
+    document.documentElement.lang = state.lang;
+    document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+    document.getElementById('langToggle').textContent = state.lang === 'ar' ? 'EN' : 'AR';
+    applyI18n(document.querySelector('header.topbar'));
+    renderList();
+  });
+  document.getElementById('userMenuBtn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('userDropdown').classList.toggle('open'); });
+  document.addEventListener('click', () => document.getElementById('userDropdown').classList.remove('open'));
+  document.querySelectorAll('[data-toast="notReady"]').forEach(el => {
+    el.addEventListener('click', (e) => { e.stopPropagation(); showToast(t('toastNotReady')); });
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    const btn = document.getElementById('logoutBtn');
+    if (btn.classList.contains('continue-armed')) { window.top.location.href = APP_BASE_URL; return; }
+    document.getElementById('userDropdown').classList.remove('open');
+    btn.disabled = true;
+    const originalContent = btn.textContent;
+    btn.textContent = t('savingText');
+    const finishLogout = onceWithTimeout(() => {
+      btn.disabled = false;
+      btn.classList.add('continue-armed');
+      btn.textContent = '👆 ' + t('continueBtn');
+    }, 8000);
+    google.script.run.withSuccessHandler(finishLogout).withFailureHandler(finishLogout).logout(CURRENT_USER_ID, masarLogoutMarker());
+  });
+
+  let forceHideOverlayFn = () => {};
+  function forceHideBusyOverlay() { forceHideOverlayFn(); }
+  function wrapGoogleScriptRunWithBusyOverlay() {
+    if (typeof google === 'undefined' || !google.script || !google.script.run) return;
+    const realRun = google.script.run;
+    const overlay = document.getElementById('globalBusyOverlay');
+    let busyCount = 0;
+    function showBusy() { busyCount++; overlay.classList.add('show'); }
+    function hideBusy() { busyCount = Math.max(0, busyCount - 1); if (busyCount === 0) overlay.classList.remove('show'); }
+    forceHideOverlayFn = () => { busyCount = 0; overlay.classList.remove('show'); };
+    Object.defineProperty(google.script, 'run', {
+      configurable: true,
+      get() {
+        const handlers = { onSuccess: null, onFailure: null };
+        let proxy;
+        const chain = {
+          withSuccessHandler(fn) { handlers.onSuccess = fn; return proxy; },
+          withFailureHandler(fn) { handlers.onFailure = fn; return proxy; }
+        };
+        proxy = new Proxy(chain, {
+          get(target, prop) {
+            if (prop === 'withSuccessHandler' || prop === 'withFailureHandler') return target[prop];
+            return (...args) => {
+              showBusy();
+              return realRun
+                .withSuccessHandler((...r) => { hideBusy(); if (handlers.onSuccess) handlers.onSuccess(...r); })
+                .withFailureHandler((...r) => { hideBusy(); if (handlers.onFailure) handlers.onFailure(...r); })
+                [prop](...args);
+            };
+          }
+        });
+        return proxy;
+      }
+    });
+  }
+
+  wrapGoogleScriptRunWithBusyOverlay();
+  applyI18n(document.querySelector('header.topbar'));
+  loadOrders();
+  masarAutoRefresh({ domains: ['DISTRIBUTION', 'SHIPMENTS', 'ORDERS'], refresh: () => loadOrders(), isBusy: () => (currentDetail !== null || !!document.querySelector('.main-tab[data-maintab="trip"].active')) });
+</script>
+
+</body>
+</html>

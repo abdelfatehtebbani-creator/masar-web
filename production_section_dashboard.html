@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#3D2B1E">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="مسار">
+<link rel="apple-touch-icon" href="icon-180.png">
+<script src="masar-config.js?v=67ea158b"></script>
+<script src="masar-runtime.js?v=67ea158b"></script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALAKER SWEETS — طلبيات المحلات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Markazi+Text:wght@600;700&family=Fraunces:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #EE7126; --primary-dark: #C85A18; --primary-tint: #FCE8D8;
+    --secondary: #3D2B1E; --ink: #2B211B; --ink-soft: #6B5D52;
+    --bg: #FAF7F1; --surface: #FFFFFF; --line: #E7DFD2;
+    --success: #4B7A4F; --success-tint: #E7EFE6;
+    --warn: #B23B2E; --warn-tint: #F7E6E2;
+    --pending: #B4802A; --pending-tint: #F5EAD9;
+    --locked: #8A7A6B; --locked-tint: #ECE7E0;
+    --radius-lg: 16px; --radius-md: 12px; --radius-sm: 8px;
+    --shadow-card: 0 1px 2px rgba(43,33,27,0.06), 0 4px 16px rgba(43,33,27,0.05);
+    --font-ar: 'IBM Plex Sans Arabic', sans-serif; --font-en: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { overflow-x: hidden; max-width: 100vw; }
+  html[lang="ar"] body { font-family: var(--font-ar); }
+  html[lang="en"] body { font-family: var(--font-en); }
+  body {
+    background-color: var(--bg);
+    background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 38px, rgba(61,43,30,0.035) 38px, rgba(61,43,30,0.035) 39px);
+    color: var(--ink); min-height: 100vh; -webkit-font-smoothing: antialiased; padding-bottom: 30px;
+  }
+
+  header.topbar {
+    display: flex; align-items: center; gap: 16px; background: var(--secondary); color: #fff;
+    padding: 10px 20px; position: sticky; top: 0; z-index: 30; box-shadow: 0 2px 10px rgba(0,0,0,0.15); max-width: 100%;
+  }
+  .brand-logo { height: 40px; width: auto; display: block; flex-shrink: 0; }
+  .brand-meta { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; overflow: hidden; }
+  .brand-meta .system-name { font-size: 11px; letter-spacing: 0.14em; color: rgba(255,255,255,0.55); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .brand-meta .role-name { font-size: 15px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .topbar-spacer { flex: 1; min-width: 8px; }
+  .dept-pill {
+    display: inline-flex; align-items: center; gap: 6px; min-width: 0;
+    background: rgba(238,113,38,0.18); border: 1px solid rgba(238,113,38,0.45);
+    color: #FBCBA0; font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 999px; white-space: nowrap;
+  }
+  .icon-btn {
+    display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #fff; cursor: pointer;
+    font-size: 14px; font-weight: 600; transition: background 0.15s ease; position: relative; flex-shrink: 0;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,0.16); }
+  .user-menu { position: relative; flex-shrink: 0; }
+  .user-dropdown {
+    position: absolute; top: calc(100% + 8px); inset-inline-end: 0; background: var(--surface); color: var(--ink);
+    border: 1px solid var(--line); border-radius: var(--radius-md); box-shadow: var(--shadow-card);
+    min-width: 200px; padding: 6px; display: none; z-index: 40;
+  }
+  .user-dropdown.open { display: block; }
+  .user-dropdown button {
+    display: flex; align-items: center; gap: 10px; width: 100%; text-align: start; background: none; border: none;
+    padding: 10px 12px; border-radius: var(--radius-sm); font-size: 14px; font-family: inherit; color: var(--ink); cursor: pointer;
+  }
+  .user-dropdown button:hover { background: var(--bg); }
+
+  @media (max-width: 420px) {
+    header.topbar { flex-wrap: wrap; row-gap: 8px; padding: 10px 12px; gap: 8px; }
+    .topbar-spacer { flex: 0 0 100%; height: 0; }
+    .brand-meta .system-name { display: none; }
+  }
+
+  main { max-width: 880px; margin: 0 auto; padding: 20px 20px 20px; }
+
+  .greeting-card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-card);
+    padding: 20px 22px; margin-bottom: 18px;
+  }
+  .greeting-card h1 { font-size: 22px; font-weight: 600; color: var(--secondary); }
+  .greeting-card .date-line { color: var(--ink-soft); font-size: 13.5px; margin-top: 4px; }
+
+  .section-title { font-size: 13px; font-weight: 600; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; padding-inline-start: 4px; }
+
+  .store-card {
+    width: 100%; display: block; text-align: start; font-family: inherit; color: inherit;
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card); padding: 16px 18px; margin-bottom: 12px; cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .store-card.received { background: var(--primary-tint); border-color: rgba(238,113,38,0.35); }
+  .store-card:hover { box-shadow: 0 4px 16px rgba(43,33,27,0.1); }
+
+  .store-top { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .store-name { font-size: 15.5px; font-weight: 700; color: var(--ink); }
+  .new-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); flex-shrink: 0; box-shadow: 0 0 0 3px rgba(238,113,38,0.25); }
+  .store-spacer { flex: 1; }
+  .order-id-tag { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-soft); }
+  .chevron { color: var(--ink-soft); font-size: 15px; flex-shrink: 0; }
+  html[dir="rtl"] .chevron { transform: scaleX(-1); display: inline-block; }
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
+  .badge.normal { color: var(--primary-dark); background: var(--primary-tint); border: 1px solid rgba(193,121,31,0.35); }
+  .badge.special { color: #fff; background: var(--secondary); }
+
+  .store-stats { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+  .stat-chip { font-size: 12px; color: var(--ink-soft); background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; }
+  .stat-chip strong { color: var(--ink); font-family: var(--font-mono); }
+  .stat-chip.shortage-chip { background: var(--warn-tint); color: var(--warn); border-color: rgba(178,59,46,0.3); }
+  .stat-chip.shortage-chip strong { color: var(--warn); }
+
+  .status-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; padding: 5px 11px; border-radius: 999px; }
+  .locked-sent-time { display: block; font-size: 11px; color: var(--ink-soft); margin-top: 6px; }
+  .load-archive-btn {
+    display: block; width: 100%; margin-top: 4px; padding: 12px; background: var(--surface); border: 1px dashed var(--line);
+    border-radius: var(--radius-md); color: var(--ink-soft); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .status-badge.locked { background: var(--locked-tint); color: var(--locked); }
+  .status-badge.progress { background: var(--pending-tint); color: var(--pending); }
+  .status-badge.done { background: var(--success-tint); color: var(--success); }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--ink-soft); font-size: 13.5px; }
+
+  .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(10px);
+    background: var(--secondary); color: #fff; font-size: 13.5px; padding: 11px 18px; border-radius: 999px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2); opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 60; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  #globalBusyOverlay { position: fixed; inset: 0; z-index: 999; cursor: wait; display: none; background: rgba(0,0,0,0.02); }
+  #globalBusyOverlay.show { display: block; }
+  .refresh-btn { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; border-radius: 999px; background: rgba(255,255,255,0.18); border: 1.5px solid rgba(255,255,255,0.9); color: #fff; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; flex-shrink: 0; white-space: nowrap; transition: background 0.15s ease; }
+  .refresh-btn:hover { background: rgba(255,255,255,0.32); }
+  .refresh-btn:active { transform: scale(0.97); }
+  .refresh-btn.armed { background: #fff; color: var(--secondary); }
+  .refresh-btn.spin .ico { animation: masar-spin 0.8s linear infinite; }
+  @keyframes masar-spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <img src="asset-82d7b1e2.png" alt="ALAKER SWEETS" class="brand-logo">
+  <div class="brand-meta">
+    <span class="system-name">MASAR</span>
+    <span class="role-name" data-i18n="roleName"></span>
+  </div>
+  <div class="topbar-spacer"></div>
+  <div class="dept-pill" id="userNamePillWrap"><span id="userNamePill"></span></div>
+  <div class="dept-pill"><span id="deptPill"></span></div>
+  <button class="refresh-btn" id="refreshBtn" type="button" title="تحديث / Refresh"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span class="rf-label">تحديث</span></button>
+  <button class="icon-btn" id="langToggle" title="AR / EN">AR</button>
+  <div class="user-menu">
+    <button class="icon-btn" id="userMenuBtn">⋮</button>
+    <div class="user-dropdown" id="userDropdown">
+      <button data-i18n="changePassword" data-toast="notReady"></button>
+      <button id="logoutBtn" data-i18n="logout"></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="greeting-card">
+    <h1 data-i18n="screenTitle"></h1>
+    <div class="date-line" id="dateLine"></div>
+  </div>
+
+  <button class="submit-btn" id="goToSupplyRequestBtn" style="width:100%; margin-bottom:16px; background:var(--secondary); color:#fff; border:none; font-family:inherit; font-size:14px; font-weight:600; padding:12px; border-radius:var(--radius-md); cursor:pointer;">📦 <span data-i18n="supplyRequestBtnLbl"></span></button>
+
+  <div class="section-title" data-i18n="storesSection"></div>
+  <div id="storesList"></div>
+</main>
+
+<div class="toast" id="toast"></div>
+<div id="globalBusyOverlay"></div>
+
+<script>
+  // ---- Shared mock store-orders "database" for this department ----
+  // This is a static, frontend-only demo: there is no real server yet, so
+  // state cannot genuinely sync with the cashier's separate tracking screen.
+  // sessionStorage is used only so this screen and the store-order screen
+  // feel connected to each other during one browsing session (both read the
+  // same key) -- not a stand-in for the real backend sync that would happen
+  // once this is wired to Apps Script.
+  const APP_BASE_URL = MASAR_TPL.appBaseUrl;
+  var TIMEOUT_SCALE = MASAR_TPL.timeoutScale; // مضاعِف مُهَل الانتظار: ١ في الإنتاج، أكبر في DIV (مشروع بارد/شبكة اختبار)
+  // ===== شبكة الاتصال (١٠ أكتوبر ٢٠٢٦) =====
+  // مولَّد من tools/net_snippet.js بواسطة tools/build_client_snippets.js -- لا تعدّله يدويًا داخل الصفحات.
+  // (١) يتتبّع نداءات الحفظ (أي نداء لا يبدأ بـ get/list) ليعرف التحديث التلقائي أن الصفحة حفظت بنفسها.
+  // (٢) بلاغ "تعذّر تنفيذ العملية" المتكرر: بطء بدء Google (أو انقطاع لحظي) كان يُسقط النداء. للقراءات الصرفة فقط (قائمة مولَّدة آليًا من الخادم: دوال لا تكتب هي
+  // ولا ما تستدعيه) تُعاد المحاولة مرة واحدة عند الفشل/الردّ الفارغ، ويُرسَل نداء ثانٍ موازٍ إن تأخّر الأول ٦ ثوانٍ؛ يُسلَّم أول ردّ صالح. الحفظ والإنشاء لا يُكرَّران أبدًا.
+  const MASAR_RAW_RUN_ = (typeof google !== 'undefined' && google.script) ? google.script.run : null;
+  const MASAR_AR_INSTANCES_ = [];
+  const MASAR_PURE_READS_ = { getActiveDriversList:1,getActiveShipments:1,getActiveStoresWithOccupancy:1,getAllDepartments:1,getAllLists:1,getAllProducts:1,getAllRoles:1,getAllSettings:1,getAllStores:1,getAllUsers:1,getChangeTokens:1,getDepartmentStoreOrders:1,getDisposalFormData:1,getDistributionComparisonDetail:1,getDistributionManagerCancelEditRequests:1,getDistributionsReadyToPrepare:1,getFinishedGoodsQuarantineHistory:1,getFinishedGoodsStockBoard:1,getIssueToDepartmentFormData:1,getManagementReports:1,getMyNotifications:1,getMyShipments:1,getMySupplyRequests:1,getOffCatalogPurchaseRequests:1,getOrderDetails:1,getOrderEditStage:1,getOrderProductionApprovalDetail:1,getOrdersAwaitingInvoice:1,getOrdersAwaitingProductionApproval:1,getOrdersReadyForShipment:1,getOrdersReadyToReceive:1,getPendingLoadDiscrepancies:1,getPendingReturnItems:1,getPendingSupplyRequestsForRMS:1,getProductionManagerApprovals:1,getProductionManagerOrderFullDetail:1,getProductionManagerOrdersOverview:1,getPurchasingRawMaterialReports:1,getRawMaterialCatalog:1,getRawMaterialCatalogForRequest:1,getRawMaterialExpiryReport:1,getRawMaterialMovementSummary:1,getRawMaterialProductHistory:1,getRawMaterialQuarantineHistory:1,getRawMaterialShortageNotices:1,getRawMaterialStockBoard:1,getReceiveSurplusFormData:1,getReceivingDetails:1,getReferenceLists:1,getReturnReasons:1,getRolePermissionsMatrix:1,getShipmentPrepareDetail:1,getShortageReasons:1,getStoreDirectRawMaterialOrders:1,getStoreOrderDetail:1,getSuppliers:1,getSuppliersList:1,getTasksCatalog:1,getUnitsAndFamiliesList:1,getVehicleCoordinatorDriverStatus:1,getVehicleCoordinatorSpecialOrders:1,listOrders:1 };
+  (function masarTrackOwnCalls() {
+    try {
+      if (!MASAR_RAW_RUN_) return;
+      Object.defineProperty(google.script, 'run', {
+        configurable: true,
+        get() {
+          const handlers = { onSuccess: null, onFailure: null };
+          let proxy;
+          const chain = {
+            withSuccessHandler(fn) { handlers.onSuccess = fn; return proxy; },
+            withFailureHandler(fn) { handlers.onFailure = fn; return proxy; }
+          };
+          proxy = new Proxy(chain, {
+            get(target, prop) {
+              if (prop === 'withSuccessHandler' || prop === 'withFailureHandler') return target[prop];
+              return (...args) => {
+                // لقطة المعالجات لحظة النداء: غلاف حاجز الانشغال في الصفحات يمسك مرجعًا واحدًا من run فتتشارك النداءات المتزامنة كائن handlers، فلو قُرئ
+                // وقت الرد لاستلم كل رد معالج آخر نداء (بلاغ: "تعذّر فتح إنشاء رحلة" -- نداءا السائقين والجاهزة كانا يتبادلان معالجيهما)
+                const onS = handlers.onSuccess, onF = handlers.onFailure;
+                const name = String(prop);
+                if (Object.prototype.hasOwnProperty.call(MASAR_PURE_READS_, name)) {
+                  let settled = false, attempts = 0, pending = 0, hedge = null;
+                  const finish = (ok, v) => { if (settled) return; settled = true; clearTimeout(hedge); if (ok) { if (onS) onS(v); } else if (onF) onF(v); else { try { console.error(v); } catch (e) { /* تجاهل */ } } };
+                  const launch = () => {
+                    attempts++; pending++;
+                    const bad = v => {
+                      pending--;
+                      if (settled) return;
+                      if (attempts < 2) { setTimeout(launch, 700); return; }   // محاولة ثانية واحدة فقط
+                      if (pending === 0) finish(false, v);                       // الأخيرة فشلت ولا نداء آخر في الطريق
+                    };
+                    MASAR_RAW_RUN_
+                      .withSuccessHandler(r => { if (r === null || r === undefined) { bad(r); } else { pending--; finish(true, r); } })
+                      .withFailureHandler(e => bad(e))
+                      [name](...args);
+                  };
+                  hedge = setTimeout(() => { if (!settled && attempts < 2) launch(); }, 6000);
+                  launch();
+                  return;
+                }
+                const done = () => { if (!/^(get|list)/.test(name)) MASAR_AR_INSTANCES_.forEach(i => { try { i.ownDone(); } catch (e) { /* لا يعطّل النداء */ } }); };
+                return MASAR_RAW_RUN_
+                  .withSuccessHandler((...r) => { done(); if (onS) onS(...r); })
+                  .withFailureHandler((...r) => { done(); if (onF) onF(...r); else { try { console.error(r[0]); } catch (e) { /* تجاهل */ } } })
+                  [prop](...args);
+              };
+            }
+          });
+          return proxy;
+        }
+      });
+    } catch (e) { /* لا تتبّع: يبقى السلوك القديم كما هو */ }
+  })();
+  // يستعمله التحديث التلقائي الصامت: نفس طبقة الاتصال (إعادة المحاولة) لكن بلا غلاف حاجز الانشغال الذي تُركّبه الصفحة لاحقًا فوقها
+  let MASAR_NET_GETTER_ = null;
+  try { MASAR_NET_GETTER_ = Object.getOwnPropertyDescriptor(google.script, 'run').get || null; } catch (e) { MASAR_NET_GETTER_ = null; }
+  // ===== نهاية شبكة الاتصال =====
+  // ===== تحديث تلقائي بالتغيّر (٩ أكتوبر ٢٠٢٦، نُقّح ١٠ أكتوبر) =====
+  // كل ٣٠ ثانية تسأل الصفحة (نداء خفيف بلا قراءة جداول) هل تغيّر شيء في مجالاتها؛ إن تغيّر تُعيد جلب بياناتها مرة واحدة. تتوقف والتبويب مخفيّ، وتستأنف عند
+  // العودة. إن كان المستخدم يكتب أو توجد نافذة مفتوحة أو حقل معدَّل لا تُبدَّل الشاشة تحت يده: يظهر شريط "توجد تحديثات" ينقر عليه حين يشاء.
+  // النداء الخفيف يمرّ عبر مرجع google.script.run الأصلي (قبل غلاف حاجز الانشغال) فلا يحجب الشاشة، ولا يمدّ الجلسة.
+  // تنقيح (بلاغ ميداني: "ساعة رملية كل برهة" و"الشاشة تُعاد بعد كل حفظ"): (١) التحديث التلقائي صامت: لا حاجز انشغال ولا ومضة "جارٍ التحميل"،
+  // ويحفظ موضع التمرير؛ (٢) ما تحفظه هذه الصفحة نفسها (أي نداء لا يبدأ بـ get) لا يُحدِّثها هي: تُعاد قراءة الرمز بعده فيصير خط الأساس الجديد؛ (٣) شارة
+  // صغيرة أسفل الشاشة تُظهر وقت آخر فحص وتومض عند التحديث، ولون أحمر إن تعذّر الفحص.
+  // ينفّذ إعادة جلب بيانات الصفحة بصمت: بلا حاجز انشغال (النداءات داخلها تمرّ بالمرجع الأصلي)، بلا ومضة "جارٍ التحميل"، وبحفظ موضع التمرير
+  function masarRunSilently(fn) {
+    let desc = null, area = null, proto = null;
+    try { desc = Object.getOwnPropertyDescriptor(google.script, 'run'); Object.defineProperty(google.script, 'run', { configurable: true, get() { return MASAR_NET_GETTER_ ? MASAR_NET_GETTER_() : MASAR_RAW_RUN_; } }); } catch (e) { desc = null; }
+    try {
+      area = document.getElementById('mainArea');
+      if (area && typeof Element !== 'undefined') {
+        proto = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
+        Object.defineProperty(area, 'innerHTML', {
+          configurable: true,
+          get() { return proto.get.call(area); },
+          set(v) { const s = String(v); if (/empty-state/.test(s) && !/order-card|<table|<button/.test(s)) return; proto.set.call(area, v); }
+        });
+      }
+    } catch (e) { proto = null; }
+    let keep = null;
+    try {
+      if (area && typeof window !== 'undefined' && typeof MutationObserver !== 'undefined') {
+        const scrollers = [document.scrollingElement, area.parentElement].filter(Boolean).map(el => ({ el: el, top: el.scrollTop }));
+        let moved = false;
+        const mark = () => { moved = true; };
+        ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(ev => window.addEventListener(ev, mark, true));
+        const mo = new MutationObserver(() => { if (!moved) requestAnimationFrame(() => scrollers.forEach(s => { if (s.top > 0 && Math.abs(s.el.scrollTop - s.top) > 4) s.el.scrollTop = s.top; })); });
+        mo.observe(area, { childList: true });
+        keep = () => { try { mo.disconnect(); ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(ev => window.removeEventListener(ev, mark, true)); } catch (e) { /* تجاهل */ } };
+        setTimeout(keep, 9000);
+      }
+    } catch (e) { keep = null; }
+    try { fn(); }
+    finally {
+      if (desc) { try { Object.defineProperty(google.script, 'run', desc); } catch (e) { /* تجاهل */ } }
+      if (proto && area) { try { delete area.innerHTML; } catch (e) { /* تجاهل */ } }
+    }
+  }
+  function masarAutoRefresh(opts) {
+    if (!MASAR_RAW_RUN_ || !opts || typeof opts.refresh !== 'function') return null;
+    const domains = opts.domains || [];
+    const interval = (opts.intervalMs || 30000) + Math.floor(Math.random() * 4000); // تشتيت بسيط كي لا تتزامن شاشات كثيرة
+    let baseline = null, inflight = false, inflightSince = 0, stopped = false, banner = null, pill = null, ownDoneAt = 0, rebaseWanted = false, changes = 0;
+    const uid = () => (typeof CURRENT_USER_ID !== 'undefined' ? CURRENT_USER_ID : (typeof Core !== 'undefined' ? Core.currentUserId : ''));
+    const isAr = () => (document.documentElement.lang || 'ar') !== 'en';
+    function setPill(text, bad) {
+      try {
+        if (!pill) {
+          pill = document.createElement('div');
+          pill.style.cssText = 'position:fixed;right:8px;bottom:6px;z-index:2147482000;font:600 10px sans-serif;color:#fff;padding:2px 8px;border-radius:999px;pointer-events:none;opacity:0.85;';
+          document.body.appendChild(pill);
+        }
+        pill.style.background = bad ? 'rgba(176,42,42,0.9)' : 'rgba(61,43,30,0.55)';
+        pill.textContent = text;
+      } catch (e) { /* الشارة تكميلية */ }
+    }
+    function clock() { try { return new Date().toTimeString().slice(0, 8); } catch (e) { return ''; } }
+    function busy() {
+      try {
+        if (opts.isBusy && opts.isBusy()) return true;
+        const a = document.activeElement;
+        if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && !/^(button|checkbox|radio|submit)$/.test(a.type || '')) return true;
+        if (document.querySelector('.header-modal-overlay.open, [class*="overlay"].open, [class*="modal"].open')) return true;
+        const fields = document.querySelectorAll('main input, main textarea, main select, #mainArea input, #mainArea textarea, #mainArea select');
+        for (let i = 0; i < fields.length; i++) {
+          const f = fields[i];
+          if (f.type === 'checkbox' || f.type === 'radio') { if (f.checked !== f.defaultChecked) return true; }
+          else if (f.type !== 'hidden' && f.type !== 'button' && f.tagName !== 'SELECT' && f.value !== f.defaultValue) return true;
+        }
+      } catch (e) { /* عند الشك نعتبر الشاشة غير مشغولة */ }
+      return false;
+    }
+    function hideBanner() { if (banner) { banner.style.display = 'none'; } }
+    function showBanner() {
+      if (!banner) {
+        banner = document.createElement('button');
+        banner.type = 'button';
+        banner.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:76px;z-index:2147483000;border:none;border-radius:999px;padding:10px 18px;background:#3D2B1E;color:#fff;font:700 13px sans-serif;box-shadow:0 6px 20px rgba(0,0,0,0.3);cursor:pointer;';
+        banner.addEventListener('click', () => doRefresh());
+        document.body.appendChild(banner);
+      }
+      banner.textContent = isAr() ? '🔄 توجد تحديثات جديدة — اضغط للتحديث' : '🔄 New updates — tap to refresh';
+      banner.style.display = 'block';
+    }
+    function doRefresh() {
+      hideBanner();
+      setPill((isAr() ? '✅ تحديث ' : '✅ Updated ') + clock(), false);
+      try { masarRunSilently(opts.refresh); } catch (e) { /* لا يعطّل الصفحة */ }
+    }
+    function handle(r, startedAt) {
+      if (!r || !r.success) {
+        if (r && r.error && r.error.code === 'SESSION_EXPIRED') stopped = true;
+        setPill('⚠ ' + ((r && r.error && r.error.code) || (isAr() ? 'تعذّر الفحص' : 'check failed')), true);
+        return;
+      }
+      setPill((isAr() ? '🔄 آخر فحص ' : '🔄 Checked ') + clock() + (changes ? (isAr() ? ' · تغيّرات ' : ' · changes ') + changes : ''), false);
+      const sig = JSON.stringify(domains.map(d => r.data.tokens[d] || ''));
+      if (rebaseWanted) {
+        // هذه الصفحة حفظت شيئًا بنفسها: الرمز بعد حفظها هو خط الأساس الجديد (لا تُحدَّث هي بما كتبته). ردٌّ بدأ قبل انتهاء حفظها قديم: نعيد السؤال
+        if (startedAt >= ownDoneAt) { rebaseWanted = false; baseline = sig; } else { setTimeout(tick, 300); }
+        return;
+      }
+      if (baseline === null) { baseline = sig; return; }
+      if (sig === baseline) return;
+      baseline = sig; changes++;
+      if (busy()) { showBanner(); return; }
+      doRefresh();
+      // الكتابة قد لا تكون ظهرت للقراءة بعد لحظة الرمز: إن كان التغيّر حديثًا (<٨ ثوانٍ) نُعيد الجلب مرة ثانية بعد استقراره
+      const newest = Math.max.apply(null, domains.map(d => parseFloat(r.data.tokens[d]) || 0));
+      const age = (r.data.serverTime || Date.now()) - newest;
+      if (age < 8000) setTimeout(() => { if (!document.hidden && !busy()) doRefresh(); }, 8500 - Math.max(0, age));
+    }
+    function tick() {
+      if (stopped || document.hidden) return;
+      // نداء ضاع بلا ردّ (شبكة بطيئة/تبويب مجمَّد) كان يُبقي inflight=true فيتوقف التحديث للأبد: بعد ٢٥ ثانية نعدّه مفقودًا ونسأل من جديد
+      if (inflight && Date.now() - inflightSince < 25000) return;
+      inflight = true;
+      const startedAt = Date.now();
+      inflightSince = startedAt;
+      MASAR_RAW_RUN_.withSuccessHandler(r => { inflight = false; handle(r, startedAt); }).withFailureHandler(() => { inflight = false; setPill(isAr() ? '⚠ تعذّر الفحص' : '⚠ check failed', true); }).getChangeTokens(uid(), domains);
+    }
+    function ownDone() { ownDoneAt = Date.now(); rebaseWanted = true; hideBanner(); setTimeout(tick, 500); }
+    MASAR_AR_INSTANCES_.push({ ownDone: ownDone });
+    setInterval(tick, interval);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) { rebaseWanted = false; setTimeout(tick, 400); } });
+    setTimeout(tick, 1500); // يلتقط خط الأساس مبكرًا
+    return { tick: tick };
+  }
+  // تسجيل الخروج (٨ أكتوبر ٢٠٢٦، بلاغ مستخدم: "لا يأخذني دائمًا لشاشة الدخول حتى أضغط زرًا في الصفحة التي بقيت مفتوحة"): المتصفحات (خصوصًا
+  // الهاتف) تحجب التنقّل غير المرتبط بلمسة مباشرة، فكانت الصفحة تبقى ظاهرة بزر "اضغط للمتابعة" مخبّأ داخل قائمة مغلقة. الآن أول ما يُستدعى
+  // logout يُغطّى المحتوى بحاجز كامل الشاشة "تم تسجيل الخروج" بزر كبير ظاهر، مع محاولة تلقائية للانتقال حيث يسمح المتصفح.
+  function masarLogoutMarker() {
+    try {
+      if (document.getElementById('masarLoggedOutOverlay')) return null;
+      var ar = (document.documentElement.lang || 'ar') !== 'en';
+      var o = document.createElement('div');
+      o.id = 'masarLoggedOutOverlay';
+      o.dir = ar ? 'rtl' : 'ltr';
+      o.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:2147483646;background:#3D2B1E;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font:600 19px/1.6 sans-serif;text-align:center;padding:24px;';
+      o.innerHTML = '<div style="font-size:48px">\uD83D\uDD12</div><div>' + (ar ? 'تم تسجيل الخروج' : 'You have been logged out') + '</div>' +
+        '<button type="button" style="border:none;background:#EE7126;color:#fff;font:700 17px sans-serif;padding:15px 34px;border-radius:999px;cursor:pointer;">' + (ar ? 'العودة إلى شاشة الدخول' : 'Back to login') + '</button>';
+      document.body.appendChild(o);
+      var go = function () { try { window.top.location.href = APP_BASE_URL; } catch (e) { window.location.href = APP_BASE_URL; } };
+      o.getElementsByTagName('button')[0].addEventListener('click', go);
+      setTimeout(go, 700);
+    } catch (e) { /* عرض فقط */ }
+    return null;
+  }
+  const CURRENT_USER_ID = MASAR_TPL.currentUserId;
+  let storeOrders = [];
+  let currentDeptNameAR = '', currentDeptNameEN = '', currentUserNameAR = '', currentUserNameEN = '';
+
+  // *** طلب مباشر (٢٢ سبتمبر ٢٠٢٦): استبدال التوقيت النسبي ("قبل ١ دقيقة") بساعة رقمية صريحة (٠٠:٠٠) ***
+  function formatSentAgo(iso) {
+    if (!iso) return '';
+    return new Date(iso).toLocaleTimeString(state.lang === 'ar' ? 'ar-QA-u-nu-latn' : 'en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+  }
+
+  const dict = {
+    ar: {
+      roleName: 'مسؤول القسم', deptName: 'قسم التزيين',
+      changePassword: '🔑 تغيير كلمة المرور', logout: '↩ تسجيل الخروج',
+      screenTitle: 'طلبيات المحلات', storesSection: 'المحلات', supplyRequestBtnLbl: 'طلب تزويد من المخزن',
+      requested: 'مطلوب', inPrep: 'قيد التجهيز', ready: 'جاهزة', cannotProvide: 'تعذّر التوفير',
+      typeNormal: 'عادي', typeSpecial: 'خاص',
+      stLocked: 'بانتظار الاعتماد', stProgress: 'قيد التنفيذ', stDone: 'سلّمت لقسم التوزيع', sentAtLbl: 'أُرسلت',
+      loadArchiveBtn: 'عرض أرشيف أقدم (30 يومًا) ⌄',
+      emptyList: 'لا توجد طلبيات لهذا القسم حاليًا', loadingText: 'جارٍ التحميل...', loadErrorText: 'تعذّر تنفيذ العملية — أعد المحاولة',
+      savingText: 'جارٍ الحفظ...', toastNotReady: 'هذه الميزة ستُبنى في خطوة قادمة', continueBtn: 'اضغط هنا للمتابعة',
+      toastReceived: 'استُلمت الطلبية — سجّل ذلك في شاشة تتبع الطلبية'
+    },
+    en: {
+      roleName: 'Section head', deptName: 'Decoration dept.',
+      changePassword: '🔑 Change password', logout: '↩ Log out',
+      screenTitle: 'Store orders', storesSection: 'Stores', supplyRequestBtnLbl: 'Request supplies from warehouse',
+      requested: 'requested', inPrep: 'in prep', ready: 'ready', cannotProvide: 'unable to fulfill',
+      typeNormal: 'Normal', typeSpecial: 'Special',
+      stLocked: 'Awaiting approval', stProgress: 'In progress', stDone: 'Sent to distribution', sentAtLbl: 'Sent',
+      loadArchiveBtn: 'Show older archive (30 days) ⌄',
+      emptyList: 'No orders for this department right now', loadingText: 'Loading...', loadErrorText: 'Could not complete the operation — please try again',
+      savingText: 'Saving...', toastNotReady: 'This feature is coming up next', continueBtn: 'Tap here to continue',
+      toastReceived: 'Order received — recorded on the order-tracking screen'
+    }
+  };
+
+  const state = { lang: (MASAR_TPL.userLang === 'en' ? 'en' : 'ar') };
+  // لغة المستخدم المحفوظة على الخادم (Users.Language) -- طلب مباشر ٢٥ سبتمبر ٢٠٢٦: تُفتح بها كل الشاشات وتبقى عند التنقّل
+  (function () {
+    if (state.lang === 'en') { document.documentElement.lang = 'en'; document.documentElement.dir = 'ltr'; }
+    const langBtn = document.getElementById('langToggle');
+    if (!langBtn) return;
+    langBtn.textContent = state.lang === 'ar' ? 'EN' : 'AR';
+    langBtn.addEventListener('click', () => setTimeout(() => {
+      try { if (MASAR_TPL.currentUserId) google.script.run.withFailureHandler(() => {}).setUserLanguage(MASAR_TPL.currentUserId, state.lang); } catch (e) { /* لا يعطّل الشاشة */ }
+    }, 0));
+  })();
+  // ---- زر التحيين (طلب مباشر ٢٦ سبتمبر ٢٠٢٦): تحديث ناعم إن وُجد مُحمِّل للصفحة، وإلا إعادة تحميل الصفحة بنفس رابطها ----
+  (function () {
+    const btn = document.getElementById('refreshBtn');
+    if (!btn) return;
+    const CONFIRM = false;
+    const label = btn.querySelector('.rf-label');
+    const idleText = () => (state.lang === 'ar' ? 'تحديث' : 'Refresh');
+    const sureText = () => (state.lang === 'ar' ? 'اضغط للتأكيد' : 'Tap to confirm');
+    const setIdle = () => { btn.classList.remove('armed'); if (label) label.textContent = idleText(); };
+    setIdle();
+    const lt = document.getElementById('langToggle');
+    if (lt) lt.addEventListener('click', () => setTimeout(setIdle, 0));
+    let armed = false, timer = null;
+    const hardReload = () => {
+      try { window.top.location.href = APP_BASE_URL + '?' + MASAR_TPL.reloadQuery; } catch (e) { window.location.reload(); }
+    };
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      if (CONFIRM && !armed) {
+        armed = true; btn.classList.add('armed'); if (label) label.textContent = sureText();
+        clearTimeout(timer); timer = setTimeout(() => { armed = false; setIdle(); }, 2800);
+        return;
+      }
+      clearTimeout(timer); armed = false; setIdle();
+      const soft = () => loadOrders();
+      if (soft) {
+        btn.classList.add('spin');
+        try { soft(); setTimeout(() => btn.classList.remove('spin'), 1200); return; } catch (e) { btn.classList.remove('spin'); }
+      }
+      hardReload();
+    });
+  })();
+  function t(key) { return (dict[state.lang] && dict[state.lang][key]) || key; }
+
+  function applyI18n() {
+    document.documentElement.lang = state.lang;
+    document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+    document.getElementById('langToggle').textContent = state.lang === 'ar' ? 'EN' : 'AR';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (dict[state.lang][key] !== undefined) el.textContent = dict[state.lang][key];
+    });
+    // SPEC v1.4 -- القيم الديناميكية (قسم/اسم المستخدم الفعليان) تُعاد تطبيقها
+    // هنا صراحة بعد مرور data-i18n العام، لا تُفقَد عند تبديل اللغة.
+    document.getElementById('deptPill').textContent = state.lang === 'ar' ? currentDeptNameAR : currentDeptNameEN;
+    document.getElementById('userNamePill').textContent = state.lang === 'ar' ? currentUserNameAR : currentUserNameEN;
+  }
+
+  function renderDate() {
+    const now = new Date();
+    const locale = state.lang === 'ar' ? 'ar-QA-u-nu-latn' : 'en-US';
+    const fmt = new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    document.getElementById('dateLine').textContent = fmt.format(now);
+  }
+
+  let currentHoursWindow = 48; // SPEC v1.4 -- يتغيّر عند طلب أرشيف أقدم صراحة
+  function loadOrders(hoursWindow) {
+    currentHoursWindow = hoursWindow || 48;
+    document.getElementById('storesList').innerHTML = `<div class="empty-state">${t('loadingText')}</div>`;
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(result => {
+        if (!result) { renderLoadError(t('loadErrorText')); return; }
+        if (!result.success) {
+          let detail = ''; try { detail = JSON.stringify(result); } catch (e) { detail = String(result); }
+          renderLoadError(t('loadErrorText') + ' — ' + detail);
+          return;
+        }
+        storeOrders = result.data.orders;
+        // SPEC v1.4 (إصلاح خطأ حقيقي، بلاغ مستخدم مباشر: الشريط العلوي يعرض
+        // "قسم التزيين" ثابتًا دائمًا بصرف النظر عن القسم الفعلي): يُستبدَل
+        // الآن بالقيمة الحقيقية القادمة من الخادم، لا نص القاموس الثابت.
+        // اسم مسؤول القسم نفسه يُعرَض أيضًا (طلب مباشر منفصل).
+        document.getElementById('deptPill').textContent = state.lang === 'ar' ? result.data.departmentNameAR : result.data.departmentNameEN;
+        document.getElementById('userNamePill').textContent = state.lang === 'ar' ? result.data.userNameAR : result.data.userNameEN;
+        currentDeptNameAR = result.data.departmentNameAR; currentDeptNameEN = result.data.departmentNameEN;
+        currentUserNameAR = result.data.userNameAR; currentUserNameEN = result.data.userNameEN;
+        renderAll();
+      }, 8000))
+      .withFailureHandler(error => {
+        let detail = ''; try { detail = (error && error.message) ? error.message : JSON.stringify(error); } catch (e) { detail = String(error); }
+        renderLoadError(t('loadErrorText') + ' (FAIL) — ' + detail);
+      })
+      .getDepartmentStoreOrders(CURRENT_USER_ID, currentHoursWindow);
+  }
+  function renderLoadError(msg) {
+    document.getElementById('storesList').innerHTML = `<div class="empty-state" style="color:var(--warn); word-break:break-all; font-size:12px;">${msg}</div>`;
+  }
+  function onceWithTimeout(fn, timeoutMs) {
+    let fired = false;
+    const timer = setTimeout(() => { if (!fired) { fired = true; forceHideBusyOverlay(); fn(); } }, timeoutMs * (typeof TIMEOUT_SCALE === 'number' ? TIMEOUT_SCALE : 1));
+    return (...args) => { if (fired) return; fired = true; clearTimeout(timer); fn(...args); };
+  }
+
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => el.classList.remove('show'), 2400);
+  }
+
+  const receivedSet = new Set(); // علامة "اطُّلع عليه" بصرية فقط، بلا حقل خادمي مقابل (UI.md لا يتطلب استمرارها عبر الجلسات)
+
+  function renderStores() {
+    const list = document.getElementById('storesList');
+    if (!storeOrders.length) { list.innerHTML = `<div class="empty-state">${t('emptyList')}</div>`; return; }
+
+    list.innerHTML = storeOrders.map(order => {
+      const st = order.overallStatus; // LOCKED/PROGRESS/DONE محسوبة خادميًا مسبقًا
+      const badgeCls = st === 'LOCKED' ? 'locked' : st === 'DONE' ? 'done' : 'progress';
+      const badgeIcon = st === 'LOCKED' ? '🔒' : st === 'DONE' ? '✅' : '🛠️';
+      const badgeKey = st === 'LOCKED' ? 'stLocked' : st === 'DONE' ? 'stDone' : 'stProgress';
+      const received = receivedSet.has(order.orderId);
+      const storeName = state.lang === 'ar' ? order.storeNameAR : order.storeNameEN;
+      return `
+        <button class="store-card ${received ? 'received' : ''}" type="button" data-store="${order.orderId}">
+          <div class="store-top">
+            ${!received ? '<span class="new-dot"></span>' : ''}
+            <span class="store-name">${storeName}</span>
+            <span class="badge ${order.orderType === 'SPECIAL' ? 'special' : 'normal'}">${order.orderType === 'SPECIAL' ? t('typeSpecial') : t('typeNormal')}</span>
+            <span class="store-spacer"></span>
+            <span class="order-id-tag">${order.orderId}</span>
+            <span class="chevron">›</span>
+          </div>
+          <div class="store-stats">
+            <span class="stat-chip"><strong>${order.totalItems}</strong> ${t('requested')}</span>
+            <span class="stat-chip"><strong>${order.pendingItems}</strong> ${t('inPrep')}</span>
+            <span class="stat-chip"><strong>${order.readyItems}</strong> ${t('ready')}</span>
+            ${order.shortageItems > 0 ? `<span class="stat-chip shortage-chip"><strong>${order.shortageItems}</strong> ${t('cannotProvide')}</span>` : ''}
+          </div>
+          <span class="status-badge ${badgeCls}">${badgeIcon} ${t(badgeKey)}</span>
+          <!-- SPEC v1.4 (جديدة، طلب مباشر): توقيت إرسال الكاشير يظهر تحديدًا
+               للطلبيات المقفلة بعد -- توضيحًا لمدة الانتظار الفعلية. -->
+          ${st === 'LOCKED' ? `<span class="locked-sent-time">${t('sentAtLbl')} ${formatSentAgo(order.createdAt)}</span>` : ''}
+        </button>`;
+    }).join('') + (currentHoursWindow === 48 ? `
+      <button class="load-archive-btn" type="button" id="loadArchiveBtn">${t('loadArchiveBtn')}</button>` : '');
+
+    const archiveBtn = document.getElementById('loadArchiveBtn');
+    // SPEC v1.4 (جديدة، طلب مباشر): "الباقي يحمل عند الطلب" -- نافذة 48
+    // ساعة قصوى افتراضيًا؛ هذا الزر يطلب أرشيفًا أوسع صراحة (30 يومًا) عند
+    // الحاجة الفعلية فقط، لا تحميلًا دائمًا لكل الأرشيف.
+    if (archiveBtn) archiveBtn.addEventListener('click', () => loadOrders(720));
+
+    list.querySelectorAll('[data-store]').forEach(el => {
+      el.addEventListener('click', () => {
+        const orderId = el.getAttribute('data-store');
+        const order = storeOrders.find(o => o.orderId === orderId);
+        // SPEC v1.4 (إصلاح خطأ حقيقي، بلاغ مستخدم مباشر): طلبية "🔒 بانتظار
+        // الاعتماد" لا تُعتبَر "استُلمت" بمجرد النقر عليها للاطّلاع فقط --
+        // القسم لا يمكنه فعليًا بدء أي عمل عليها قبل اعتمادها أصلًا (بوابة
+        // ما قبل التنفيذ)، فتسجيل "استلام" في هذه الحالة مضلِّل تمامًا.
+        if (order && order.overallStatus !== 'LOCKED' && !receivedSet.has(orderId)) {
+          receivedSet.add(orderId);
+          showToast(t('toastReceived'));
+        }
+        // SPEC v1.4 -- نفس آلية التوجيه الموثوقة عبر الخادم (WebApp.gs) المُستخدَمة
+        // في كل شاشات الكاشير -- لا رابط ملف نسبي (لا معنى له خارج بيئة Apps Script)
+        window.top.location.href = APP_BASE_URL + '?page=production_section_order&id=' + encodeURIComponent(orderId) + '&uid=' + encodeURIComponent(CURRENT_USER_ID);
+      });
+    });
+  }
+
+  function renderAll() {
+    applyI18n();
+    renderDate();
+    renderStores();
+  }
+
+  document.getElementById('goToSupplyRequestBtn').addEventListener('click', () => {
+    window.top.location.href = APP_BASE_URL + '?page=production_supply_request&uid=' + encodeURIComponent(CURRENT_USER_ID);
+  });
+
+  document.getElementById('langToggle').addEventListener('click', () => {
+    state.lang = state.lang === 'ar' ? 'en' : 'ar';
+    renderAll();
+  });
+  document.getElementById('userMenuBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.getElementById('userDropdown').classList.toggle('open');
+  });
+  document.addEventListener('click', () => document.getElementById('userDropdown').classList.remove('open'));
+  document.querySelectorAll('[data-toast="notReady"]').forEach(el => {
+    el.addEventListener('click', (e) => { e.stopPropagation(); showToast(t('toastNotReady')); });
+  });
+
+  /**
+   * تسجيل الخروج -- نفس نمط "اضغط للمتابعة" المُثبَت عبر كل الأدوار بعد
+   * اكتشاف "Redirect blocked" الميداني (انظر driver_shipments.html/
+   * split_cashier.py للتوثيق الكامل).
+   */
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    const btn = document.getElementById('logoutBtn');
+    if (btn.classList.contains('continue-armed')) { window.top.location.href = APP_BASE_URL; return; }
+    document.getElementById('userDropdown').classList.remove('open');
+    btn.disabled = true;
+    const originalContent = btn.textContent;
+    btn.textContent = t('savingText');
+    const finishLogout = onceWithTimeout(() => {
+      btn.disabled = false;
+      btn.classList.add('continue-armed');
+      btn.style.color = 'var(--success)'; btn.style.fontWeight = '700';
+      btn.textContent = '👆 ' + t('continueBtn');
+    }, 8000);
+    google.script.run.withSuccessHandler(finishLogout).withFailureHandler(finishLogout).logout(CURRENT_USER_ID, masarLogoutMarker());
+  });
+
+  let forceHideOverlayFn = () => {};
+  function forceHideBusyOverlay() { forceHideOverlayFn(); }
+  function wrapGoogleScriptRunWithBusyOverlay() {
+    if (typeof google === 'undefined' || !google.script || !google.script.run) return;
+    const realRun = google.script.run;
+    const overlay = document.getElementById('globalBusyOverlay');
+    let busyCount = 0;
+    function showBusy() { busyCount++; overlay.classList.add('show'); }
+    function hideBusy() { busyCount = Math.max(0, busyCount - 1); if (busyCount === 0) overlay.classList.remove('show'); }
+    forceHideOverlayFn = () => { busyCount = 0; overlay.classList.remove('show'); };
+    Object.defineProperty(google.script, 'run', {
+      configurable: true,
+      get() {
+        const handlers = { onSuccess: null, onFailure: null };
+        let proxy;
+        const chain = {
+          withSuccessHandler(fn) { handlers.onSuccess = fn; return proxy; },
+          withFailureHandler(fn) { handlers.onFailure = fn; return proxy; }
+        };
+        proxy = new Proxy(chain, {
+          get(target, prop) {
+            if (prop === 'withSuccessHandler' || prop === 'withFailureHandler') return target[prop];
+            return (...args) => {
+              showBusy();
+              return realRun
+                .withSuccessHandler((...r) => { hideBusy(); if (handlers.onSuccess) handlers.onSuccess(...r); })
+                .withFailureHandler((...r) => { hideBusy(); if (handlers.onFailure) handlers.onFailure(...r); })
+                [prop](...args);
+            };
+          }
+        });
+        return proxy;
+      }
+    });
+  }
+
+  wrapGoogleScriptRunWithBusyOverlay();
+  applyI18n();
+  renderDate();
+  loadOrders();
+  masarAutoRefresh({ domains: ['PRODUCTION', 'ORDERS'], refresh: () => loadOrders() });
+</script>
+
+</body>
+</html>

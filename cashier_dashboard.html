@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#3D2B1E">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="مسار">
+<link rel="apple-touch-icon" href="icon-180.png">
+<script src="masar-config.js?v=67ea158b"></script>
+<script src="masar-runtime.js?v=67ea158b"></script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALAKER SWEETS — لوحة الكاشير</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Markazi+Text:wght@600;700&family=Fraunces:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+
+:root {
+  /* SPEC v1.4 -- إعادة تصميم بصري مقصودة (طلب مستخدم مباشر: أهمية خاصة
+     للشكل الجمالي). البرتقالي السابق (#EE7126) كان لونًا عامًا يشبه أي
+     تطبيق طعام تقريبًا. النخب الجديدة مستمدة من مواد الحلويات الشرقية
+     فعليًا: نحاسي مُحرَّق (سكر/عسل)، وردي ماء الورد، فستقي مُخفَّف. */
+  --primary: #C1791F; --primary-dark: #9C5F15; --primary-tint: #F5E4CC;
+  --secondary: #35231A; --ink: #2A1F17; --ink-soft: #71594A;
+  --bg: #FBF6EC; --surface: #FFFFFF; --line: #E8DDC8;
+  --success: #6B8F5C; --success-tint: #E9EEE3;
+  --warn: #B23B2E; --warn-tint: #F7E6E2;
+  --pending: #A8842A; --pending-tint: #F2E9D3;
+  --locked: #8A7A6B; --locked-tint: #ECE7E0;
+  --accent-rose: #C97B85; --accent-rose-tint: #F5E4E6;
+  --radius-lg: 16px; --radius-md: 12px; --radius-sm: 8px;
+  --shadow-card: 0 1px 2px rgba(43,33,27,0.06), 0 4px 16px rgba(43,33,27,0.05);
+  --font-ar: 'IBM Plex Sans Arabic', sans-serif; --font-en: 'IBM Plex Sans', sans-serif;
+  --font-display-ar: 'Markazi Text', serif; --font-display-en: 'Fraunces', serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { overflow-x: hidden; max-width: 100vw; }
+html[lang="ar"] body { font-family: var(--font-ar); }
+html[lang="en"] body { font-family: var(--font-en); }
+html[lang="ar"] .display { font-family: var(--font-display-ar); }
+html[lang="en"] .display { font-family: var(--font-display-en); }
+body {
+  background-color: var(--bg);
+  background-image: repeating-linear-gradient(
+    to bottom, transparent 0, transparent 38px,
+    rgba(53,35,26,0.035) 38px, rgba(53,35,26,0.035) 39px
+  );
+  color: var(--ink); min-height: 100vh; -webkit-font-smoothing: antialiased;
+}
+.view { display: none; }
+.view.active { display: block; }
+
+/* SPEC v1.4 (ملاحظة مستخدم مباشرة) -- مؤشر انتظار واضح أثناء أي عملية غير
+   متزامنة. كل زر يُعطَّل فعليًا أثناء انتظار استجابة google.script.run في
+   هذا المشروع بالكامل (button.disabled = true) -- ربط المؤشر بهذه الحالة
+   الموجودة أصلًا يُغطي كل زر بلا استثناء بلا أي تعديل JS إضافي. */
+/* SPEC v1.4 -- تصحيح جوهري (ملاحظة مستخدم مباشرة، مرتين): القاعدة السابقة
+   (button:disabled { cursor: wait }) كانت غير كافية جوهريًا -- مؤشر عنصر
+   واحد يختفي بمجرد إبعاد الفأرة عنه، ولا يمنع الضغط على أي زر آخر أثناء
+   انتظار الأول (قد يُطلق عمليتين متزامنتين). حاجز حقيقي على مستوى الصفحة
+   كاملة بدلًا منه -- انظر wrapGoogleScriptRunWithBusyOverlay() في الأسفل. */
+#globalBusyOverlay {
+  position: fixed; inset: 0; z-index: 999; cursor: wait; display: none;
+  background: rgba(0,0,0,0.02);
+}
+#globalBusyOverlay.show { display: block; }
+
+/* SPEC v1.4 -- طلب مستخدم مباشر: مزامنة متعددة الأجهزة. عند إغلاق النوبة
+   من جهاز/مصدر آخر، الضغط على أي زر في هذا الجهاز يجب أن يُظهر رسالة كاملة
+   الشاشة (إلا الشريط العلوي) توضح إغلاق النوبة وتطلب تسجيل دخول جديد --
+   بدل استمرار الأزرار بالعمل ظاهريًا بينما تفشل صامتًا في الخلفية. top
+   يُضبَط ديناميكيًا عبر JS (ارتفاع الشريط العلوي متغيّر، لا قيمة ثابتة).
+*/
+#shiftEndedOverlay {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 1000; display: none;
+  background: var(--bg); flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 32px 24px;
+}
+/* SPEC v1.4 (طلب مستخدم مباشر: "لمسة جمالية تشبه غلق ستائر النوافذ") --
+   clip-path يكشف المحتوى تدريجيًا من الأعلى للأسفل، كستارة تسقط لتغطية
+   النافذة -- بخلاف scale الذي كان سيُشوِّه النص والأيقونة داخل الرسالة. */
+#shiftEndedOverlay.show { display: flex; animation: curtain-fall 0.5s ease-out forwards; }
+@keyframes curtain-fall {
+  from { clip-path: inset(0 0 100% 0); }
+  to { clip-path: inset(0 0 0% 0); }
+}
+#shiftEndedOverlay .icon { font-size: 48px; margin-bottom: 16px; }
+#shiftEndedOverlay .title { font-size: 17px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+#shiftEndedOverlay .desc { font-size: 13.5px; color: var(--ink-soft); margin-bottom: 24px; max-width: 320px; line-height: 1.6; }
+#shiftEndedOverlay button {
+  background: var(--secondary); color: #fff; border: none; font-family: inherit;
+  font-size: 14.5px; font-weight: 600; padding: 12px 28px; border-radius: var(--radius-md); cursor: pointer;
+}
+
+/* SPEC v1.4 -- shared header-account modal (change password / logout confirm) */
+.header-modal-overlay { position: fixed; inset: 0; background: rgba(43,33,27,0.45); display: none; align-items: center; justify-content: center; z-index: 90; padding: 20px; }
+.header-modal-overlay.open { display: flex; }
+.header-modal-box { background: var(--surface); border-radius: var(--radius-lg); padding: 22px; max-width: 360px; width: 100%; box-shadow: var(--shadow-card); }
+.header-modal-box h3 { font-size: 15px; font-weight: 700; color: var(--secondary); margin-bottom: 14px; }
+.header-modal-box .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.header-modal-box .field label { font-size: 12px; font-weight: 600; color: var(--ink-soft); }
+.header-modal-box .field input { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 9px 11px; font-family: inherit; font-size: 13px; }
+.header-modal-box .error-banner { display: none; background: var(--warn-tint); color: var(--warn); border: 1px solid rgba(178,59,46,0.3); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 12px; margin-bottom: 10px; }
+.header-modal-box .error-banner.show { display: block; }
+.header-modal-actions { display: flex; gap: 8px; margin-top: 6px; }
+.header-modal-actions button { flex: 1; font-family: inherit; font-size: 13px; font-weight: 600; padding: 10px; border-radius: var(--radius-sm); cursor: pointer; border: none; }
+.header-modal-cancel { background: var(--bg); color: var(--ink); }
+.header-modal-save { background: var(--secondary); color: #fff; }
+.header-modal-save:disabled { background: #B7ADA2; cursor: not-allowed; }
+
+/* ========================================================
+   ALAKER SWEETS — Shared design tokens & components
+   Reused across every role screen. Screen-specific CSS goes
+   in the screen's own <style> block, not here.
+
+   Design tokens (:root, body texture, .display font-switching)
+   now live in split_cashier.py's canonical common_css block —
+   this file previously had its own duplicate copy that
+   silently overrode the real one later in the cascade, which
+   is why palette/font changes made here never took effect.
+   ======================================================== */
+
+/* ---------- Header (identical on every screen) ---------- */
+header.topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--secondary);
+  color: #fff;
+  padding: 10px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  max-width: 100%;
+}
+.brand-logo { height: 44px; width: auto; display: block; flex-shrink: 0; }
+.brand-meta { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; overflow: hidden; }
+.brand-meta .system-name {
+  font-family: var(--font-display-en); font-size: 12px; letter-spacing: 0.02em; color: rgba(255,255,255,0.6);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.brand-meta .store-name {
+  font-size: 16px; font-weight: 600; color: #fff;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+html[lang="ar"] .brand-meta .store-name { font-family: var(--font-display-ar); }
+html[lang="en"] .brand-meta .store-name { font-family: var(--font-display-en); }
+.topbar-spacer { flex: 1; min-width: 8px; }
+.shift-pill {
+  display: inline-flex; align-items: center; gap: 6px; min-width: 0; flex-shrink: 1;
+  background: rgba(193,121,31,0.22); border: 1px solid rgba(193,121,31,0.5);
+  color: #F0CD9B; font-size: 13px; font-weight: 500; padding: 6px 12px;
+  border-radius: 999px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.shift-pill .dot {
+  width: 7px; height: 7px; border-radius: 50%; background: #A8C99A;
+  box-shadow: 0 0 0 3px rgba(168,201,154,0.25); flex-shrink: 0;
+}
+.icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; border-radius: 10px;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+  color: #fff; cursor: pointer; font-size: 14px; font-weight: 600;
+  transition: background 0.15s ease; position: relative; flex-shrink: 0;
+}
+.icon-btn:hover { background: rgba(255,255,255,0.16); }
+.user-menu { position: relative; flex-shrink: 0; }
+
+/* Narrow phones: the system-name label is redundant with the logo right next
+   to it -- drop it first to give the store name and shift status room, and
+   tighten spacing before anything is forced to truncate. */
+@media (max-width: 420px) {
+  header.topbar { flex-wrap: wrap; row-gap: 8px; padding: 10px 12px; gap: 8px; }
+  .topbar-spacer { flex: 0 0 100%; height: 0; }
+  .brand-meta .system-name { display: none; }
+  .brand-meta { overflow: visible; }
+  .brand-meta .store-name { overflow: visible; white-space: normal; }
+}
+.user-dropdown {
+  position: absolute; top: calc(100% + 8px); inset-inline-end: 0;
+  background: var(--surface); color: var(--ink); border: 1px solid var(--line);
+  border-radius: var(--radius-md); box-shadow: var(--shadow-card);
+  min-width: 200px; padding: 6px; display: none; z-index: 40;
+}
+.user-dropdown.open { display: block; }
+.user-dropdown button {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: start;
+  background: none; border: none; padding: 10px 12px; border-radius: var(--radius-sm);
+  font-size: 14px; font-family: inherit; color: var(--ink); cursor: pointer;
+}
+.user-dropdown button:hover { background: var(--bg); }
+
+/* ---------- Sub-header (back button + screen title) ---------- */
+.subheader {
+  display: flex; align-items: center; gap: 12px;
+  max-width: 880px; margin: 0 auto; padding: 16px 20px 4px;
+}
+.back-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--line);
+  color: var(--secondary); cursor: pointer; font-size: 16px; flex-shrink: 0;
+  box-shadow: var(--shadow-card);
+}
+/* SPEC v1.4 -- back-btn هو زر أيقونة مربّع صغير (34px) بالتصميم الأصلي؛
+   نص "اضغط هنا للمتابعة" الطويل لا يتّسع فيه إطلاقًا. حالة ready-to-leave
+   تُوسِّعه ليلائم النص بدل حشره في مساحة الأيقونة الضيّقة. */
+.back-btn.ready-to-leave { width: auto; padding: 0 14px; border-radius: 999px; white-space: nowrap; }
+/* SPEC v1.4 (طلب مستخدم مباشر): "جارٍ الحفظ" على زر الرجوع تحتاج نفس معاملة
+   "اضغط مرة أخرى للتأكيد" (confirm-armed) -- اتساع تلقائي + تأثير لوني نابض،
+   لا نص صغير مضغوط بلا تمييز. لون مختلف عن ready-to-leave (أخضر=انتهى) وعن
+   confirm-armed (أصفر=تأكيد) -- نحاسي أساسي نابض يعني "قيد التنفيذ الآن". */
+.back-btn.saving-state {
+  width: auto; padding: 0 14px; border-radius: 999px; white-space: nowrap;
+  background: var(--primary) !important; color: #fff; border-color: var(--primary);
+  animation: pulse-confirm 1s ease-in-out infinite;
+}
+html[dir="rtl"] .back-btn .arrow { transform: scaleX(-1); display: inline-block; }
+.subheader h1 { font-size: 20px; font-weight: 600; color: var(--secondary); flex: 1; }
+html[lang="ar"] .subheader h1 { font-family: var(--font-display-ar); font-size: 22px; }
+html[lang="en"] .subheader h1 { font-family: var(--font-display-en); }
+.subheader .meta-badge {
+  font-size: 12.5px; font-weight: 600; color: var(--primary-dark);
+  background: var(--primary-tint); border: 1px solid rgba(193,121,31,0.35);
+  padding: 5px 11px; border-radius: 999px; white-space: nowrap;
+}
+
+main { max-width: 880px; margin: 0 auto; padding: 12px 20px 20px; }
+
+/* ---------- Badges / status (shared vocabulary) ---------- */
+.badge {
+  display: inline-flex; align-items: center; font-size: 11.5px; font-weight: 600;
+  padding: 3px 9px; border-radius: 999px; white-space: nowrap;
+}
+.badge.normal { color: var(--primary-dark); background: var(--primary-tint); border: 1px solid rgba(193,121,31,0.35); }
+.badge.special { color: #fff; background: var(--secondary); }
+
+.chevron { color: var(--ink-soft); font-size: 15px; }
+.load-archive-btn {
+  display: block; width: 100%; margin-top: 4px; padding: 12px; background: var(--surface); border: 1px dashed var(--line);
+  border-radius: var(--radius-md); color: var(--ink-soft); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+html[dir="rtl"] .chevron { transform: scaleX(-1); display: inline-block; }
+
+.section-title {
+  font-size: 14px; font-weight: 600; color: var(--ink-soft);
+  margin-bottom: 10px; padding-inline-start: 4px;
+}
+
+/* ---------- Generic sticky bottom bar w/ torn-receipt edge (signature) ---------- */
+.sticky-bar-wrap { position: fixed; bottom: 0; left: 0; right: 0; z-index: 25; }
+.scallop {
+  height: 11px;
+  background-image: radial-gradient(circle at 10px 0, transparent 9px, var(--bg) 9.5px);
+  background-size: 20px 11px;
+  background-repeat: repeat-x;
+}
+.sticky-bar {
+  background: var(--surface); border-top: 1px solid var(--line);
+  box-shadow: 0 -6px 20px rgba(43,33,27,0.08); padding: 12px 20px 16px;
+}
+.sticky-bar-inner { max-width: 880px; margin: 0 auto; }
+
+.notice {
+  display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.5;
+  padding: 10px 12px; border-radius: var(--radius-sm); margin-bottom: 10px;
+}
+.notice.blocking { background: var(--warn-tint); color: #7A2A20; border: 1px solid rgba(178,59,46,0.25); }
+.notice.info { background: var(--pending-tint); color: #7A5A1C; border: 1px solid rgba(180,128,42,0.25); }
+.notice .notice-text { flex: 1; }
+.notice .notice-action {
+  background: var(--secondary); color: #fff; border: none; font-family: inherit;
+  font-size: 12.5px; font-weight: 600; padding: 6px 12px; border-radius: 999px;
+  cursor: pointer; white-space: nowrap; margin-top: 2px;
+}
+.notice.hidden { display: none; }
+.hidden { display: none !important; }
+.btn-secondary {
+  background: var(--surface); color: var(--warn); border: 1px solid var(--warn);
+  border-radius: var(--radius-md); padding: 12px; font-family: inherit; font-size: 14px;
+  font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+
+.btn-primary {
+  width: 100%; background: var(--secondary); color: #fff; border: none; font-family: inherit;
+  font-size: 15px; font-weight: 600; padding: 13px; border-radius: var(--radius-md);
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: background 0.15s ease;
+}
+.btn-primary:hover { background: #2E2015; }
+.btn-primary:disabled { background: #B7ADA2; cursor: not-allowed; }
+.confirm-armed { background: var(--warn) !important; animation: pulse-confirm 1s ease-in-out infinite; }
+/* SPEC v1.4 (بلاغ مستخدم مباشر: حالة "تم -- اضغط للمتابعة" لم تكن واضحة
+   بما يكفي -- نفس لون ونمط الزر العادي، بلا تمييز حقيقي). لون أخضر نجاح
+   واضح + نبض مستمر، متمايز تمامًا عن الحالة العادية وعن confirm-armed
+   (أصفر/تحذيري) معًا -- لا التباس بين "لا يزال يحمِّل" و"جاهز للمتابعة". */
+.ready-to-leave {
+  background: var(--success) !important; animation: pulse-continue 1.1s ease-in-out infinite;
+  box-shadow: 0 0 0 3px rgba(107,143,92,0.25);
+}
+@keyframes pulse-continue { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+@keyframes pulse-confirm { 0%, 100% { opacity: 1; } 50% { opacity: 0.75; } }
+
+/* ---------- Toast ---------- */
+.toast {
+  position: fixed; bottom: 128px; left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--secondary); color: #fff; font-size: 13.5px; padding: 11px 18px;
+  border-radius: 999px; box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 60; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ---------- Card surface ---------- */
+.card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.empty-state { padding: 34px 20px; text-align: center; color: var(--ink-soft); font-size: 14px; }
+
+
+.view { display: none; }
+.view.active { display: block; }
+
+button.tile, button.order-row {
+  font-family: inherit; color: inherit; text-decoration: none; margin: 0;
+  border: none; background: var(--surface); width: 100%; display: flex;
+}
+button.order-row { border-bottom: 1px dashed var(--line); }
+button.order-row:last-child { border-bottom: none; }
+
+
+/* SPEC v1.4 -- نافذة عرض صورة الصنف عند الطلب (new-order.html وnew-special.html معًا) */
+.image-peek-overlay {
+  position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.75);
+  display: flex; align-items: center; justify-content: center; padding: 24px; cursor: zoom-out;
+}
+.image-peek-overlay img { max-width: 100%; max-height: 100%; border-radius: 12px; }
+
+  .refresh-btn { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; border-radius: 999px; background: rgba(255,255,255,0.18); border: 1.5px solid rgba(255,255,255,0.9); color: #fff; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; flex-shrink: 0; white-space: nowrap; transition: background 0.15s ease; }
+  .refresh-btn:hover { background: rgba(255,255,255,0.32); }
+  .refresh-btn:active { transform: scale(0.97); }
+  .refresh-btn.armed { background: #fff; color: var(--secondary); }
+  .refresh-btn.spin .ico { animation: masar-spin 0.8s linear infinite; }
+  @keyframes masar-spin { to { transform: rotate(360deg); } }
+</style>
+<style>
+/* ===== dashboard ===== */
+/* ===== dashboard ===== */
+#view-dashboard .greeting-card {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    padding: 22px 24px; margin: 18px 0 20px;
+  }
+#view-dashboard .greeting-card h1 { font-size: 26px; font-weight: 600; color: var(--secondary); }
+html[lang="ar"] #view-dashboard .greeting-card h1.display { font-size: 30px; }
+#view-dashboard .greeting-card .date-line { color: var(--ink-soft); font-size: 14px; margin-top: 4px; }
+#view-dashboard .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
+#view-dashboard .tiles { grid-template-columns: repeat(2, 1fr); }
+#view-dashboard .tile {
+    position: relative; background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius-md); padding: 18px 14px 16px; text-align: center; cursor: pointer;
+    box-shadow: var(--shadow-card); transition: transform 0.12s ease, box-shadow 0.12s ease;
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
+    text-decoration: none; display: block;
+  }
+#view-dashboard .tile::before {
+    content: ''; position: absolute; top: 0; inset-inline-end: 0; width: 14px; height: 14px;
+    background: var(--bg); border-inline-start: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  }
+#view-dashboard .tile:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(43,33,27,0.10); }
+#view-dashboard .tile:active { transform: translateY(0); }
+#view-dashboard .tile .tile-count { position: absolute; top: 8px; left: 8px; min-width: 22px; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; background: var(--primary-tint); color: var(--primary-dark); }
+#view-dashboard .tile .tile-count.zero { background: var(--bg); color: var(--ink-soft); font-weight: 600; }
+#view-dashboard .tile .icon { font-size: 26px; margin-bottom: 8px; display: block; }
+#view-dashboard .tile .label { font-size: 14px; font-weight: 600; color: var(--ink); }
+#view-dashboard .tile.accent { border-top: 3px solid var(--primary); }
+#view-dashboard .tile.accent2 { border-top: 3px solid var(--secondary); }
+#view-dashboard .orders-card { overflow: hidden; }
+#view-dashboard .order-row {
+    display: flex; align-items: center; gap: 14px; padding: 15px 18px;
+    border-bottom: 1px dashed var(--line); cursor: pointer; transition: background 0.12s ease;
+  }
+#view-dashboard .order-row:last-child { border-bottom: none; }
+#view-dashboard .order-row:hover { background: rgba(193,121,31,0.05); }
+#view-dashboard .order-id { font-family: var(--font-mono); font-size: 14px; font-weight: 600; color: var(--secondary); min-width: 92px; }
+#view-dashboard .order-status { display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 500; }
+#view-dashboard .order-status.st-draft { color: var(--locked); font-style: italic; }
+#view-dashboard .order-status.st-pending { color: var(--pending); }
+#view-dashboard .order-status.st-progress { color: var(--primary-dark); }
+#view-dashboard .order-status.st-executing { color: var(--pending); }
+#view-dashboard .order-status.st-success { color: var(--success); }
+#view-dashboard .order-status.st-done { color: var(--ink-soft); }
+#view-dashboard .order-status.st-cancelled { color: var(--warn); }
+#view-dashboard .order-time { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-soft); min-width: 116px; text-align: center; margin-inline-start: auto; }
+#view-dashboard .order-spacer { flex: 0; }
+#view-dashboard .order-row { flex-wrap: wrap; row-gap: 6px; }
+/* حالة آخر طلب تعديل/إلغاء للطلبية (٧ أكتوبر ٢٠٢٦): معلَّق / قُبل / رُفض */
+.change-line { flex-basis: 100%; font-size: 12.5px; font-weight: 600; padding: 4px 10px; border-radius: 8px; text-align: start; }
+.change-line.pending { background: #FFF0D6; color: #8A5A00; }
+.change-line.approved { background: #E8F3EA; color: #2F6B3D; }
+.change-line.rejected { background: #F6D5CE; color: #9A2F20; }
+#view-dashboard .order-status { flex-basis: 100%; white-space: nowrap; }
+/* SPEC v1.4 -- restores the original core.js viewPadding value (dropped when
+   building the split-page Core shim -- a real regression, caught by direct
+   user feedback: content was hidden under the fixed sticky bar). */
+#view-dashboard { display: block; }
+body { padding-bottom: 96px; }
+
+/* SPEC v1.4 (طلب مستخدم مباشر) -- حالة القفل البصرية بعد إغلاق النوبة */
+#view-dashboard .tile:disabled,
+#view-dashboard .tile.locked {
+  opacity: 0.4; cursor: not-allowed; pointer-events: none;
+  transform: none !important; box-shadow: none !important;
+}
+#db-closeShiftBtn:disabled { background: var(--locked, #8A7A6B) !important; cursor: not-allowed !important; }
+
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <img src="asset-82d7b1e2.png" alt="ALAKER SWEETS" class="brand-logo">
+  <div class="brand-meta">
+    <span class="system-name">MASAR</span>
+    <span class="store-name" id="storeNameDisplay"></span>
+  </div>
+  <div class="topbar-spacer"></div>
+  <div class="shift-pill"><span class="dot"></span><span data-i18n="shiftOpen"></span></div>
+  <button class="refresh-btn" id="refreshBtn" type="button" title="تحديث / Refresh"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span class="rf-label">تحديث</span></button>
+  <button class="icon-btn" id="langToggle" title="AR / EN">AR</button>
+  <div class="user-menu">
+    <button class="icon-btn" id="userMenuBtn">⋮</button>
+    <div class="user-dropdown" id="userDropdown">
+      <button data-i18n="changePassword"></button>
+      <button data-i18n="logout"></button>
+    </div>
+  </div>
+</header>
+
+<div class="header-modal-overlay" id="changePasswordOverlay">
+  <div class="header-modal-box">
+    <h3 id="cp-title"></h3>
+    <div class="error-banner" id="cp-errorBanner"></div>
+    <div class="field"><label id="cp-oldLabel"></label><input type="password" id="cp-fOldPassword"></div>
+    <div class="field"><label id="cp-newLabel"></label><input type="password" id="cp-fNewPassword"></div>
+    <div class="header-modal-actions">
+      <button class="header-modal-cancel" id="cp-cancelBtn"></button>
+      <button class="header-modal-save" id="cp-saveBtn"></button>
+    </div>
+  </div>
+</div>
+
+<div id="view-dashboard" class="view active">
+
+<main>
+  <div class="card greeting-card">
+    <div>
+      <h1 class="display"><span data-i18n="greeting"></span> <span data-i18n="cashierName"></span></h1>
+      <div class="date-line" id="db-dateLine"></div>
+    </div>
+  </div>
+
+  <div class="tiles">
+    <button class="tile accent" type="button" data-goto="new-order"><span class="icon">🧾</span><span class="label" data-i18n="newNormal"></span></button>
+    <button class="tile accent2" type="button" data-goto="new-special"><span class="icon">✨</span><span class="label" data-i18n="newSpecial"></span></button>
+    <button class="tile" type="button" data-goto="receive"><span class="tile-count" data-count="receive" style="display:none;"></span><span class="icon">📦</span><span class="label" data-i18n="receiveGoods"></span></button>
+    <button class="tile" type="button" data-goto="return"><span class="icon">↩️</span><span class="label" data-i18n="returnItem"></span></button>
+  </div>
+
+  <div class="section-title" data-i18n="todayOrders"></div>
+  <div class="orders-card card" id="db-ordersList"></div>
+</main>
+
+<div class="sticky-bar-wrap">
+  <div class="scallop"></div>
+  <div class="sticky-bar">
+    <div class="sticky-bar-inner">
+      <div class="notice info hidden" id="db-draftNotice">
+        <span>📝</span>
+        <span class="notice-text" data-i18n="draftNoticeText"></span>
+      </div>
+      <div class="notice blocking hidden" id="db-blockingNotice">
+        <span>⚠️</span>
+        <span class="notice-text" data-i18n="blockingNoticeText"></span>
+        <button class="notice-action" id="db-sendEmptyBtn" data-i18n="sendEmptyNow"></button>
+      </div>
+      <button class="btn-primary" id="db-closeShiftBtn"><span>🔒</span><span data-i18n="closeShift"></span></button>
+    </div>
+  </div>
+</div>
+
+<div class="header-modal-overlay" id="db-draftsModal">
+  <div class="header-modal-box" style="max-width:420px;">
+    <h3 data-i18n="draftsModalTitle"></h3>
+    <p data-i18n="draftsModalDesc" style="font-size:12.5px; color:var(--ink-soft); margin-bottom:10px;"></p>
+    <div id="db-draftsModalList"></div>
+  </div>
+</div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="globalBusyOverlay"></div>
+<div id="shiftEndedOverlay">
+  <div class="icon">🔒</div>
+  <div class="title" data-i18n="shiftEndedTitle"></div>
+  <div class="desc" data-i18n="shiftEndedDesc"></div>
+  <button id="shiftEndedLoginBtn" data-i18n="shiftEndedLoginBtn"></button>
+</div>
+
+<script>
+
+// مرجع google.script.run الأصلي قبل غلاف "مؤشر الانشغال" (يحجب النقر) -- لنداء عدّاد "استلام بضاعة" الصامت
+const CASHIER_RAW_RUN = (typeof google !== 'undefined' && google.script) ? google.script.run : null;
+  // ===== شبكة الاتصال (١٠ أكتوبر ٢٠٢٦) =====
+  // مولَّد من tools/net_snippet.js بواسطة tools/build_client_snippets.js -- لا تعدّله يدويًا داخل الصفحات.
+  // (١) يتتبّع نداءات الحفظ (أي نداء لا يبدأ بـ get/list) ليعرف التحديث التلقائي أن الصفحة حفظت بنفسها.
+  // (٢) بلاغ "تعذّر تنفيذ العملية" المتكرر: بطء بدء Google (أو انقطاع لحظي) كان يُسقط النداء. للقراءات الصرفة فقط (قائمة مولَّدة آليًا من الخادم: دوال لا تكتب هي
+  // ولا ما تستدعيه) تُعاد المحاولة مرة واحدة عند الفشل/الردّ الفارغ، ويُرسَل نداء ثانٍ موازٍ إن تأخّر الأول ٦ ثوانٍ؛ يُسلَّم أول ردّ صالح. الحفظ والإنشاء لا يُكرَّران أبدًا.
+  const MASAR_RAW_RUN_ = (typeof google !== 'undefined' && google.script) ? google.script.run : null;
+  const MASAR_AR_INSTANCES_ = [];
+  const MASAR_PURE_READS_ = { getActiveDriversList:1,getActiveShipments:1,getActiveStoresWithOccupancy:1,getAllDepartments:1,getAllLists:1,getAllProducts:1,getAllRoles:1,getAllSettings:1,getAllStores:1,getAllUsers:1,getChangeTokens:1,getDepartmentStoreOrders:1,getDisposalFormData:1,getDistributionComparisonDetail:1,getDistributionManagerCancelEditRequests:1,getDistributionsReadyToPrepare:1,getFinishedGoodsQuarantineHistory:1,getFinishedGoodsStockBoard:1,getIssueToDepartmentFormData:1,getManagementReports:1,getMyNotifications:1,getMyShipments:1,getMySupplyRequests:1,getOffCatalogPurchaseRequests:1,getOrderDetails:1,getOrderEditStage:1,getOrderProductionApprovalDetail:1,getOrdersAwaitingInvoice:1,getOrdersAwaitingProductionApproval:1,getOrdersReadyForShipment:1,getOrdersReadyToReceive:1,getPendingLoadDiscrepancies:1,getPendingReturnItems:1,getPendingSupplyRequestsForRMS:1,getProductionManagerApprovals:1,getProductionManagerOrderFullDetail:1,getProductionManagerOrdersOverview:1,getPurchasingRawMaterialReports:1,getRawMaterialCatalog:1,getRawMaterialCatalogForRequest:1,getRawMaterialExpiryReport:1,getRawMaterialMovementSummary:1,getRawMaterialProductHistory:1,getRawMaterialQuarantineHistory:1,getRawMaterialShortageNotices:1,getRawMaterialStockBoard:1,getReceiveSurplusFormData:1,getReceivingDetails:1,getReferenceLists:1,getReturnReasons:1,getRolePermissionsMatrix:1,getShipmentPrepareDetail:1,getShortageReasons:1,getStoreDirectRawMaterialOrders:1,getStoreOrderDetail:1,getSuppliers:1,getSuppliersList:1,getTasksCatalog:1,getUnitsAndFamiliesList:1,getVehicleCoordinatorDriverStatus:1,getVehicleCoordinatorSpecialOrders:1,listOrders:1 };
+  (function masarTrackOwnCalls() {
+    try {
+      if (!MASAR_RAW_RUN_) return;
+      Object.defineProperty(google.script, 'run', {
+        configurable: true,
+        get() {
+          const handlers = { onSuccess: null, onFailure: null };
+          let proxy;
+          const chain = {
+            withSuccessHandler(fn) { handlers.onSuccess = fn; return proxy; },
+            withFailureHandler(fn) { handlers.onFailure = fn; return proxy; }
+          };
+          proxy = new Proxy(chain, {
+            get(target, prop) {
+              if (prop === 'withSuccessHandler' || prop === 'withFailureHandler') return target[prop];
+              return (...args) => {
+                // لقطة المعالجات لحظة النداء: غلاف حاجز الانشغال في الصفحات يمسك مرجعًا واحدًا من run فتتشارك النداءات المتزامنة كائن handlers، فلو قُرئ
+                // وقت الرد لاستلم كل رد معالج آخر نداء (بلاغ: "تعذّر فتح إنشاء رحلة" -- نداءا السائقين والجاهزة كانا يتبادلان معالجيهما)
+                const onS = handlers.onSuccess, onF = handlers.onFailure;
+                const name = String(prop);
+                if (Object.prototype.hasOwnProperty.call(MASAR_PURE_READS_, name)) {
+                  let settled = false, attempts = 0, pending = 0, hedge = null;
+                  const finish = (ok, v) => { if (settled) return; settled = true; clearTimeout(hedge); if (ok) { if (onS) onS(v); } else if (onF) onF(v); else { try { console.error(v); } catch (e) { /* تجاهل */ } } };
+                  const launch = () => {
+                    attempts++; pending++;
+                    const bad = v => {
+                      pending--;
+                      if (settled) return;
+                      if (attempts < 2) { setTimeout(launch, 700); return; }   // محاولة ثانية واحدة فقط
+                      if (pending === 0) finish(false, v);                       // الأخيرة فشلت ولا نداء آخر في الطريق
+                    };
+                    MASAR_RAW_RUN_
+                      .withSuccessHandler(r => { if (r === null || r === undefined) { bad(r); } else { pending--; finish(true, r); } })
+                      .withFailureHandler(e => bad(e))
+                      [name](...args);
+                  };
+                  hedge = setTimeout(() => { if (!settled && attempts < 2) launch(); }, 6000);
+                  launch();
+                  return;
+                }
+                const done = () => { if (!/^(get|list)/.test(name)) MASAR_AR_INSTANCES_.forEach(i => { try { i.ownDone(); } catch (e) { /* لا يعطّل النداء */ } }); };
+                return MASAR_RAW_RUN_
+                  .withSuccessHandler((...r) => { done(); if (onS) onS(...r); })
+                  .withFailureHandler((...r) => { done(); if (onF) onF(...r); else { try { console.error(r[0]); } catch (e) { /* تجاهل */ } } })
+                  [prop](...args);
+              };
+            }
+          });
+          return proxy;
+        }
+      });
+    } catch (e) { /* لا تتبّع: يبقى السلوك القديم كما هو */ }
+  })();
+  // يستعمله التحديث التلقائي الصامت: نفس طبقة الاتصال (إعادة المحاولة) لكن بلا غلاف حاجز الانشغال الذي تُركّبه الصفحة لاحقًا فوقها
+  let MASAR_NET_GETTER_ = null;
+  try { MASAR_NET_GETTER_ = Object.getOwnPropertyDescriptor(google.script, 'run').get || null; } catch (e) { MASAR_NET_GETTER_ = null; }
+  // ===== نهاية شبكة الاتصال =====
+  // ===== تحديث تلقائي بالتغيّر (٩ أكتوبر ٢٠٢٦، نُقّح ١٠ أكتوبر) =====
+  // كل ٣٠ ثانية تسأل الصفحة (نداء خفيف بلا قراءة جداول) هل تغيّر شيء في مجالاتها؛ إن تغيّر تُعيد جلب بياناتها مرة واحدة. تتوقف والتبويب مخفيّ، وتستأنف عند
+  // العودة. إن كان المستخدم يكتب أو توجد نافذة مفتوحة أو حقل معدَّل لا تُبدَّل الشاشة تحت يده: يظهر شريط "توجد تحديثات" ينقر عليه حين يشاء.
+  // النداء الخفيف يمرّ عبر مرجع google.script.run الأصلي (قبل غلاف حاجز الانشغال) فلا يحجب الشاشة، ولا يمدّ الجلسة.
+  // تنقيح (بلاغ ميداني: "ساعة رملية كل برهة" و"الشاشة تُعاد بعد كل حفظ"): (١) التحديث التلقائي صامت: لا حاجز انشغال ولا ومضة "جارٍ التحميل"،
+  // ويحفظ موضع التمرير؛ (٢) ما تحفظه هذه الصفحة نفسها (أي نداء لا يبدأ بـ get) لا يُحدِّثها هي: تُعاد قراءة الرمز بعده فيصير خط الأساس الجديد؛ (٣) شارة
+  // صغيرة أسفل الشاشة تُظهر وقت آخر فحص وتومض عند التحديث، ولون أحمر إن تعذّر الفحص.
+  // ينفّذ إعادة جلب بيانات الصفحة بصمت: بلا حاجز انشغال (النداءات داخلها تمرّ بالمرجع الأصلي)، بلا ومضة "جارٍ التحميل"، وبحفظ موضع التمرير
+  function masarRunSilently(fn) {
+    let desc = null, area = null, proto = null;
+    try { desc = Object.getOwnPropertyDescriptor(google.script, 'run'); Object.defineProperty(google.script, 'run', { configurable: true, get() { return MASAR_NET_GETTER_ ? MASAR_NET_GETTER_() : MASAR_RAW_RUN_; } }); } catch (e) { desc = null; }
+    try {
+      area = document.getElementById('mainArea');
+      if (area && typeof Element !== 'undefined') {
+        proto = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
+        Object.defineProperty(area, 'innerHTML', {
+          configurable: true,
+          get() { return proto.get.call(area); },
+          set(v) { const s = String(v); if (/empty-state/.test(s) && !/order-card|<table|<button/.test(s)) return; proto.set.call(area, v); }
+        });
+      }
+    } catch (e) { proto = null; }
+    let keep = null;
+    try {
+      if (area && typeof window !== 'undefined' && typeof MutationObserver !== 'undefined') {
+        const scrollers = [document.scrollingElement, area.parentElement].filter(Boolean).map(el => ({ el: el, top: el.scrollTop }));
+        let moved = false;
+        const mark = () => { moved = true; };
+        ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(ev => window.addEventListener(ev, mark, true));
+        const mo = new MutationObserver(() => { if (!moved) requestAnimationFrame(() => scrollers.forEach(s => { if (s.top > 0 && Math.abs(s.el.scrollTop - s.top) > 4) s.el.scrollTop = s.top; })); });
+        mo.observe(area, { childList: true });
+        keep = () => { try { mo.disconnect(); ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(ev => window.removeEventListener(ev, mark, true)); } catch (e) { /* تجاهل */ } };
+        setTimeout(keep, 9000);
+      }
+    } catch (e) { keep = null; }
+    try { fn(); }
+    finally {
+      if (desc) { try { Object.defineProperty(google.script, 'run', desc); } catch (e) { /* تجاهل */ } }
+      if (proto && area) { try { delete area.innerHTML; } catch (e) { /* تجاهل */ } }
+    }
+  }
+  function masarAutoRefresh(opts) {
+    if (!MASAR_RAW_RUN_ || !opts || typeof opts.refresh !== 'function') return null;
+    const domains = opts.domains || [];
+    const interval = (opts.intervalMs || 30000) + Math.floor(Math.random() * 4000); // تشتيت بسيط كي لا تتزامن شاشات كثيرة
+    let baseline = null, inflight = false, inflightSince = 0, stopped = false, banner = null, pill = null, ownDoneAt = 0, rebaseWanted = false, changes = 0;
+    const uid = () => (typeof CURRENT_USER_ID !== 'undefined' ? CURRENT_USER_ID : (typeof Core !== 'undefined' ? Core.currentUserId : ''));
+    const isAr = () => (document.documentElement.lang || 'ar') !== 'en';
+    function setPill(text, bad) {
+      try {
+        if (!pill) {
+          pill = document.createElement('div');
+          pill.style.cssText = 'position:fixed;right:8px;bottom:6px;z-index:2147482000;font:600 10px sans-serif;color:#fff;padding:2px 8px;border-radius:999px;pointer-events:none;opacity:0.85;';
+          document.body.appendChild(pill);
+        }
+        pill.style.background = bad ? 'rgba(176,42,42,0.9)' : 'rgba(61,43,30,0.55)';
+        pill.textContent = text;
+      } catch (e) { /* الشارة تكميلية */ }
+    }
+    function clock() { try { return new Date().toTimeString().slice(0, 8); } catch (e) { return ''; } }
+    function busy() {
+      try {
+        if (opts.isBusy && opts.isBusy()) return true;
+        const a = document.activeElement;
+        if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && !/^(button|checkbox|radio|submit)$/.test(a.type || '')) return true;
+        if (document.querySelector('.header-modal-overlay.open, [class*="overlay"].open, [class*="modal"].open')) return true;
+        const fields = document.querySelectorAll('main input, main textarea, main select, #mainArea input, #mainArea textarea, #mainArea select');
+        for (let i = 0; i < fields.length; i++) {
+          const f = fields[i];
+          if (f.type === 'checkbox' || f.type === 'radio') { if (f.checked !== f.defaultChecked) return true; }
+          else if (f.type !== 'hidden' && f.type !== 'button' && f.tagName !== 'SELECT' && f.value !== f.defaultValue) return true;
+        }
+      } catch (e) { /* عند الشك نعتبر الشاشة غير مشغولة */ }
+      return false;
+    }
+    function hideBanner() { if (banner) { banner.style.display = 'none'; } }
+    function showBanner() {
+      if (!banner) {
+        banner = document.createElement('button');
+        banner.type = 'button';
+        banner.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:76px;z-index:2147483000;border:none;border-radius:999px;padding:10px 18px;background:#3D2B1E;color:#fff;font:700 13px sans-serif;box-shadow:0 6px 20px rgba(0,0,0,0.3);cursor:pointer;';
+        banner.addEventListener('click', () => doRefresh());
+        document.body.appendChild(banner);
+      }
+      banner.textContent = isAr() ? '🔄 توجد تحديثات جديدة — اضغط للتحديث' : '🔄 New updates — tap to refresh';
+      banner.style.display = 'block';
+    }
+    function doRefresh() {
+      hideBanner();
+      setPill((isAr() ? '✅ تحديث ' : '✅ Updated ') + clock(), false);
+      try { masarRunSilently(opts.refresh); } catch (e) { /* لا يعطّل الصفحة */ }
+    }
+    function handle(r, startedAt) {
+      if (!r || !r.success) {
+        if (r && r.error && r.error.code === 'SESSION_EXPIRED') stopped = true;
+        setPill('⚠ ' + ((r && r.error && r.error.code) || (isAr() ? 'تعذّر الفحص' : 'check failed')), true);
+        return;
+      }
+      setPill((isAr() ? '🔄 آخر فحص ' : '🔄 Checked ') + clock() + (changes ? (isAr() ? ' · تغيّرات ' : ' · changes ') + changes : ''), false);
+      const sig = JSON.stringify(domains.map(d => r.data.tokens[d] || ''));
+      if (rebaseWanted) {
+        // هذه الصفحة حفظت شيئًا بنفسها: الرمز بعد حفظها هو خط الأساس الجديد (لا تُحدَّث هي بما كتبته). ردٌّ بدأ قبل انتهاء حفظها قديم: نعيد السؤال
+        if (startedAt >= ownDoneAt) { rebaseWanted = false; baseline = sig; } else { setTimeout(tick, 300); }
+        return;
+      }
+      if (baseline === null) { baseline = sig; return; }
+      if (sig === baseline) return;
+      baseline = sig; changes++;
+      if (busy()) { showBanner(); return; }
+      doRefresh();
+      // الكتابة قد لا تكون ظهرت للقراءة بعد لحظة الرمز: إن كان التغيّر حديثًا (<٨ ثوانٍ) نُعيد الجلب مرة ثانية بعد استقراره
+      const newest = Math.max.apply(null, domains.map(d => parseFloat(r.data.tokens[d]) || 0));
+      const age = (r.data.serverTime || Date.now()) - newest;
+      if (age < 8000) setTimeout(() => { if (!document.hidden && !busy()) doRefresh(); }, 8500 - Math.max(0, age));
+    }
+    function tick() {
+      if (stopped || document.hidden) return;
+      // نداء ضاع بلا ردّ (شبكة بطيئة/تبويب مجمَّد) كان يُبقي inflight=true فيتوقف التحديث للأبد: بعد ٢٥ ثانية نعدّه مفقودًا ونسأل من جديد
+      if (inflight && Date.now() - inflightSince < 25000) return;
+      inflight = true;
+      const startedAt = Date.now();
+      inflightSince = startedAt;
+      MASAR_RAW_RUN_.withSuccessHandler(r => { inflight = false; handle(r, startedAt); }).withFailureHandler(() => { inflight = false; setPill(isAr() ? '⚠ تعذّر الفحص' : '⚠ check failed', true); }).getChangeTokens(uid(), domains);
+    }
+    function ownDone() { ownDoneAt = Date.now(); rebaseWanted = true; hideBanner(); setTimeout(tick, 500); }
+    MASAR_AR_INSTANCES_.push({ ownDone: ownDone });
+    setInterval(tick, interval);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) { rebaseWanted = false; setTimeout(tick, 400); } });
+    setTimeout(tick, 1500); // يلتقط خط الأساس مبكرًا
+    return { tick: tick };
+  }
+const Core = (() => {
+  let forceHideOverlayFn = () => {}; // wrapGoogleScriptRunWithBusyOverlay() تملأها فعليًا -- انظر تعليقها
+  const commonDict = {
+    ar: {
+      changePassword: '🔑 تغيير كلمة المرور', logout: '↩ تسجيل الخروج',
+      changePasswordTitle: 'تغيير كلمة المرور', oldPasswordLbl: 'كلمة المرور الحالية', newPasswordLbl: 'كلمة المرور الجديدة',
+      cancelBtn: 'إلغاء', saveBtn: 'حفظ',
+      changePasswordMissing: 'الرجاء إدخال كلمتَي المرور معًا', changePasswordSuccess: 'تم تغيير كلمة المرور بنجاح',
+      loadErrorText: 'تعذّر تنفيذ العملية — أعد المحاولة',
+      toastNotReady: 'هذه الميزة ستُبنى في خطوة قادمة',
+      shiftEndedTitle: 'أُغلقت هذه النوبة', shiftEndedDesc: 'أُغلقت من جهاز آخر أو من الإدارة — الرجاء تسجيل الدخول من جديد للمتابعة.', shiftEndedLoginBtn: 'تسجيل الدخول من جديد'
+    },
+    en: {
+      changePassword: '🔑 Change password', logout: '↩ Log out',
+      changePasswordTitle: 'Change password', oldPasswordLbl: 'Current password', newPasswordLbl: 'New password',
+      cancelBtn: 'Cancel', saveBtn: 'Save',
+      changePasswordMissing: 'Please enter both passwords', changePasswordSuccess: 'Password changed successfully',
+      loadErrorText: 'Could not complete the operation — please try again',
+      toastNotReady: 'This feature is coming up next',
+      shiftEndedTitle: 'This shift has ended', shiftEndedDesc: 'It was closed from another device or by an admin — please log in again to continue.', shiftEndedLoginBtn: 'Log in again'
+    }
+  };
+
+  // SPEC v1.4 -- injected server-side (WebApp.gs doGet(), HtmlTemplate) --
+  // see admin_dashboard.html/login.html for the full rationale on both.
+  const APP_BASE_URL = MASAR_TPL.appBaseUrl;
+  var TIMEOUT_SCALE = MASAR_TPL.timeoutScale; // مضاعِف مُهَل الانتظار: ١ في الإنتاج، أكبر في DIV (مشروع بارد/شبكة اختبار)
+  // تسجيل الخروج (٨ أكتوبر ٢٠٢٦، بلاغ مستخدم: "لا يأخذني دائمًا لشاشة الدخول حتى أضغط زرًا في الصفحة التي بقيت مفتوحة"): المتصفحات (خصوصًا
+  // الهاتف) تحجب التنقّل غير المرتبط بلمسة مباشرة، فكانت الصفحة تبقى ظاهرة بزر "اضغط للمتابعة" مخبّأ داخل قائمة مغلقة. الآن أول ما يُستدعى
+  // logout يُغطّى المحتوى بحاجز كامل الشاشة "تم تسجيل الخروج" بزر كبير ظاهر، مع محاولة تلقائية للانتقال حيث يسمح المتصفح.
+  function masarLogoutMarker() {
+    try {
+      if (document.getElementById('masarLoggedOutOverlay')) return null;
+      var ar = (document.documentElement.lang || 'ar') !== 'en';
+      var o = document.createElement('div');
+      o.id = 'masarLoggedOutOverlay';
+      o.dir = ar ? 'rtl' : 'ltr';
+      o.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:2147483646;background:#3D2B1E;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font:600 19px/1.6 sans-serif;text-align:center;padding:24px;';
+      o.innerHTML = '<div style="font-size:48px">\uD83D\uDD12</div><div>' + (ar ? 'تم تسجيل الخروج' : 'You have been logged out') + '</div>' +
+        '<button type="button" style="border:none;background:#EE7126;color:#fff;font:700 17px sans-serif;padding:15px 34px;border-radius:999px;cursor:pointer;">' + (ar ? 'العودة إلى شاشة الدخول' : 'Back to login') + '</button>';
+      document.body.appendChild(o);
+      var go = function () { try { window.top.location.href = APP_BASE_URL; } catch (e) { window.location.href = APP_BASE_URL; } };
+      o.getElementsByTagName('button')[0].addEventListener('click', go);
+      setTimeout(go, 700);
+    } catch (e) { /* عرض فقط */ }
+    return null;
+  }
+  const CURRENT_USER_ID = MASAR_TPL.currentUserId;
+  const CURRENT_STORE_ID = MASAR_TPL.currentStoreId;
+  const CURRENT_STORE_NAME = MASAR_TPL.currentStoreName;
+  const CURRENT_ASSIGNMENT_ID = MASAR_TPL.currentAssignmentId;
+  const CURRENT_FULL_NAME = MASAR_TPL.currentFullName;
+  const CURRENT_ORDER_ID = MASAR_TPL.currentOrderId;
+
+  const state = { lang: (MASAR_TPL.userLang === 'en' ? 'en' : 'ar') };
+  // لغة المستخدم المحفوظة على الخادم (Users.Language) -- طلب مباشر ٢٥ سبتمبر ٢٠٢٦: تُفتح بها كل الشاشات وتبقى عند التنقّل
+  (function () {
+    if (state.lang === 'en') { document.documentElement.lang = 'en'; document.documentElement.dir = 'ltr'; }
+    const langBtn = document.getElementById('langToggle');
+    if (!langBtn) return;
+    langBtn.textContent = state.lang === 'ar' ? 'EN' : 'AR';
+    langBtn.addEventListener('click', () => setTimeout(() => {
+      try { if (MASAR_TPL.currentUserId) google.script.run.withFailureHandler(() => {}).setUserLanguage(MASAR_TPL.currentUserId, state.lang); } catch (e) { /* لا يعطّل الشاشة */ }
+    }, 0));
+  })();
+  // ---- زر التحيين (طلب مباشر ٢٦ سبتمبر ٢٠٢٦): تحديث ناعم إن وُجد مُحمِّل للصفحة، وإلا إعادة تحميل الصفحة بنفس رابطها ----
+  (function () {
+    const btn = document.getElementById('refreshBtn');
+    if (!btn) return;
+    const CONFIRM = false;
+    const label = btn.querySelector('.rf-label');
+    const idleText = () => (state.lang === 'ar' ? 'تحديث' : 'Refresh');
+    const sureText = () => (state.lang === 'ar' ? 'اضغط للتأكيد' : 'Tap to confirm');
+    const setIdle = () => { btn.classList.remove('armed'); if (label) label.textContent = idleText(); };
+    setIdle();
+    const lt = document.getElementById('langToggle');
+    if (lt) lt.addEventListener('click', () => setTimeout(setIdle, 0));
+    let armed = false, timer = null;
+    const hardReload = () => {
+      try { window.top.location.href = APP_BASE_URL + '?' + MASAR_TPL.reloadQuery; } catch (e) { window.location.reload(); }
+    };
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      if (CONFIRM && !armed) {
+        armed = true; btn.classList.add('armed'); if (label) label.textContent = sureText();
+        clearTimeout(timer); timer = setTimeout(() => { armed = false; setIdle(); }, 2800);
+        return;
+      }
+      clearTimeout(timer); armed = false; setIdle();
+      const soft = null;
+      if (soft) {
+        btn.classList.add('spin');
+        try { soft(); setTimeout(() => btn.classList.remove('spin'), 1200); return; } catch (e) { btn.classList.remove('spin'); }
+      }
+      hardReload();
+    });
+  })();
+  const UID_SUFFIX = '&uid=' + encodeURIComponent(CURRENT_USER_ID) + '&storeId=' + encodeURIComponent(CURRENT_STORE_ID) + '&storeName=' + encodeURIComponent(CURRENT_STORE_NAME) + '&assignmentId=' + encodeURIComponent(CURRENT_ASSIGNMENT_ID) + '&fullName=' + encodeURIComponent(CURRENT_FULL_NAME);
+  const PAGE_MAP = {
+    dashboard: APP_BASE_URL + '?page=cashier' + UID_SUFFIX,
+    'new-order': APP_BASE_URL + '?page=cashier_new_order' + UID_SUFFIX,
+    'new-special': APP_BASE_URL + '?page=cashier_new_special' + UID_SUFFIX,
+    tracking: APP_BASE_URL + '?page=cashier_tracking' + UID_SUFFIX,
+    receive: APP_BASE_URL + '?page=cashier_receive' + UID_SUFFIX,
+    return: APP_BASE_URL + '?page=cashier_return' + UID_SUFFIX,
+    edit: APP_BASE_URL + '?page=cashier_edit' + UID_SUFFIX
+  };
+
+  function t(key) { return (commonDict[state.lang] && commonDict[state.lang][key]) || key; }
+
+  function applyI18n(container, dict) {
+    if (!container) return;
+    container.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      const val = dict[state.lang] && dict[state.lang][key];
+      if (val !== undefined) el.textContent = val;
+    });
+  }
+
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => el.classList.remove('show'), 2400);
+  }
+
+  function attachNotReadyToasts(container) {
+    container.querySelectorAll('[data-toast="notReady"]').forEach(el => {
+      if (el._notReadyWired) return;
+      el._notReadyWired = true;
+      el.addEventListener('click', (e) => { e.stopPropagation(); showToast(t('toastNotReady')); });
+    });
+  }
+
+  function register() {} // no-op here -- single-view pages don't need a registry
+
+  /**
+   * registerBeforeLeaveHook(fn)/runBeforeLeaveHooks(callback) -- SPEC v1.4
+   * (طلب مستخدم مباشر بعد نقد بنّاء لتصميم سابق): بناء الطلبية يبقى محليًا
+   * بالكامل أثناء الإضافة/التعديل (لا مزامنة لكل نقرة -- كانت تجربة كارثية
+   * فعليًا مع كميات كبيرة)، والمزامنة الفعلية الوحيدة تحدث *عند المغادرة*
+   * فقط (رجوع، أو تسجيل خروج) -- الزر الخاص بكل شاشة (رجوع) يستدعي مزامنته
+   * مباشرة، لكن "تسجيل الخروج" في الرأس المشترك لا يعرف تفاصيل أي شاشة --
+   * هذا السجل يسمح للشاشة الحالية بتسجيل دالة "أنهِ عملي أولًا" يستدعيها
+   * زر الخروج قبل تنفيذ logout() الفعلي.
+   */
+  let beforeLeaveHook = null;
+  function registerBeforeLeaveHook(fn) { beforeLeaveHook = fn; }
+  function runBeforeLeaveHooks(callback) {
+    if (beforeLeaveHook) beforeLeaveHook(callback); else callback();
+  }
+
+  // SPEC v1.4 -- real page navigation (see admin's Core-shim for the full
+  // window.top + absolute-URL rationale). params (e.g. {id: orderId}) are
+  // threaded onto the URL as extra query params for the target page to read.
+  function showView(name, params) {
+    let url = PAGE_MAP[name] || (APP_BASE_URL + '?page=cashier' + UID_SUFFIX);
+    if (params) {
+      Object.keys(params).forEach(k => { url += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(params[k]); });
+    }
+    window.top.location.href = url;
+  }
+
+  function wireConfirmableClick(btn, onConfirm, confirmLabel) {
+    let armed = false;
+    let timer = null;
+    const original = btn.innerHTML;
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      if (!armed) {
+        armed = true;
+        btn.classList.add('confirm-armed');
+        btn.innerHTML = confirmLabel || (state.lang === 'ar' ? '👆 اضغط مرة أخرى للتأكيد' : '👆 Tap again to confirm');
+        timer = setTimeout(() => {
+          armed = false;
+          btn.classList.remove('confirm-armed');
+          btn.innerHTML = original;
+        }, 2800);
+      } else {
+        clearTimeout(timer);
+        armed = false;
+        btn.classList.remove('confirm-armed');
+        btn.innerHTML = original; // SPEC v1.4 (بلاغ مستخدم مباشر) -- كان يبقى عالقًا على "اضغط مرة أخرى" حتى بعد نجاح العملية؛ يُعاد فورًا هنا قبل أي استدعاء فعلي
+        btn.disabled = true;
+        onConfirm();
+      }
+    });
+  }
+
+  function wireHeader() {
+    document.getElementById('storeNameDisplay').textContent = CURRENT_STORE_NAME;
+    document.getElementById('langToggle').addEventListener('click', () => {
+      state.lang = state.lang === 'ar' ? 'en' : 'ar';
+      document.documentElement.lang = state.lang;
+      document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+      document.getElementById('langToggle').textContent = state.lang === 'ar' ? 'EN' : 'AR';
+      applyI18n(document.querySelector('header.topbar'), commonDict);
+      applyI18n(document.getElementById('view-dashboard'), DashboardView.dict);
+      DashboardView.render({});
+    });
+    const userMenuBtn = document.getElementById('userMenuBtn');
+    const userDropdown = document.getElementById('userDropdown');
+    userMenuBtn.addEventListener('click', (e) => { e.stopPropagation(); userDropdown.classList.toggle('open'); });
+    document.addEventListener('click', () => userDropdown.classList.remove('open'));
+    attachNotReadyToasts(document.querySelector('header.topbar'));
+
+    const dropdownButtons = userDropdown.querySelectorAll('button');
+    dropdownButtons[0].addEventListener('click', () => {
+      userDropdown.classList.remove('open');
+      openChangePasswordModal();
+    });
+    dropdownButtons[1].addEventListener('click', () => {
+      userDropdown.classList.remove('open');
+      dropdownButtons[1].disabled = true;
+      // ملاحظة: الحاجز المرئي أثناء هذا النداء يأتي تلقائيًا الآن من
+      // wrapGoogleScriptRunWithBusyOverlay() -- لا حاجة لإدارة مؤشر يدويًا هنا.
+      // SPEC v1.4 -- runBeforeLeaveHooks تُنهي مزامنة أي مسودة قيد البناء
+      // في الشاشة الحالية أولًا (إن وُجدت) قبل تنفيذ logout() الفعلي.
+      runBeforeLeaveHooks(() => {
+        google.script.run
+          .withSuccessHandler(() => { window.top.location.href = APP_BASE_URL; })
+          .withFailureHandler(() => { window.top.location.href = APP_BASE_URL; })
+          .logout(CURRENT_USER_ID, masarLogoutMarker());
+      });
+    });
+    wireChangePasswordModal();
+  }
+
+  function openChangePasswordModal() {
+    document.getElementById('cp-title').textContent = t('changePasswordTitle');
+    document.getElementById('cp-oldLabel').textContent = t('oldPasswordLbl');
+    document.getElementById('cp-newLabel').textContent = t('newPasswordLbl');
+    document.getElementById('cp-cancelBtn').textContent = t('cancelBtn');
+    document.getElementById('cp-saveBtn').textContent = t('saveBtn');
+    document.getElementById('cp-fOldPassword').value = '';
+    document.getElementById('cp-fNewPassword').value = '';
+    document.getElementById('cp-errorBanner').classList.remove('show');
+    document.getElementById('changePasswordOverlay').classList.add('open');
+  }
+
+  function wireChangePasswordModal() {
+    document.getElementById('cp-cancelBtn').addEventListener('click', () => {
+      document.getElementById('changePasswordOverlay').classList.remove('open');
+    });
+    document.getElementById('cp-saveBtn').addEventListener('click', () => {
+      const oldPassword = document.getElementById('cp-fOldPassword').value;
+      const newPassword = document.getElementById('cp-fNewPassword').value;
+      const errBanner = document.getElementById('cp-errorBanner');
+      if (!oldPassword || !newPassword) {
+        errBanner.textContent = t('changePasswordMissing');
+        errBanner.classList.add('show');
+        return;
+      }
+      const btn = document.getElementById('cp-saveBtn');
+      btn.disabled = true;
+      google.script.run
+        .withSuccessHandler(result => {
+          btn.disabled = false;
+          if (!result || !result.success) {
+            errBanner.textContent = state.lang === 'ar' ? (result && result.error ? result.error.messageAR : t('loadErrorText')) : (result && result.error ? result.error.messageEN : t('loadErrorText'));
+            errBanner.classList.add('show');
+            return;
+          }
+          document.getElementById('changePasswordOverlay').classList.remove('open');
+          showToast(t('changePasswordSuccess'));
+        })
+        .withFailureHandler(() => {
+          btn.disabled = false;
+          errBanner.textContent = t('loadErrorText');
+          errBanner.classList.add('show');
+        })
+        .changePassword(CURRENT_USER_ID, oldPassword, newPassword);
+    });
+  }
+
+  /**
+   * wrapGoogleScriptRunWithBusyOverlay() -- SPEC v1.4 (تصحيح جوهري بعد
+   * ملاحظة مستخدم مباشرة مرتين): يستبدل google.script.run بنسخة مُغلَّفة
+   * عبر Proxy تُظهر/تُخفي حاجزًا حقيقيًا على مستوى الصفحة كاملة تلقائيًا
+   * حول كل نداء -- بلا أي تعديل على أي من نقاط الاستدعاء الفعلية في كل
+   * ملفات الشاشات (بناء الجملة `google.script.run.withSuccessHandler(...)
+   * .withFailureHandler(...).دالة(...)` يبقى كما هو تمامًا). عدّاد لا علم
+   * منطقي (busyCount) يدعم نداءات متزامنة متعددة بشكل صحيح (كما في render()
+   * التي تُطلق أكثر من نداء معًا) -- الحاجز لا يختفي إلا بعد اكتمال الجميع.
+   */
+  /**
+   * showShiftEndedOverlay() -- SPEC v1.4 (طلب مستخدم مباشر): يُحسَب ارتفاع
+   * الشريط العلوي فعليًا عند كل استدعاء (لا قيمة CSS ثابتة -- الشريط قد
+   * يلتفّ لسطرين على شاشات ضيّقة جدًا، فارتفاعه متغيّر فعليًا)، فتُغطّي
+   * الرسالة كل ما تحته فقط، تاركة الشريط العلوي ظاهرًا كما طُلب صراحة.
+   */
+  function showShiftEndedOverlay() {
+    const overlay = document.getElementById('shiftEndedOverlay');
+    const topbar = document.querySelector('header.topbar');
+    if (topbar) overlay.style.top = topbar.getBoundingClientRect().height + 'px';
+    overlay.classList.add('show');
+  }
+
+  function wrapGoogleScriptRunWithBusyOverlay() {
+    if (typeof google === 'undefined' || !google.script || !google.script.run) return; // بيئة اختبار محلية بلا Apps Script حقيقي
+    const realRun = google.script.run;
+    const overlay = document.getElementById('globalBusyOverlay');
+    let busyCount = 0;
+    function showBusy() { busyCount++; overlay.classList.add('show'); }
+    function hideBusy() { busyCount = Math.max(0, busyCount - 1); if (busyCount === 0) overlay.classList.remove('show'); }
+    /**
+     * SPEC v1.4 (تصحيح جوهري -- بلاغ ميداني مباشر من الهاتف: "اضغط هنا
+     * للمتابعة" يظهر لكن يبقى بلا استجابة فعلية لفترة): مهلة أمان هذا
+     * الحاجز العام مضبوطة هنا على 20 ثانية، بينما مهلة أمان كل شاشة على
+     * حدة (onceWithTimeout في new-order/new-special) مضبوطة على 8 ثوانٍ
+     * فقط -- توقيتان منفصلان بلا أي تنسيق بينهما! عند الثانية 8، الشاشة
+     * تُحدِّث الزر ليصبح "جاهزًا للمتابعة" (disabled=false فعليًا) -- لكن
+     * الحاجز الشفّاف الكامل للصفحة (z-index:999) يبقى ظاهرًا فوق كل شيء
+     * حتى الثانية 20 (أو وصول رد حقيقي)، فيمتص أي لمسة فعليًا رغم أن الزر
+     * تحته أصبح مفعَّلًا! الحل: forceHideOverlayFn تُتيح لكود الشاشة إخفاء
+     * الحاجز صراحة *في نفس لحظة* تحديث الزر، لا الاعتماد على توقيت مستقل.
+     */
+    forceHideOverlayFn = () => { busyCount = 0; overlay.classList.remove('show'); };
+    /**
+     * كل سلسلة نداء في هذا المشروع تبدأ دائمًا من google.script.run نفسها
+     * طازجة (لا إعادة استخدام سلسلة جزئية محفوظة) -- لذا Object.defineProperty
+     * بمُسترجِع (getter) يُنشئ حالة (state) جديدة مستقلة عند كل قراءة لـ
+     * google.script.run هو الأبسط والأضمن، بدل محاولة تمرير حالة عبر Proxy
+     * متداخل (نسخة سابقة من هذا الإصلاح كانت تحتوي خللًا فعليًا في تمرير
+     * معرِّف المهلة عبر حلقات chainObj المتغيّرة).
+     */
+    function makeChain(state) {
+      return {
+        withSuccessHandler(fn) {
+          return Object.assign({}, makeChain(state), {
+            _onSuccess: (...args) => { finishOnce(state); fn(...args); }
+          });
+        },
+        withFailureHandler(fn) {
+          return Object.assign({}, makeChain(state), {
+            _onFailure: (...args) => { finishOnce(state); fn(...args); }
+          });
+        }
+      };
+    }
+    function finishOnce(state) {
+      if (state.done) return;
+      state.done = true;
+      clearTimeout(state.safetyTimerId);
+      hideBusy();
+    }
+    Object.defineProperty(google.script, 'run', {
+      configurable: true,
+      get() {
+        const state = { done: false, safetyTimerId: null };
+        const handlers = { onSuccess: null, onFailure: null };
+        let proxy; // مرجع ذاتي -- withSuccessHandler/withFailureHandler يجب أن تُعيدا الكائن المُغلَّف (proxy) نفسه، لا الكائن الخام، وإلا فقدت أي استدعاء تالٍ (مثل .getOrderDetails) اعتراض get trap
+        const chain = {
+          withSuccessHandler(fn) { handlers.onSuccess = fn; return proxy; },
+          withFailureHandler(fn) { handlers.onFailure = fn; return proxy; }
+        };
+        proxy = new Proxy(chain, {
+          get(target, prop) {
+            if (prop === 'withSuccessHandler' || prop === 'withFailureHandler') return target[prop];
+            // أي اسم آخر = الدالة الفعلية المطلوب استدعاؤها فعليًا على الخادم
+            return (...args) => {
+              showBusy();
+              // SPEC v1.4 (شبكة أمان -- بلاغ مستخدم مباشر: زر الرجوع/الإلغاء
+              // بدا "معطَّلًا" أحيانًا عند استئناف مسودة، بلا أي خطأ ظاهر في
+              // الكونسول -- لم أستطع إعادة إنتاج السبب الجذري الدقيق محليًا،
+              // لكن نداءً واحدًا لا يستجيب أبدًا لأي سبب بنيوي يُبقي الحاجز
+              // ظاهرًا للأبد بصمت، يمنع أي نقرة أخرى حتى لو لا علاقة لها
+              // بالنداء العالق. مهلة أمان 20 ثانية تمنع قفل الواجهة نهائيًا.
+              state.safetyTimerId = setTimeout(() => finishOnce(state), 20000);
+              return realRun
+                .withSuccessHandler((...r) => {
+                  finishOnce(state);
+                  // SPEC v1.4 (طلب مستخدم مباشر -- مزامنة متعددة الأجهزة):
+                  // اعتراض عام لكل استجابة، بصرف النظر عن الدالة المُستدعاة
+                  // -- أي رد يحمل SHIFT_NOT_ACTIVE أو SESSION_EXPIRED يعني
+                  // هذا الجهاز لم يعد صالحًا للعمل إطلاقًا (نوبة أُغلقت من
+                  // مكان آخر، أو جلسة انتهت) -- رسالة كاملة الشاشة فورية
+                  // بدل تمرير الخطأ لمعالج الشاشة العادي (الذي كان سيعرض
+                  // توست عامًا مبهمًا لا يوضّح للمستخدم ما يجب فعله فعليًا).
+                  const errCode = r[0] && r[0].error && r[0].error.code;
+                  if (errCode === 'SHIFT_NOT_ACTIVE' || errCode === 'SESSION_EXPIRED') {
+                    showShiftEndedOverlay();
+                    return;
+                  }
+                  if (handlers.onSuccess) handlers.onSuccess(...r);
+                })
+                .withFailureHandler((...r) => { finishOnce(state); if (handlers.onFailure) handlers.onFailure(...r); })
+                [prop](...args);
+            };
+          }
+        });
+        return proxy;
+      }
+    });
+  }
+
+  function start() {
+    wrapGoogleScriptRunWithBusyOverlay();
+    wireHeader();
+    applyI18n(document.querySelector('header.topbar'), commonDict);
+    applyI18n(document.getElementById('shiftEndedOverlay'), commonDict);
+    document.getElementById('shiftEndedLoginBtn').addEventListener('click', () => { window.top.location.href = APP_BASE_URL; });
+    applyI18n(document.getElementById('view-dashboard'), DashboardView.dict);
+    attachNotReadyToasts(document.getElementById('view-dashboard'));
+    DashboardView.render({});
+  }
+
+  return { register, showView, showToast, state, t, start, applyI18n, attachNotReadyToasts, wireConfirmableClick, registerBeforeLeaveHook,
+    forceHideBusyOverlay: () => forceHideOverlayFn(),
+    currentUserId: CURRENT_USER_ID, currentStoreId: CURRENT_STORE_ID, currentStoreName: CURRENT_STORE_NAME,
+    currentAssignmentId: CURRENT_ASSIGNMENT_ID, currentFullName: CURRENT_FULL_NAME, currentOrderId: CURRENT_ORDER_ID, appBaseUrl: APP_BASE_URL };
+})();
+
+</script>
+<script>
+const DashboardView = (function () {
+  const root = document.getElementById('view-dashboard');
+
+  // SPEC v1.4 -- orders is filled by listOrders() in render(); hasDraftOrders
+  // is computed from that real list (any DRAFT order). hasSubmittedNormal is
+  // no longer tracked client-side at all -- closeShift() itself is the
+  // single source of truth for "was a normal order submitted this shift"
+  // (DAILY_ORDER_REQUIRED error), so the close-shift button just attempts
+  // the real call and reacts to that specific error instead of duplicating
+  // the business rule here.
+  let orders = [];
+  let currentOrdersWindow = 48; // SPEC v1.4 -- يتغيّر عند طلب أرشيف أقدم صراحة، وقائيًا لنفس مبدأ شاشة القسم
+  const screenState = { hasDraftOrders: false };
+
+  // Real Orders.Status (DATABASE.md B1) collapsed into the five display
+  // buckets the dashboard already had designed -- DRAFT/SUBMITTED show as
+  // "pending" (nothing distributed yet), the three in-transit stages show
+  // as "progress", DELIVERED as "success", RECEIVED/INVOICED/CLOSED as
+  // "done". Worth revisiting once tracking.html is connected and the
+  // exact stage-by-stage wording is settled with real usage.
+  const STATUS_MAP = {
+    DRAFT: 'draft', SUBMITTED: 'pending',
+    PROCESSING: 'progress', DISTRIBUTION_APPROVED: 'progress', READY_FOR_DRIVER: 'progress',
+    DELIVERED: 'success',
+    RECEIVED: 'done', INVOICED: 'done', CLOSED: 'done',
+    CANCELLED: 'cancelled'
+  };
+
+  const statusMeta = {
+    draft:     { icon: '📝', key: 'stDraft',    cls: 'st-draft' },
+    pending:   { icon: '⏳', key: 'stPending',  cls: 'st-pending' },
+    executing: { icon: '🛠️', key: 'stExecuting', cls: 'st-executing' },
+    progress:  { icon: '🚚', key: 'stProgress', cls: 'st-progress' },
+    success:   { icon: '✅', key: 'stSuccess',  cls: 'st-success' },
+    done:      { icon: '📋', key: 'stDone',     cls: 'st-done' },
+    cancelled: { icon: '✕',  key: 'stCancelled',cls: 'st-cancelled' }
+  };
+
+  const dict = {
+    ar: {
+      greeting: 'مرحبًا،',
+      newNormal: 'طلب عادي', newSpecial: 'طلب خاص', receiveGoods: 'استلام بضاعة', returnItem: 'إرجاع',
+      todayOrders: 'طلبيات اليوم', normal: 'عادي', special: 'خاص',
+      draftsModalTitle: 'لديك مسودات غير مُرسَلة', draftsModalDesc: 'يجب إرسال كل مسودة كطلبية حقيقية أو إلغاؤها قبل إغلاق النوبة',
+      sendDraftBtn: 'إرسال', cancelDraftBtn: 'إلغاء',
+      draftNoticeText: 'لديك طلبيات غير مُرسَلة — ستبقى محفوظة وتظهر تلقائيًا عند فتح نوبة جديدة',
+      blockingNoticeText: 'يجب إرسال طلبية عادية أولًا (حتى لو فارغة) لتغطية احتياجات الغد قبل إغلاق النوبة',
+      sendEmptyNow: 'إرسال طلبية فارغة الآن', closeShift: 'إغلاق النوبة', sendingEmptyText: 'جارٍ الإرسال...',
+      toastCheckList: 'العملية تستغرق وقتًا أطول من المعتاد — تحقّق من القائمة أدناه',
+      stDraft: 'مسودة غير مُرسَلة', stPending: 'قيد الانتظار', stExecuting: 'قيد التنفيذ', stProgress: 'قيد التوزيع', stSuccess: 'تم التسليم', stDone: 'مكتملة', stCancelled: 'ملغاة',
+      emptyOrders: 'لا توجد طلبيات اليوم بعد',
+      chgEditPending: '⏳ طلب تعديل بانتظار موافقة مسؤول التوزيع', chgCancelPending: '⏳ طلب إلغاء بانتظار الموافقة',
+      chgEditApproved: '✅ قُبل طلب التعديل وطُبِّق على الطلبية', chgCancelApproved: '✅ قُبل طلب الإلغاء',
+      chgEditRejected: '✖ رُفض طلب التعديل — الطلبية كما هي', chgCancelRejected: '✖ رُفض طلب الإلغاء — الطلبية قائمة',
+      chgReason: 'السبب: ',
+      loadArchiveBtn: 'عرض أرشيف أقدم (30 يومًا) ⌄',
+      toastEmptySent: 'أُرسلت طلبية عادية فارغة — يمكنك الآن إغلاق النوبة',
+      toastShiftClosed: 'أُغلقت النوبة بنجاح',
+      shiftClosedLockedLabel: 'النوبة مغلقة — يمكنك تسجيل الخروج من ⋮',
+      loadingText: 'جارٍ التحميل...', loadErrorText: 'تعذّر تنفيذ العملية — أعد المحاولة'
+    },
+    en: {
+      greeting: 'Hello,',
+      newNormal: 'New order', newSpecial: 'Special order', receiveGoods: 'Receive goods', returnItem: 'Return',
+      todayOrders: "Today's orders", normal: 'Normal', special: 'Special',
+      draftsModalTitle: 'You have unsent drafts', draftsModalDesc: 'Each draft must be sent as a real order or cancelled before closing the shift',
+      sendDraftBtn: 'Send', cancelDraftBtn: 'Cancel',
+      draftNoticeText: "You have unsent orders — they stay saved and reappear automatically when the next shift opens",
+      blockingNoticeText: "Send a normal order first (even empty) to cover tomorrow's needs before closing the shift",
+      sendEmptyNow: 'Send empty order now', closeShift: 'Close shift', sendingEmptyText: 'Sending...',
+      toastCheckList: 'This is taking longer than usual — check the list below',
+      stDraft: 'Unsent draft', stPending: 'Pending', stExecuting: 'In execution', stProgress: 'In distribution', stSuccess: 'Delivered', stDone: 'Completed', stCancelled: 'Cancelled',
+      emptyOrders: 'No orders yet today',
+      chgEditPending: '⏳ Edit request awaiting the distribution manager', chgCancelPending: '⏳ Cancellation request awaiting approval',
+      chgEditApproved: '✅ Edit request approved and applied', chgCancelApproved: '✅ Cancellation request approved',
+      chgEditRejected: '✖ Edit request rejected — order unchanged', chgCancelRejected: '✖ Cancellation request rejected — order stays active',
+      chgReason: 'Reason: ',
+      loadArchiveBtn: 'Show older archive (30 days) ⌄',
+      toastEmptySent: 'Empty normal order sent — you can close the shift now',
+      toastShiftClosed: 'Shift closed successfully',
+      shiftClosedLockedLabel: 'Shift closed — log out from ⋮',
+      loadingText: 'Loading...', loadErrorText: 'Could not complete the operation — please try again'
+    }
+  };
+
+  function t(key) { const v = dict[Core.state.lang] && dict[Core.state.lang][key]; return v !== undefined ? v : Core.t(key); }
+
+  function renderDate() {
+    const now = new Date();
+    const locale = Core.state.lang === 'ar' ? 'ar-QA-u-nu-latn' : 'en-US';
+    const fmt = new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    root.querySelector('#db-dateLine').textContent = fmt.format(now) + ' · ' + Core.t('shiftOpen');
+  }
+
+  function formatOrderTime(createdAt) {
+    // listOrders() يُرجع صفوف الشيت الخام (createOrder/submitOrder وغيرها لا
+    // تُطبِّق تحويل أسماء camelCase -- CreatedAt هنا تاريخ حقيقي أو نص تاريخ)
+    const d = new Date(createdAt);
+    if (isNaN(d.getTime())) return '';
+    const today = new Date();
+    const isToday = d.toDateString() === today.toDateString();
+    if (isToday) {
+      return d.toLocaleTimeString(Core.state.lang === 'ar' ? 'ar-QA-u-nu-latn' : 'en-US', { hour: '2-digit', minute: '2-digit' });
+    }
+    return Core.state.lang === 'ar' ? 'أمس' : 'Yesterday';
+  }
+
+  function renderOrders() {
+    const list = root.querySelector('#db-ordersList');
+    if (!orders.length) { list.innerHTML = '<div class="empty-state">' + t('emptyOrders') + '</div>'; return; }
+    list.innerHTML = orders.map(o => {
+      // SPEC v1.4 (إصلاح خطأ حقيقي، بلاغ مستخدم مباشر مع أرقام طلبيات فعلية:
+      // طلبيتان أُنشئتا معًا، إحداهما أظهرت "قيد التوزيع" فورًا): PROCESSING
+      // يُكتَب تلقائيًا لحظة الإرسال (routeOrderItems الفورية)، بصرف النظر
+      // كليًا عن اعتماد مسؤول التوزيع/الإنتاج الفعلي -- لم يكن يميّز هذا
+      // الفارق إطلاقًا، فكل طلبية PROCESSING تظهر "قيد التوزيع" ولو لم
+      // يطّلع عليها أحد بعد. التمييز الصحيح: PROCESSING بلا ProductionApprovedAt
+      // بعد = لا تزال فعليًا "قيد الانتظار" حتى تُعتمَد.
+      // SPEC v1.4 (طلب مباشر، تسلسل أربع مراحل دقيق): مسودة (لم تُرسَل) ←
+      // قيد الانتظار (أُرسِلت، بانتظار اعتماد التوزيع) ← قيد التنفيذ (اعتُمدت،
+      // الأقسام تعمل عليها) ← قيد التوزيع (أنهت كل الأقسام عملها، صارت مع
+      // فريق التوزيع فعليًا). allProductionDone من الخادم يميّز المرحلتين
+      // الأخيرتين اللتين كانتا مُدمَجتين سابقًا في "PROCESSING" واحدة.
+      let bucket;
+      if (o.Status === 'PROCESSING' && !o.ProductionApprovedAt) bucket = 'pending';
+      else if (o.Status === 'PROCESSING' && o.ProductionApprovedAt && !o.allProductionDone) bucket = 'executing';
+      else if (o.Status === 'PROCESSING' && o.ProductionApprovedAt && o.allProductionDone) bucket = 'progress';
+      else bucket = STATUS_MAP[o.Status] || 'pending';
+      const meta = statusMeta[bucket];
+      const badgeClass = o.OrderType === 'NORMAL' ? 'normal' : 'special';
+      const badgeText = o.OrderType === 'NORMAL' ? t('normal') : t('special');
+      // SPEC v1.4 (طلب مستخدم مباشر، نقطة 4): طلبية DRAFT تفتح على شاشة
+      // بناء الطلبية نفسها (استئناف، لا "تتبّع" طلبية لم تُرسَل أصلًا بعد) --
+      // نفس آلية معرِّف الرابط الموثوقة المُستخدَمة لـedit/tracking/receive.
+      const isDraft = o.Status === 'DRAFT';
+      const targetView = isDraft ? (o.OrderType === 'NORMAL' ? 'new-order' : 'new-special') : 'tracking';
+      // آخر طلب تعديل/إلغاء: يظهر إن كان معلَّقًا، أو قُرِّر خلال آخر ٧٢ ساعة (ليعلم الكاشير بالنتيجة)
+      let changeLine = '';
+      const cr = o.changeRequest;
+      if (cr) {
+        const isCancel = cr.type === 'CANCELLATION';
+        const decidedRecently = cr.decidedAt && (Date.now() - new Date(cr.decidedAt).getTime()) < 72 * 3600 * 1000;
+        if (cr.decision === 'PENDING') changeLine = `<span class="change-line pending">${t(isCancel ? 'chgCancelPending' : 'chgEditPending')}</span>`;
+        else if (decidedRecently && (cr.decision === 'APPROVED' || cr.decision === 'MODIFIED')) changeLine = `<span class="change-line approved">${t(isCancel ? 'chgCancelApproved' : 'chgEditApproved')}</span>`;
+        else if (decidedRecently && cr.decision === 'REJECTED') {
+          const why = cr.comment ? ' — ' + t('chgReason') + String(cr.comment).replace(/</g, '&lt;') : '';
+          changeLine = `<span class="change-line rejected">${t(isCancel ? 'chgCancelRejected' : 'chgEditRejected')}${why}</span>`;
+        }
+      }
+      return `
+        <button class="order-row" type="button" data-goto-order="${o.OrderID}" data-goto-view="${targetView}">
+          <span class="order-id">${o.OrderID}</span>
+          <span class="badge ${badgeClass}">${badgeText}</span>
+          <span class="order-status ${meta.cls}"><span>${meta.icon}</span>${t(meta.key)}</span>
+          <span class="order-spacer"></span>
+          <span class="order-time">${formatOrderTime(o.CreatedAt)}</span>
+          <span class="chevron">›</span>
+          ${changeLine}
+        </button>`;
+    }).join('') + (currentOrdersWindow === 48 ? `
+      <button class="load-archive-btn" type="button" id="db-loadArchiveBtn">${t('loadArchiveBtn')}</button>` : '');
+
+    const archiveBtn = root.querySelector('#db-loadArchiveBtn');
+    // SPEC v1.4 (جديدة، طلب مباشر مُطبَّق وقائيًا هنا أيضًا، نفس مبدأ شاشة
+    // القسم بالضبط): نافذة 48 ساعة افتراضية، توسيع صريح فقط عند الحاجة.
+    if (archiveBtn) archiveBtn.addEventListener('click', () => { currentOrdersWindow = 720; render(); });
+
+    list.querySelectorAll('[data-goto-order]').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        Core.showView(el.getAttribute('data-goto-view'), { id: el.getAttribute('data-goto-order') });
+      });
+    });
+  }
+
+  /**
+   * render() -- SPEC v1.4: fetches listOrders() (real) before showing
+   * anything. cashierName comes from Core.currentFullName (threaded via
+   * URL from login.html, not fetched separately -- see WebApp.gs).
+   */
+  function render(silent) {
+    document.querySelector('[data-i18n="greeting"]').textContent = t('greeting');
+    document.querySelector('[data-i18n="cashierName"]').textContent = Core.currentFullName;
+    if (silent !== true) root.querySelector('#db-ordersList').innerHTML = `<div style="padding:14px 0; text-align:center; color:var(--ink-soft);">${t('loadingText')}</div>`;
+
+    google.script.run
+      .withSuccessHandler(result => {
+        if (!result || !result.success) {
+          // SPEC v1.4 (تشخيص — بلاغ مستخدم لم أستطع إعادة إنتاجه محليًا رغم
+          // اختبار حقيقي شامل): رسالة الخطأ الفعلية من الخادم تُعرَض الآن
+          // صراحة (لا نص عام يُخفي التفاصيل)، لتحديد السبب الحقيقي في حال
+          // تكراره.
+          // SPEC v1.4 (تشخيص عاجل -- المحاولة السابقة لم تُظهر أي تفصيل رغم
+          // ظهور الخطأ، ما يعني أن افتراضي عن شكل result كان خاطئًا. هذه
+          // النسخة تعرض البيانات الخام كاملة (JSON.stringify) بلا أي شرط
+          // مسبق يفترض شكلًا معيّنًا -- لا يمكنها أن "تفشل بصمت" مهما كان
+          // الشكل الفعلي لما يعود من الخادم.
+          let detail = '';
+          try { detail = JSON.stringify(result); } catch (e) { detail = String(result); }
+          root.querySelector('#db-ordersList').innerHTML = `<div class="empty-state" style="color:var(--warn); word-break:break-all; font-size:11px; text-align:${Core.state.lang === 'ar' ? 'right' : 'left'};"><div>${t('loadErrorText')}</div><div style="margin-top:8px; font-family:var(--font-mono);">${detail}</div></div>`;
+          return;
+        }
+        orders = result.data.orders.sort((a, b) => new Date(b.CreatedAt) - new Date(a.CreatedAt));
+        screenState.hasDraftOrders = orders.some(o => o.Status === 'DRAFT');
+        renderDate();
+        renderOrders();
+        root.querySelector('#db-draftNotice').classList.toggle('hidden', !screenState.hasDraftOrders);
+      })
+      .withFailureHandler(error => {
+        let detail = '';
+        try { detail = (error && error.message) ? error.message : JSON.stringify(error); } catch (e) { detail = String(error); }
+        root.querySelector('#db-ordersList').innerHTML = `<div class="empty-state" style="color:var(--warn); word-break:break-all; font-size:11px;"><div>${t('loadErrorText')} (FAIL)</div><div style="margin-top:8px; font-family:var(--font-mono);">${detail}</div></div>`;
+      })
+      .listOrders(Core.currentUserId, { storeId: Core.currentStoreId, hoursWindow: currentOrdersWindow });
+
+    // عدّاد "استلام بضاعة" = طلبيات هذا المحل المُسلَّمة (DELIVERED) بانتظار استلام الكاشير -- نداء صامت لا يحجب الشاشة
+    try {
+      (CASHIER_RAW_RUN || google.script.run)
+        .withSuccessHandler(r => {
+          try {
+            if (!r || !r.success) return;
+            const n = r.data.orders.length;
+            const el = root.querySelector('[data-count="receive"]');
+            if (el) { el.textContent = n; el.style.display = ''; el.classList.toggle('zero', n === 0); }
+          } catch (e) { /* تجاهل */ }
+        })
+        .withFailureHandler(() => { /* تجاهل */ })
+        .listOrders(Core.currentUserId, { storeId: Core.currentStoreId, status: 'DELIVERED' });
+    } catch (e) { /* تجاهل */ }
+  }
+
+  root.querySelectorAll('[data-goto]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+      Core.showView(el.getAttribute('data-goto'));
+    });
+  });
+
+  /**
+   * close-shift button -- SPEC v1.4 (طلب مستخدم مباشر، نقطة 2): قبل محاولة
+   * الإغلاق الفعلي، يُتحقَّق أولًا من وجود طلبيات DRAFT في هذا المحل (بلا
+   * قيد على النوع -- عادية أو خاصة معًا). إن وُجدت، تُعرَض قائمة تُخيِّر
+   * الكاشير بين إرسال كل مسودة كطلبية حقيقية أو إلغائها، ولا يُستكمَل
+   * الإغلاق الفعلي إلا بعد حسم الجميع (أو إن لم توجد مسودات أصلًا).
+   */
+  (function () {
+    const btn = root.querySelector('#db-closeShiftBtn');
+    let armed = false;
+    let timer = null;
+    const original = btn.innerHTML;
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      if (!armed) {
+        armed = true;
+        btn.classList.add('confirm-armed');
+        btn.innerHTML = Core.state.lang === 'ar' ? '👆 اضغط مرة أخرى للتأكيد' : '👆 Tap again to confirm';
+        timer = setTimeout(() => {
+          armed = false;
+          btn.classList.remove('confirm-armed');
+          btn.innerHTML = original;
+        }, 2800);
+      } else {
+        clearTimeout(timer);
+        armed = false;
+        btn.classList.remove('confirm-armed');
+        btn.innerHTML = original;
+        btn.disabled = true;
+        checkDraftsBeforeClosing(btn);
+      }
+    });
+
+    function checkDraftsBeforeClosing(btn) {
+      google.script.run
+        .withSuccessHandler(result => {
+          if (!result || !result.success) { btn.disabled = false; Core.showToast(t('loadErrorText')); return; }
+          const drafts = result.data.orders.filter(o => o.Status === 'DRAFT');
+          if (!drafts.length) { proceedToCloseShift(btn); return; }
+          btn.disabled = false;
+          openDraftsModal(drafts, () => proceedToCloseShift(btn));
+        })
+        .withFailureHandler(() => { btn.disabled = false; Core.showToast(t('loadErrorText')); })
+        .listOrders(Core.currentUserId, { storeId: Core.currentStoreId });
+    }
+
+    function proceedToCloseShift(btn) {
+      btn.disabled = true;
+      google.script.run
+        .withSuccessHandler(result => {
+          btn.disabled = false;
+          if (!result || !result.success) {
+            if (result && result.error && result.error.code === 'DAILY_ORDER_REQUIRED') {
+              root.querySelector('#db-blockingNotice').classList.remove('hidden');
+            } else {
+              Core.showToast(t('loadErrorText'));
+            }
+            return;
+          }
+          Core.showToast(t('toastShiftClosed'));
+          lockDashboardAfterShiftClose();
+        })
+        .withFailureHandler(() => { btn.disabled = false; Core.showToast(t('loadErrorText')); })
+        .closeShift(Core.currentUserId, Core.currentAssignmentId);
+    }
+  })();
+
+  /**
+   * openDraftsModal(drafts, onAllResolved) -- يعرض كل مسودة بزرَّي "إرسال"
+   * و"إلغاء"؛ بمجرد حسم الجميع (القائمة تصبح فارغة)، يُغلَق العرض ويُستدعى
+   * onAllResolved() تلقائيًا فيُستكمَل إغلاق النوبة الفعلي.
+   */
+  function openDraftsModal(drafts, onAllResolved) {
+    root.querySelector('#db-draftsModal').classList.add('open');
+    renderDraftsModalList(drafts, onAllResolved);
+  }
+
+  function renderDraftsModalList(drafts, onAllResolved) {
+    const wrap = root.querySelector('#db-draftsModalList');
+    if (!drafts.length) {
+      root.querySelector('#db-draftsModal').classList.remove('open');
+      onAllResolved();
+      return;
+    }
+    wrap.innerHTML = drafts.map(o => `
+      <div class="shift-row" data-draft-id="${o.OrderID}" style="display:flex; align-items:center; gap:8px; padding:10px 0; border-bottom:1px solid var(--line);">
+        <span style="font-family:var(--font-mono); font-weight:600; font-size:12.5px;">${o.OrderID}</span>
+        <span style="font-size:11.5px; color:var(--ink-soft);">${o.OrderType === 'NORMAL' ? t('normal') : t('special')}</span>
+        <span style="flex:1;"></span>
+        <button class="draft-send-btn" data-action="send" data-id="${o.OrderID}" style="background:var(--success); color:#fff; border:none; border-radius:8px; padding:6px 10px; font-size:11.5px; font-family:inherit; cursor:pointer;">${t('sendDraftBtn')}</button>
+        <button class="draft-cancel-btn" data-action="cancel" data-id="${o.OrderID}" style="background:none; color:var(--warn); border:1px solid var(--warn); border-radius:8px; padding:6px 10px; font-size:11.5px; font-family:inherit; cursor:pointer;">${t('cancelDraftBtn')}</button>
+      </div>`).join('');
+
+    wrap.querySelectorAll('[data-action]').forEach(actionBtn => {
+      actionBtn.addEventListener('click', () => {
+        const orderId = actionBtn.getAttribute('data-id');
+        const action = actionBtn.getAttribute('data-action');
+        actionBtn.closest('[data-draft-id]').style.opacity = '0.5';
+        wrap.querySelectorAll(`[data-id="${orderId}"]`).forEach(b => { b.disabled = true; });
+        const call = action === 'send'
+          ? google.script.run.withSuccessHandler(handleResolved).withFailureHandler(handleFailed).submitOrder(Core.currentUserId, orderId)
+          : google.script.run.withSuccessHandler(handleResolved).withFailureHandler(handleFailed).cancelOrder(Core.currentUserId, orderId, '');
+        function handleResolved(result) {
+          if (!result || !result.success) { handleFailed(); return; }
+          const remaining = drafts.filter(o => o.OrderID !== orderId);
+          drafts = remaining;
+          renderDraftsModalList(remaining, onAllResolved);
+        }
+        function handleFailed() {
+          Core.showToast(t('loadErrorText'));
+          actionBtn.closest('[data-draft-id]').style.opacity = '1';
+          wrap.querySelectorAll(`[data-id="${orderId}"]`).forEach(b => { b.disabled = false; });
+        }
+      });
+    });
+  }
+
+  /**
+   * lockDashboardAfterShiftClose() -- SPEC v1.4 (طلب مستخدم مباشر): بدل
+   * إعادة توجيه تلقائية فورية، تُقفَل الواجهة في مكانها -- كل بطاقات
+   * العمل والزر نفسه معطَّلة، والخروج الوحيد المتاح هو تسجيل الخروج
+   * الصريح من قائمة ⋮.
+   */
+  function lockDashboardAfterShiftClose() {
+    root.querySelectorAll('.tile[data-goto]').forEach(el => {
+      el.disabled = true;
+      el.classList.add('locked');
+    });
+    const closeBtn = root.querySelector('#db-closeShiftBtn');
+    closeBtn.disabled = true;
+    closeBtn.innerHTML = `<span>🔒</span><span>${t('shiftClosedLockedLabel')}</span>`;
+    root.querySelector('#db-sendEmptyBtn').style.display = 'none';
+    root.querySelector('#db-blockingNotice').classList.add('hidden');
+  }
+
+  /**
+   * onceWithTimeout(fn, timeoutMs) -- نفس الآلية المُستخدَمة في new-order/
+   * new-special.module.js (انظر تعليقها هناك للسبب الكامل): ضمان استدعاء
+   * fn مرة واحدة بالضبط، من الاستجابة الحقيقية أو مهلة أمان صريحة تفترض
+   * النجاح الأرجح إحصائيًا، أيهما أسبق.
+   */
+  function onceWithTimeout(fn, timeoutMs) {
+    let fired = false;
+    const timer = setTimeout(() => { if (!fired) { fired = true; Core.forceHideBusyOverlay(); fn(); } }, timeoutMs * (typeof TIMEOUT_SCALE === 'number' ? TIMEOUT_SCALE : 1));
+    return (...args) => {
+      if (fired) return;
+      fired = true;
+      clearTimeout(timer);
+      fn(...args);
+    };
+  }
+
+  root.querySelector('#db-sendEmptyBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    const btn = root.querySelector('#db-sendEmptyBtn');
+    const originalContent = btn.innerHTML;
+    btn.disabled = true;
+    // SPEC v1.4 (بلاغ ميداني مباشر من الهاتف: لا تغذية راجعة واضحة عند
+    // الضغط -- تعطيل صامت فقط بلا تغيير نص، بدا وكأن شيئًا لم يحدث).
+    btn.innerHTML = t('sendingEmptyText');
+    function finish(success) {
+      btn.disabled = false;
+      btn.innerHTML = originalContent;
+      if (!success) { Core.showToast(t('loadErrorText')); return; }
+      root.querySelector('#db-blockingNotice').classList.add('hidden');
+      Core.showToast(t('toastEmptySent'));
+      render(); // إعادة تحميل القائمة لتُظهر الطلبية الفارغة الجديدة
+    }
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(createResult => {
+        if (createResult && !createResult.success) { finish(false); return; }
+        const newOrderId = createResult ? createResult.data.orderId : null;
+        if (!newOrderId) {
+          // SPEC v1.4 (تصحيح جوهري -- بلاغ ميداني مباشر: "في الأخير تظهر
+          // رسالة تعذّر الإرسال" رغم أن العملية على الأرجح نجحت فعليًا):
+          // انتهاء المهلة هنا يعني عدم وصول رد createOrder خلال 8ث -- هذا
+          // *ليس* نادرًا فعليًا في البيئة الحقيقية البطيئة (مؤكَّد مرارًا في
+          // هذه المحادثة)، لا حالة استثنائية كما افترضتُ خطأً سابقًا. بلا
+          // معرِّف طلبية، لا يمكن المتابعة لـsubmitOrder -- لكن ادِّعاء
+          // "فشل" هنا كذب محتمل (العملية غالبًا نجحت في الخلفية). الأصدق:
+          // تحديث القائمة فعليًا ليرى المستخدم الحالة الحقيقية بنفسه، بدل
+          // رسالة قد تكون خاطئة تمامًا في أي من الاتجاهين.
+          btn.disabled = false;
+          btn.innerHTML = originalContent;
+          Core.showToast(t('toastCheckList'));
+          render();
+          return;
+        }
+        google.script.run
+          .withSuccessHandler(onceWithTimeout(submitResult => {
+            // نفس تصحيح new-order.html بالضبط: عند انتهاء المهلة، submitResult
+            // يصل بلا وسيطة (undefined) -- نجاح مفترض لا فشل. الفشل الحقيقي
+            // الوحيد نتيجة *فعلية* تحمل success:false صراحة.
+            finish(!(submitResult && !submitResult.success) ? true : false);
+          }, 8000))
+          .withFailureHandler(() => finish(false))
+          .submitOrder(Core.currentUserId, newOrderId);
+      }, 8000))
+      .withFailureHandler(() => finish(false))
+      .createOrder(Core.currentUserId, Core.currentStoreId, 'NORMAL', [], null, null, null, null, null, null);
+  });
+
+  return { dict, render };
+})();
+Core.register('dashboard', DashboardView);
+
+</script>
+<script>
+  Core.start();
+  masarAutoRefresh({ domains: ['ORDERS', 'SHIPMENTS', 'DISTRIBUTION'], refresh: () => DashboardView.render(true) });
+</script>
+
+</body>
+</html>

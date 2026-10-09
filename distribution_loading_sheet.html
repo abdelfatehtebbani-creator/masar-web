@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#3D2B1E">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="مسار">
+<link rel="apple-touch-icon" href="icon-180.png">
+<script src="masar-config.js?v=67ea158b"></script>
+<script src="masar-runtime.js?v=67ea158b"></script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALAKER SWEETS — كشف التحميل</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #EE7126; --primary-dark: #C85A18; --primary-tint: #FCE8D8;
+    --secondary: #3D2B1E; --ink: #2B211B; --ink-soft: #6B5D52;
+    --bg: #FAF7F1; --surface: #FFFFFF; --line: #E7DFD2;
+    --success: #4B7A4F; --success-tint: #E7EFE6; --warn: #B23B2E; --warn-tint: #F7E6E2; --pending: #B4802A;
+    --radius-lg: 16px; --radius-md: 12px; --radius-sm: 8px;
+    --shadow-card: 0 1px 2px rgba(43,33,27,0.06), 0 4px 16px rgba(43,33,27,0.05);
+    --font-ar: 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif; --font-en: 'IBM Plex Sans', 'Segoe UI', sans-serif; --font-mono: 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html[lang="ar"] body { font-family: var(--font-ar); }
+  html[lang="en"] body { font-family: var(--font-en); }
+  body { background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; padding-bottom: 40px; }
+  header.topbar { display: flex; align-items: center; gap: 12px; background: var(--secondary); color: #fff; padding: 10px 20px; position: sticky; top: 0; z-index: 30; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
+  header.topbar .ttl { font-size: 15px; font-weight: 700; }
+  header.topbar .sub { font-size: 11px; opacity: .65; letter-spacing: .12em; }
+  .spacer { flex: 1; }
+  .icon-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 38px; height: 38px; padding: 0 10px; border-radius: 10px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #fff; cursor: pointer; font-size: 14px; font-weight: 600; font-family: inherit; }
+  .icon-btn:hover { background: rgba(255,255,255,0.16); }
+
+  .controls { max-width: 1100px; margin: 16px auto 10px; padding: 0 16px; }
+  .ctl-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 16px 18px; display: flex; flex-wrap: wrap; gap: 14px 22px; align-items: flex-end; }
+  .ctl-group { display: flex; flex-direction: column; gap: 6px; }
+  .ctl-group > label { font-size: 12px; font-weight: 700; color: var(--ink-soft); }
+  .seg { display: inline-flex; background: #EFE8DC; padding: 4px; border-radius: 12px; gap: 4px; }
+  .seg button { border: none; background: transparent; font-family: inherit; font-size: 13.5px; font-weight: 700; color: var(--ink-soft); padding: 8px 14px; border-radius: 9px; cursor: pointer; }
+  .seg button.active { background: var(--surface); color: var(--secondary); box-shadow: 0 1px 4px rgba(43,33,27,0.12); }
+  .ctl-group input, .ctl-group select { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 9px 11px; font-family: inherit; font-size: 13.5px; background: #fff; color: var(--ink); min-width: 170px; }
+  .btn { border: none; font-family: inherit; font-weight: 700; font-size: 14px; padding: 11px 18px; border-radius: var(--radius-md); cursor: pointer; }
+  .btn.ghost { background: var(--bg); border: 1px solid var(--line); color: var(--ink); }
+  .btn.primary { background: var(--primary); color: #fff; }
+  .btn.primary:hover { background: var(--primary-dark); }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .status-bar { max-width: 1100px; margin: 0 auto 10px; padding: 0 16px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; }
+  .pill { padding: 4px 12px; border-radius: 999px; font-weight: 700; font-size: 12.5px; }
+  .pill.draft { background: #FFF0D6; color: #8A5A00; }
+  .pill.issued { background: var(--success-tint); color: var(--success); }
+  .pill.chg { background: #FFF0D6; color: #8A5A00; }
+  .change-banner { max-width: 1100px; margin: 0 auto 10px; padding: 0 16px; }
+  .change-banner > div { background: #FFF6E5; border: 1px solid #F0D9A8; color: #6B4A00; border-radius: var(--radius-md); padding: 10px 14px; font-size: 13px; line-height: 1.8; }
+  .empty { max-width: 1100px; margin: 24px auto; text-align: center; color: var(--ink-soft); padding: 40px 16px; background: var(--surface); border: 1px dashed var(--line); border-radius: var(--radius-lg); }
+  .msg { max-width: 1100px; margin: 12px auto; padding: 0 16px; color: var(--warn); font-size: 13px; }
+
+  /* ======= الوثيقة (تُطبَع كما تُرى) ======= */
+  .sheet-wrap { overflow-x: auto; padding: 0 16px; }
+  .page { position: relative; width: 277mm; max-width: 100%; margin: 0 auto 14px; background: #fff; padding: 8mm 9mm; border: 1px solid var(--line); box-shadow: var(--shadow-card); color: #2B211B; font-size: 11px; }
+  .doc-head { display: flex; align-items: center; gap: 14px; border-bottom: 3px solid #3D2B1E; padding-bottom: 8px; }
+  .doc-head img { height: 58px; }
+  .doc-head .co { flex: 1; }
+  .doc-head .co h1 { font-size: 20px; color: #3D2B1E; }
+  .doc-head .co p { font-size: 11px; color: #6B5D52; margin-top: 2px; }
+  .doc-head .docno { text-align: left; direction: ltr; font-family: var(--font-mono); font-size: 11px; line-height: 1.7; }
+  .doc-title { text-align: center; margin: 9px 0 7px; }
+  .doc-title h2 { display: inline-block; font-size: 16px; color: #fff; background: #3D2B1E; padding: 5px 30px; border-radius: 4px; }
+  .doc-title .basis { display: block; margin-top: 4px; font-size: 11.5px; color: #6B5D52; font-weight: 600; }
+  .doc-meta { display: flex; gap: 20px; justify-content: space-between; flex-wrap: wrap; font-size: 11px; margin-bottom: 7px; }
+  .doc-meta b { color: #3D2B1E; }
+  table.ls { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 8px; }
+  table.ls th, table.ls td { border: 1px solid #8C7F73; padding: 4px 3px; text-align: center; }
+  table.ls thead th { background: #3D2B1E; color: #fff; border-color: #3D2B1E; font-weight: 700; }
+  table.ls thead th.corner { width: 22%; }
+  table.ls thead th.u { width: 7%; }
+  table.ls thead th.tot { width: 9%; background: #EE7126; border-color: #EE7126; }
+  table.ls th .st { font-size: 11.5px; }
+  table.ls th .oid { font-family: var(--font-mono); font-size: 9px; font-weight: 400; opacity: .8; margin-top: 1px; }
+  table.ls th .sp { display: inline-block; margin-top: 2px; background: #FFE2C7; color: #8A3B00; border-radius: 8px; padding: 0 6px; font-size: 9px; font-weight: 700; }
+  table.ls th .dl { font-size: 9px; font-weight: 400; opacity: .9; margin-top: 1px; }
+  table.ls th .nr { display: inline-block; margin-top: 2px; background: #B23B2E; color: #fff; border-radius: 8px; padding: 0 6px; font-size: 9px; }
+  td.item { text-align: right; padding-right: 8px; font-weight: 600; }
+  td.u { color: #6B5D52; font-size: 10px; }
+  td.n { font-family: var(--font-mono); font-size: 12px; }
+  td.n.z { color: #B5AA9D; }
+  td.n.chg { background: #FFE9A8 !important; font-weight: 800; }
+  td.n.chg .was { display: block; font-size: 9px; font-weight: 400; color: #8A5A00; text-decoration: line-through; }
+  td.n.new { background: #CFEBD3 !important; font-weight: 800; }
+  td.n.new .was { display: block; font-size: 9px; font-weight: 600; color: #2F6B3D; }
+  td.tot { font-weight: 800; background: #FCE8D8; font-family: var(--font-mono); font-size: 12.5px; }
+  tr.dept td { background: #E9DFD0; color: #3D2B1E; font-weight: 800; text-align: right; padding: 5px 8px; }
+  tr.sum td { background: #3D2B1E; color: #fff; font-weight: 800; border-color: #3D2B1E; }
+  tr.sum td.tot { background: #EE7126; border-color: #EE7126; }
+  tbody tr:nth-child(even):not(.dept):not(.sum) td:not(.tot):not(.chg):not(.new) { background: #FBF8F3; }
+  .doc-foot { display: flex; gap: 14px; margin-top: 14px; }
+  .sign { flex: 1; border: 1px solid #8C7F73; border-radius: 4px; height: 58px; padding: 5px 8px; font-size: 10.5px; color: #6B5D52; }
+  .sign b { color: #2B211B; display: block; margin-bottom: 2px; }
+  .doc-note { margin-top: 7px; font-size: 9.5px; color: #6B5D52; display: flex; justify-content: space-between; gap: 12px; }
+  .watermark { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; font-size: 74px; font-weight: 800; color: rgba(178,59,46,0.10); transform: rotate(-18deg); letter-spacing: .05em; }
+  .legend { display: flex; gap: 14px; font-size: 10px; color: #6B5D52; margin: 2px 0 6px; align-items: center; }
+  .legend i { display: inline-block; width: 12px; height: 12px; border: 1px solid #8C7F73; vertical-align: -2px; margin-inline-end: 4px; }
+  .share-overlay { position: fixed; inset: 0; background: rgba(43,33,27,0.55); display: none; align-items: center; justify-content: center; z-index: 80; padding: 16px; }
+  .share-overlay.open { display: flex; }
+  .share-box { background: #fff; border-radius: 18px; max-width: 460px; width: 100%; padding: 22px 20px; box-shadow: 0 16px 48px rgba(0,0,0,0.3); }
+  .share-box h3 { font-size: 17px; color: var(--secondary); margin-bottom: 6px; }
+  .share-box p { font-size: 13px; color: var(--ink-soft); line-height: 1.7; margin-bottom: 12px; }
+  .share-link { direction: ltr; text-align: left; font-family: var(--font-mono); font-size: 11.5px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 9px 10px; word-break: break-all; margin-bottom: 12px; user-select: all; }
+  .share-actions { display: flex; flex-direction: column; gap: 8px; }
+  .share-actions a, .share-actions button { display: block; text-align: center; text-decoration: none; border: none; font-family: inherit; font-size: 14.5px; font-weight: 700; padding: 13px; border-radius: 12px; cursor: pointer; }
+  .share-wa { background: #25D366; color: #fff; }
+  .share-copy { background: var(--bg); color: var(--ink); border: 1px solid var(--line) !important; }
+  .share-revoke { background: transparent; color: var(--warn); font-size: 13px !important; }
+  .share-close { background: transparent; color: var(--ink-soft); font-size: 13px !important; }
+  .toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); background: var(--secondary); color: #fff; padding: 10px 18px; border-radius: 999px; font-size: 13.5px; opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 60; }
+  .toast.show { opacity: 1; }
+
+  /* ===== عرض الشاشة (الهاتف خصوصًا): الوثيقة بعرضها الطبيعي تُمرَّر أفقيًا، وعمود الصنف مثبَّت ليبقى الاسم ظاهرًا أثناء التمرير؛ الطباعة لا تتأثر ===== */
+  @media screen {
+    .sheet-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .page { display: block; width: max-content; min-width: min(277mm, 100%); max-width: none; margin-inline: 0; }
+    table.ls { width: max-content; min-width: 100%; table-layout: auto; }
+    table.ls thead th.corner { width: 132px; min-width: 132px; }
+    table.ls thead th.u { width: 54px; min-width: 54px; }
+    table.ls thead th.tot { width: 72px; min-width: 72px; }
+    table.ls thead th:not(.corner):not(.u):not(.tot) { min-width: 86px; }
+    table.ls td.item, table.ls th.corner { position: sticky; inset-inline-start: 0; z-index: 3; box-shadow: -2px 0 0 rgba(61,43,30,0.12); }
+    table.ls td.item { background: #fff; }
+    table.ls tbody tr:nth-child(even):not(.dept):not(.sum) td.item { background: #FBF8F3; }
+    table.ls tr.sum td.item { background: #3D2B1E; }
+    table.ls tr.dept td { position: static; }
+    table.ls tr.dept td:first-child { position: sticky; inset-inline-start: 0; z-index: 3; }
+  }
+  @page { size: A4 landscape; margin: 8mm 8mm 10mm; }
+  @media print {
+    body { background: #fff; padding: 0; }
+    .no-print { display: none !important; }
+    .sheet-wrap { overflow: visible; padding: 0; }
+    .page { width: auto; margin: 0; padding: 0; border: none; box-shadow: none; page-break-after: always; }
+    .page:last-child { page-break-after: auto; }
+    table.ls tr { page-break-inside: avoid; }
+    table.ls thead { display: table-header-group; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<header class="topbar no-print">
+  <button class="icon-btn" id="backBtn" title="القائمة الرئيسية">↩</button>
+  <div><div class="ttl" id="pgTitle"></div><div class="sub">MASAR</div></div>
+  <div class="spacer"></div>
+  <button class="icon-btn" id="langToggle">EN</button>
+</header>
+
+<div class="controls no-print">
+  <div class="ctl-card">
+    <div class="ctl-group"><label id="lblBasis"></label>
+      <div class="seg" id="basisSeg"><button type="button" data-basis="APPROVED"></button><button type="button" data-basis="CONFIRMED"></button></div></div>
+    <div class="ctl-group"><label id="lblScope"></label>
+      <div class="seg" id="scopeSeg"><button type="button" data-scope="DAY"></button><button type="button" data-scope="SHIPMENT"></button></div></div>
+    <div class="ctl-group" id="dayGroup"><label id="lblDate"></label><input type="date" id="dateInput"></div>
+    <div class="ctl-group" id="shipGroup" style="display:none;"><label id="lblShip"></label><select id="shipSelect"></select></div>
+    <div class="ctl-group"><label>&nbsp;</label><button class="btn ghost" id="refreshBtn" type="button"></button></div>
+    <div class="spacer"></div>
+    <div class="ctl-group"><label>&nbsp;</label><button class="btn" id="shareBtn" type="button" disabled style="background:#25D366;color:#fff;"></button></div>
+    <div class="ctl-group"><label>&nbsp;</label><button class="btn primary" id="issueBtn" type="button" disabled></button></div>
+  </div>
+</div>
+<div class="status-bar no-print" id="statusBar"></div>
+<div class="change-banner no-print" id="changeBanner"></div>
+<div class="msg no-print" id="msgBox"></div>
+<div class="sheet-wrap" id="sheetArea"></div>
+<div class="share-overlay no-print" id="shareOverlay">
+  <div class="share-box">
+    <h3 id="shTitle"></h3>
+    <p id="shText"></p>
+    <div class="share-link" id="shLink"></div>
+    <div class="share-actions">
+      <a class="share-wa" id="shWa" href="#" target="_blank" rel="noopener"></a>
+      <button class="share-copy" id="shCopy" type="button"></button>
+      <button class="share-revoke" id="shRevoke" type="button"></button>
+      <button class="share-close" id="shClose" type="button"></button>
+    </div>
+  </div>
+</div>
+<div class="toast no-print" id="toast"></div>
+
+<script>
+  const WA_ORIGIN_ = 'https:' + String.fromCharCode(47, 47) + 'wa.me'; // لا شرطتان مائلتان متتاليتان حرفيًا داخل نص في <script> (انظر tests/static_check.js)
+  const APP_BASE_URL = MASAR_TPL.appBaseUrl;
+  var TIMEOUT_SCALE = MASAR_TPL.timeoutScale;
+  const CURRENT_USER_ID = MASAR_TPL.currentUserId;
+  const PAGE_PARAMS = MASAR_TPL.pageParams;
+  document.getElementById('backBtn').addEventListener('click', () => { window.top.location.href = APP_BASE_URL + '?page=distribution_hub&uid=' + encodeURIComponent(CURRENT_USER_ID); });
+
+  const dict = {
+    ar: {
+      title: 'كشف التحميل', basis: 'أساس الكميات', approved: 'المعتمَدة (خطة)', confirmed: 'المؤكَّدة (بعد الاستلام والمقارنة)',
+      scope: 'النطاق', day: 'طلبيات اعتُمدت في يوم', shipment: 'طلبيات رحلة', date: 'التاريخ', ship: 'الرحلة', refresh: '🔄 تحديث', issue: '🖨️ إصدار وطباعة',
+      chooseShip: '— اختر الرحلة —', loading: 'جارٍ التحميل...', error: 'تعذّر تنفيذ العملية — أعد المحاولة',
+      empty: 'لا طلبيات في هذا النطاق', emptyConfirmed: 'لا كميات مؤكَّدة بعد في هذا النطاق — تظهر بعد "استلام ومقارنة"',
+      draft: 'مسودة — ستصدر كنسخة', issued: 'نسخة صادرة', changed: (n) => `تغيّرت ${n} خلية منذ النسخة السابقة`,
+      docApproved: 'كشف تحميل الطلبيات — الكميات المعتمَدة', docConfirmed: 'كشف تحميل الطلبيات — الكميات المؤكَّدة عند الاستلام',
+      colItem: 'الصنف', colUnit: 'الوحدة', colTotal: 'المجموع', rowCount: 'عدد الأصناف', special: 'خاص', notReceived: 'لم يُستلم بعد',
+      date2: 'التاريخ', stores: 'عدد المحلات', by: 'أعدّه', rev: 'النسخة', page: 'صفحة', of: 'من',
+      signDist: 'مسؤول التوزيع', signLoad: 'مشرف التحميل', signDriver: 'السائق', signHint: 'الاسم / التوقيع',
+      foot: 'وثيقة صادرة آليًا من نظام مسار — أي تعديل على الطلبيات بعد هذا الوقت يصدر في نسخة جديدة',
+      legendChg: 'تغيّرت (القيمة السابقة مشطوبة)', legendNew: 'جديدة', watermark: 'مسودة',
+      chgTitle: (r) => `النسخة ${r}: ما تغيّر عن النسخة السابقة`, chgCells: (a, b, c) => `${a} خلية تغيّرت، ${b} جديدة، ${c} أُزيلت`,
+      chgRemoved: 'أصناف أُلغيت بالكامل', chgNew: 'محلات جديدة', chgDropped: 'محلات خرجت من الكشف',
+      issuedToast: 'صدرت النسخة — جارٍ الطباعة',       allShips: 'رحلة', stops: 'توقف', specialAt: 'تسليم',
+      share: '📲 إرسال عبر واتساب', shTitle: 'رابط الكشف لمساعدي التحميل', shText: 'أُصدرت النسخة وأُنشئ الرابط. يفتح المساعد الرابط على هاتفه فيرى الكشف بشكله الرسمي، ويتحدّث تلقائيًا إن تغيّرت الطلبيات (مع تلوين المتغيّر). ينتهي الرابط **نهاية اليوم**. اختر المرسَل إليه (شخص أو مجموعة) من واتساب.',
+      shWa: 'فتح واتساب واختيار المرسَل إليه', shCopy: '📋 نسخ الرابط', shCopied: 'نُسخ الرابط', shRevoke: '⛔ إيقاف هذا الرابط الآن', shClose: 'إغلاق', shRevoked: 'أُوقف الرابط',
+      shMsg: (doc, date, url) => `كشف التحميل ${doc}\n${date}\nالرابط يتحدّث تلقائيًا ويُغلق نهاية اليوم:\n${url}`
+    },
+    en: {
+      title: 'Loading sheet', basis: 'Quantity basis', approved: 'Approved (plan)', confirmed: 'Confirmed (after receive & compare)',
+      scope: 'Scope', day: 'Orders approved on a day', shipment: 'Orders of a trip', date: 'Date', ship: 'Trip', refresh: '🔄 Refresh', issue: '🖨️ Issue & print',
+      chooseShip: '— Choose a trip —', loading: 'Loading...', error: 'Could not complete the operation — please try again',
+      empty: 'No orders in this scope', emptyConfirmed: 'No confirmed quantities yet in this scope — they appear after "Receive & compare"',
+      draft: 'Draft — will be issued as revision', issued: 'Issued revision', changed: (n) => `${n} cells changed since the previous revision`,
+      docApproved: 'Orders loading sheet — approved quantities', docConfirmed: 'Orders loading sheet — quantities confirmed at receiving',
+      colItem: 'Item', colUnit: 'Unit', colTotal: 'Total', rowCount: 'Item count', special: 'Special', notReceived: 'Not received yet',
+      date2: 'Date', stores: 'Stores', by: 'Prepared by', rev: 'Revision', page: 'Page', of: 'of',
+      signDist: 'Distribution manager', signLoad: 'Loading supervisor', signDriver: 'Driver', signHint: 'Name / signature',
+      foot: 'Automatically generated by MASAR — any order change after this time is issued as a new revision',
+      legendChg: 'Changed (previous value struck through)', legendNew: 'New', watermark: 'DRAFT',
+      chgTitle: (r) => `Revision ${r}: what changed since the previous revision`, chgCells: (a, b, c) => `${a} changed, ${b} new, ${c} removed`,
+      chgRemoved: 'Items removed entirely', chgNew: 'New stores', chgDropped: 'Stores dropped from the sheet',
+      issuedToast: 'Revision issued — printing', allShips: 'Trip', stops: 'stops', specialAt: 'Delivery',
+      share: '📲 Send via WhatsApp', shTitle: 'Sheet link for the loading helpers', shText: 'The revision was issued and the link created. The helper opens it on their phone to see the official sheet; it updates by itself when orders change (changes are highlighted). The link expires at the **end of today**. Pick the recipient (person or group) in WhatsApp.',
+      shWa: 'Open WhatsApp and choose a recipient', shCopy: '📋 Copy link', shCopied: 'Link copied', shRevoke: '⛔ Stop this link now', shClose: 'Close', shRevoked: 'Link stopped',
+      shMsg: (doc, date, url) => `Loading sheet ${doc}\n${date}\nThe link updates automatically and closes at the end of the day:\n${url}`
+    }
+  };
+  const state = { lang: (MASAR_TPL.userLang === 'en' ? 'en' : 'ar'), basis: (PAGE_PARAMS.basis === 'CONFIRMED' ? 'CONFIRMED' : 'APPROVED'), scope: (PAGE_PARAMS.scope === 'SHIPMENT' ? 'SHIPMENT' : 'DAY'), shipmentId: PAGE_PARAMS.shipment || '', data: null, busy: false };
+  const t = (k) => (dict[state.lang] && dict[state.lang][k] !== undefined) ? dict[state.lang][k] : k;
+  const esc = (x) => String(x == null ? '' : x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const $ = (id) => document.getElementById(id);
+  const nm = (o, a, e) => state.lang === 'ar' ? o[a] : (o[e] || o[a]);
+
+  function onceWithTimeout(fn, timeoutMs) {
+    let fired = false;
+    const timer = setTimeout(() => { if (!fired) { fired = true; fn(); } }, timeoutMs * (typeof TIMEOUT_SCALE === 'number' ? TIMEOUT_SCALE : 1));
+    return (...args) => { if (fired) return; fired = true; clearTimeout(timer); fn(...args); };
+  }
+  function toast(msg) { const el = $('toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove('show'), 2500); }
+  function localToday() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function fmtNum(n) { return Number.isInteger(n) ? String(n) : String(Math.round(n * 100) / 100); }
+  function fmtDateLong(iso) {
+    try { return new Intl.DateTimeFormat(state.lang === 'ar' ? 'ar-QA-u-nu-latn' : 'en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(iso + 'T12:00:00')); } catch (e) { return iso; }
+  }
+
+  function applyLang() {
+    document.documentElement.lang = state.lang; document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+    $('pgTitle').textContent = t('title'); $('lblBasis').textContent = t('basis'); $('lblScope').textContent = t('scope'); $('lblDate').textContent = t('date'); $('lblShip').textContent = t('ship');
+    $('refreshBtn').textContent = t('refresh'); $('issueBtn').textContent = t('issue'); $('shareBtn').textContent = t('share'); $('langToggle').textContent = state.lang === 'ar' ? 'EN' : 'AR';
+    document.querySelector('[data-basis="APPROVED"]').textContent = t('approved'); document.querySelector('[data-basis="CONFIRMED"]').textContent = t('confirmed');
+    document.querySelector('[data-scope="DAY"]').textContent = t('day'); document.querySelector('[data-scope="SHIPMENT"]').textContent = t('shipment');
+    document.querySelectorAll('[data-basis]').forEach(b => b.classList.toggle('active', b.getAttribute('data-basis') === state.basis));
+    document.querySelectorAll('[data-scope]').forEach(b => b.classList.toggle('active', b.getAttribute('data-scope') === state.scope));
+    $('dayGroup').style.display = state.scope === 'DAY' ? '' : 'none'; $('shipGroup').style.display = state.scope === 'SHIPMENT' ? '' : 'none';
+  }
+
+  function currentParams() { return { basis: state.basis, scope: state.scope, date: $('dateInput').value, shipmentId: state.scope === 'SHIPMENT' ? $('shipSelect').value : '' }; }
+
+  function load() {
+    if (state.scope === 'SHIPMENT' && !$('shipSelect').value) { state.data = null; renderAll(); return; }
+    $('msgBox').textContent = ''; $('sheetArea').innerHTML = `<div class="empty">${t('loading')}</div>`; $('issueBtn').disabled = true; $('shareBtn').disabled = true;
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(r => {
+        if (!r || !r.success) { $('sheetArea').innerHTML = ''; $('msgBox').textContent = t('error') + (r && r.error ? ' — ' + (state.lang === 'ar' ? r.error.messageAR : r.error.messageEN) : ''); return; }
+        state.data = r.data; renderAll();
+      }, 12000))
+      .withFailureHandler(() => { $('sheetArea').innerHTML = ''; $('msgBox').textContent = t('error'); })
+      .getLoadingSheet(CURRENT_USER_ID, currentParams());
+  }
+
+  function issueAndPrint() {
+    if (state.busy || !state.data) return;
+    state.busy = true; $('issueBtn').disabled = true;
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(r => {
+        state.busy = false;
+        if (!r || !r.success) { $('issueBtn').disabled = false; toast(t('error')); return; }
+        state.data = r.data; renderAll(); toast(t('issuedToast'));
+        setTimeout(() => window.print(), 400);
+      }, 20000))
+      .withFailureHandler(() => { state.busy = false; $('issueBtn').disabled = false; toast(t('error')); })
+      .issueLoadingSheet(CURRENT_USER_ID, currentParams());
+  }
+
+  function boldMd(txt) { return esc(txt).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'); }
+
+  // إرسال الرابط: يُصدر النسخة الحالية ثم يُنشئ رابطًا (أو يُعيد رابط اليوم نفسه) ويعرضه مع زر واتساب (رابط wa.me بلا رقم = اختيار المرسَل إليه)
+  function shareViaWhatsApp() {
+    if (state.busy || !state.data) return;
+    state.busy = true; $('shareBtn').disabled = true;
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(r => {
+        state.busy = false; $('shareBtn').disabled = false;
+        if (!r || !r.success) { toast(t('error')); return; }
+        const link = r.data;
+        const msg = t('shMsg')(link.docNo, fmtDateLong(state.data.date), link.url);
+        $('shTitle').textContent = t('shTitle'); $('shText').innerHTML = boldMd(t('shText'));
+        $('shLink').textContent = link.url;
+        $('shWa').textContent = t('shWa'); $('shWa').setAttribute('href', WA_ORIGIN_ + '/?text=' + encodeURIComponent(msg));
+        $('shCopy').textContent = t('shCopy'); $('shRevoke').textContent = t('shRevoke'); $('shClose').textContent = t('shClose');
+        $('shareOverlay').classList.add('open');
+        state.lastLink = link;
+        load(); // نسخة الكشف المعروضة صارت مُصدَرة
+      }, 20000))
+      .withFailureHandler(() => { state.busy = false; $('shareBtn').disabled = false; toast(t('error')); })
+      .createLoadingSheetLink(CURRENT_USER_ID, currentParams());
+  }
+  function copyLink() {
+    const url = state.lastLink && state.lastLink.url; if (!url) return;
+    const done = () => toast(t('shCopied'));
+    try { navigator.clipboard.writeText(url).then(done, () => { selectLink(); }); } catch (e) { selectLink(); }
+  }
+  function selectLink() { const r = document.createRange(); r.selectNodeContents($('shLink')); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r); try { document.execCommand('copy'); toast(t('shCopied')); } catch (e) { /* التحديد يكفي للنسخ اليدوي */ } }
+  function revokeLink() {
+    google.script.run
+      .withSuccessHandler(r => { if (r && r.success) { toast(t('shRevoked')); $('shareOverlay').classList.remove('open'); state.lastLink = null; } else toast(t('error')); })
+      .withFailureHandler(() => toast(t('error')))
+      .revokeLoadingSheetLinks(CURRENT_USER_ID, currentParams());
+  }
+
+  function chunk(arr, n) { const out = []; for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n)); return out.length ? out : [[]]; }
+
+  function renderAll() {
+    applyLang();
+    const d = state.data;
+    $('statusBar').innerHTML = ''; $('changeBanner').innerHTML = '';
+    if (!d) { $('sheetArea').innerHTML = state.scope === 'SHIPMENT' ? `<div class="empty">${t('chooseShip')}</div>` : ''; $('issueBtn').disabled = true; $('shareBtn').disabled = true; return; }
+    $('statusBar').innerHTML = `<span class="pill ${d.isDraft ? 'draft' : 'issued'}">${d.isDraft ? t('draft') + ' ' + d.revision : t('issued') + ' ' + d.revision}</span>` +
+      `<span style="font-family:var(--font-mono); font-size:12px; color:var(--ink-soft);">${esc(d.docNo)}</span>` +
+      (d.hasChanges && d.changes ? `<span class="pill chg">${t('changed')(d.changes.changedCells + d.changes.addedCells + d.changes.removedCells)}</span>` : '');
+    if (d.hasChanges && d.changes) {
+      const c = d.changes, parts = [`<b>${t('chgTitle')(d.revision)}</b>`, t('chgCells')(c.changedCells, c.addedCells, c.removedCells)];
+      if (c.removedItemNames && c.removedItemNames.length) parts.push(`${t('chgRemoved')}: <b>${c.removedItemNames.map(esc).join('، ')}</b>`);
+      if (c.newStores && c.newStores.length) parts.push(`${t('chgNew')}: ${c.newStores.map(esc).join(', ')}`);
+      if (c.droppedStores && c.droppedStores.length) parts.push(`${t('chgDropped')}: ${c.droppedStores.map(esc).join(', ')}`);
+      $('changeBanner').innerHTML = `<div>${parts.join('<br>')}</div>`;
+    }
+    $('issueBtn').disabled = false; $('shareBtn').disabled = !(d.stores.length && d.totalItems);
+    if (!d.stores.length || !d.totalItems) { $('sheetArea').innerHTML = `<div class="empty">${state.basis === 'CONFIRMED' && d.stores.length ? t('emptyConfirmed') : t('empty')}</div>`; return; }
+
+    const groups = chunk(d.stores.map((s, i) => i), d.storesPerTable || 9);
+    const pages = groups.map((idxs, gi) => pageHtml(d, idxs, gi, groups.length));
+    $('sheetArea').innerHTML = pages.join('');
+  }
+
+  function pageHtml(d, idxs, gi, totalPages) {
+    const title = d.basis === 'CONFIRMED' ? t('docConfirmed') : t('docApproved');
+    const head = idxs.map(i => {
+      const s = d.stores[i];
+      return `<th><div class="st">${esc(nm(s, 'storeNameAR', 'storeNameEN'))}</div><div class="oid">${esc(s.orderId)}</div>` +
+        (s.isSpecial ? `<div class="sp">${t('special')}</div><div class="dl">${esc(s.deliveryDate)} ${esc(s.deliveryTime)}</div>` : '') +
+        (d.basis === 'CONFIRMED' && !s.received ? `<div class="nr">${t('notReceived')}</div>` : '') + `</th>`;
+    }).join('');
+    let body = '';
+    d.sections.forEach(sec => {
+      body += `<tr class="dept"><td colspan="${idxs.length + 3}">${esc(nm(sec, 'nameAR', 'nameEN'))}</td></tr>`;
+      sec.items.forEach(it => {
+        const cells = idxs.map(i => {
+          const q = it.qtys[i], f = it.flags[i];
+          if (f && f.kind === 'CHANGED') return `<td class="n chg">${fmtNum(q)}<span class="was">${fmtNum(f.old)}</span></td>`;
+          if (f && f.kind === 'NEW') return `<td class="n new">${fmtNum(q)}<span class="was">${state.lang === 'ar' ? 'جديد' : 'new'}</span></td>`;
+          return `<td class="n ${q > 0 ? '' : 'z'}">${q > 0 ? fmtNum(q) : '—'}</td>`;
+        }).join('');
+        body += `<tr><td class="item">${esc(nm(it, 'nameAR', 'nameEN'))}</td><td class="u">${esc(it.unit)}</td>${cells}<td class="tot">${fmtNum(it.total)}</td></tr>`;
+      });
+    });
+    const counts = idxs.map(i => `<td class="n">${d.itemCounts[i]}</td>`).join('');
+    body += `<tr class="sum"><td class="item" colspan="2">${t('rowCount')}</td>${counts}<td class="tot">${d.totalItems}</td></tr>`;
+    const legend = (d.hasChanges ? `<div class="legend"><span><i style="background:#FFE9A8"></i>${t('legendChg')}</span><span><i style="background:#CFEBD3"></i>${t('legendNew')}</span></div>` : '');
+    return `
+    <div class="page">
+      ${d.isDraft ? `<div class="watermark">${t('watermark')}</div>` : ''}
+      <div class="doc-head">
+        <img src="${esc(d.logoDataUri)}" alt="">
+        <div class="co"><h1>${esc(d.factoryName)}</h1><p>${state.lang === 'ar' ? 'إدارة التوزيع' : 'Distribution department'}</p></div>
+        <div class="docno">${esc(d.docNo)}<br>${t('rev')} ${d.revision}${d.isDraft ? ' (draft)' : ''}</div>
+      </div>
+      <div class="doc-title"><h2>${title}</h2>
+        ${d.scope === 'SHIPMENT' ? `<span class="basis">${t('allShips')}: ${esc(d.shipmentId)}</span>` : ''}</div>
+      <div class="doc-meta">
+        <span>${t('date2')}: <b>${esc(fmtDateLong(d.date))}</b></span>
+        <span>${t('stores')}: <b>${d.stores.length}</b></span>
+        <span>${t('by')}: <b>${esc(nm(d, 'preparedByAR', 'preparedByEN'))}</b></span>
+        <span>${esc(new Date(d.generatedAt).toLocaleString(state.lang === 'ar' ? 'ar-QA-u-nu-latn' : 'en-GB'))}</span>
+      </div>
+      ${legend}
+      <table class="ls"><thead><tr><th class="corner">${t('colItem')}</th><th class="u">${t('colUnit')}</th>${head}<th class="tot">${t('colTotal')}</th></tr></thead><tbody>${body}</tbody></table>
+      <div class="doc-foot">
+        <div class="sign"><b>${t('signDist')}</b>${t('signHint')}</div>
+        <div class="sign"><b>${t('signLoad')}</b>${t('signHint')}</div>
+        <div class="sign"><b>${t('signDriver')}</b>${t('signHint')}</div>
+      </div>
+      <div class="doc-note"><span>${t('page')} ${gi + 1} ${t('of')} ${totalPages}</span><span>${t('foot')}</span></div>
+    </div>`;
+  }
+
+  function loadShipments(cb) {
+    google.script.run
+      .withSuccessHandler(r => {
+        const sel = $('shipSelect');
+        let html = `<option value="">${t('chooseShip')}</option>`;
+        if (r && r.success) r.data.shipments.forEach(s => { html += `<option value="${esc(s.shipmentId)}">${esc(s.shipmentId)} — ${esc(nm(s, 'driverNameAR', 'driverNameEN'))} (${s.stops.length} ${t('stops')})</option>`; });
+        sel.innerHTML = html; if (state.shipmentId) sel.value = state.shipmentId; cb();
+      })
+      .withFailureHandler(() => { $('shipSelect').innerHTML = `<option value="">${t('chooseShip')}</option>`; cb(); })
+      .getActiveShipments(CURRENT_USER_ID);
+  }
+
+  document.querySelectorAll('[data-basis]').forEach(b => b.addEventListener('click', () => { state.basis = b.getAttribute('data-basis'); applyLang(); load(); }));
+  document.querySelectorAll('[data-scope]').forEach(b => b.addEventListener('click', () => { state.scope = b.getAttribute('data-scope'); applyLang(); load(); }));
+  $('dateInput').addEventListener('change', load);
+  $('shipSelect').addEventListener('change', () => { state.shipmentId = $('shipSelect').value; load(); });
+  $('refreshBtn').addEventListener('click', load);
+  $('issueBtn').addEventListener('click', issueAndPrint);
+  $('shareBtn').addEventListener('click', shareViaWhatsApp);
+  $('shCopy').addEventListener('click', copyLink);
+  $('shRevoke').addEventListener('click', revokeLink);
+  $('shClose').addEventListener('click', () => $('shareOverlay').classList.remove('open'));
+  $('langToggle').addEventListener('click', () => {
+    state.lang = state.lang === 'ar' ? 'en' : 'ar'; renderAll();
+    try { google.script.run.withFailureHandler(() => {}).setUserLanguage(CURRENT_USER_ID, state.lang); } catch (e) { /* لا يعطّل الشاشة */ }
+  });
+
+  $('dateInput').value = PAGE_PARAMS.date || localToday();
+  applyLang();
+  loadShipments(load);
+</script>
+</body>
+</html>

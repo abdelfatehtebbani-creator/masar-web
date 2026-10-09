@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#3D2B1E">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="مسار">
+<link rel="apple-touch-icon" href="icon-180.png">
+<script src="masar-config.js?v=67ea158b"></script>
+<script src="masar-runtime.js?v=67ea158b"></script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALAKER SWEETS — شحناتي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Markazi+Text:wght@600;700&family=Fraunces:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #EE7126; --primary-dark: #C85A18; --primary-tint: #FCE8D8;
+    --secondary: #3D2B1E; --ink: #2B211B; --ink-soft: #6B5D52;
+    --bg: #FAF7F1; --surface: #FFFFFF; --line: #E7DFD2;
+    --success: #4B7A4F; --success-tint: #E7EFE6;
+    --warn: #B23B2E; --warn-tint: #F7E6E2;
+    --pending: #B4802A; --pending-tint: #F5EAD9;
+    --radius-lg: 16px; --radius-md: 12px; --radius-sm: 8px;
+    --shadow-card: 0 1px 2px rgba(43,33,27,0.06), 0 4px 16px rgba(43,33,27,0.05);
+    --font-ar: 'IBM Plex Sans Arabic', sans-serif; --font-en: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { overflow-x: hidden; max-width: 100vw; }
+  html[lang="ar"] body { font-family: var(--font-ar); }
+  html[lang="en"] body { font-family: var(--font-en); }
+  body {
+    background-color: var(--bg);
+    background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 38px, rgba(61,43,30,0.035) 38px, rgba(61,43,30,0.035) 39px);
+    color: var(--ink); min-height: 100vh; -webkit-font-smoothing: antialiased; padding-bottom: 30px;
+  }
+  header.topbar {
+    display: flex; align-items: center; gap: 16px; background: var(--secondary); color: #fff;
+    padding: 10px 20px; position: sticky; top: 0; z-index: 30; box-shadow: 0 2px 10px rgba(0,0,0,0.15); max-width: 100%;
+  }
+  .brand-logo { height: 40px; width: auto; display: block; flex-shrink: 0; }
+  .brand-meta { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; overflow: hidden; }
+  .brand-meta .system-name { font-size: 11px; letter-spacing: 0.14em; color: rgba(255,255,255,0.55); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .brand-meta .role-name { font-size: 15px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .topbar-spacer { flex: 1; min-width: 8px; }
+  .icon-btn {
+    display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #fff; cursor: pointer;
+    font-size: 14px; font-weight: 600; transition: background 0.15s ease; position: relative; flex-shrink: 0;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,0.16); }
+  .user-menu { position: relative; flex-shrink: 0; }
+  .user-dropdown {
+    position: absolute; top: calc(100% + 8px); inset-inline-end: 0; background: var(--surface); color: var(--ink);
+    border: 1px solid var(--line); border-radius: var(--radius-md); box-shadow: var(--shadow-card);
+    min-width: 200px; padding: 6px; display: none; z-index: 40;
+  }
+  .user-dropdown.open { display: block; }
+  .user-dropdown button {
+    display: flex; align-items: center; gap: 10px; width: 100%; text-align: start; background: none; border: none;
+    padding: 10px 12px; border-radius: var(--radius-sm); font-size: 14px; font-family: inherit; color: var(--ink); cursor: pointer;
+  }
+  .user-dropdown button:hover { background: var(--bg); }
+  @media (max-width: 420px) {
+    header.topbar { flex-wrap: wrap; row-gap: 8px; padding: 10px 12px; gap: 8px; }
+    .topbar-spacer { flex: 0 0 100%; height: 0; }
+    .brand-meta .system-name { display: none; }
+  }
+  main { max-width: 880px; margin: 0 auto; padding: 20px 20px 20px; }
+  .greeting-card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-card);
+    padding: 20px 22px; margin-bottom: 18px;
+  }
+  .greeting-card h1 { font-size: 22px; font-weight: 600; color: var(--secondary); }
+  .greeting-card .date-line { color: var(--ink-soft); font-size: 13.5px; margin-top: 4px; }
+
+  /* ===== تبويبا الاستلام والتسليم (٨ أكتوبر ٢٠٢٦) ===== */
+  .driver-tabs { display: flex; gap: 8px; margin-bottom: 16px; background: #EFE8DC; padding: 5px; border-radius: 14px; }
+  .driver-tab {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; border: none; background: transparent; cursor: pointer;
+    font-family: inherit; font-size: 15px; font-weight: 700; color: var(--ink-soft); padding: 12px 8px; border-radius: 10px; transition: background .15s ease, color .15s ease;
+  }
+  .driver-tab.active { background: var(--surface); color: var(--secondary); box-shadow: 0 1px 4px rgba(43,33,27,0.12); }
+  .driver-tab .cnt { min-width: 24px; height: 24px; padding: 0 7px; border-radius: 999px; background: #D8CDBB; color: var(--secondary); font-size: 12.5px; font-family: var(--font-mono); display: inline-flex; align-items: center; justify-content: center; }
+  .driver-tab.active .cnt { background: var(--primary); color: #fff; }
+  .driver-tab .cnt.zero { opacity: .55; }
+  .section-label { font-size: 12.5px; font-weight: 700; color: var(--ink-soft); margin: 18px 2px 8px; }
+  .tab-empty { text-align: center; padding: 30px 16px; color: var(--ink-soft); background: var(--surface); border: 1px dashed var(--line); border-radius: var(--radius-lg); }
+  .tab-empty .big { font-size: 34px; margin-bottom: 8px; }
+  .tab-empty .go-btn { margin-top: 14px; border: none; background: var(--secondary); color: #fff; font-family: inherit; font-weight: 700; font-size: 14px; padding: 11px 20px; border-radius: 999px; cursor: pointer; }
+  .deliver-items { margin-bottom: 14px; }
+  .trip-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .trip-header .icon { font-size: 22px; }
+  .trip-header .title { font-size: 15px; font-weight: 700; color: var(--secondary); }
+  .trip-header .trip-id { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-soft); margin-inline-start: auto; }
+
+  .stop-card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-card);
+    padding: 18px 20px; margin-bottom: 16px; position: relative;
+  }
+  .stop-card.delivered { opacity: 0.6; }
+  .stop-top { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+  .stop-num {
+    width: 30px; height: 30px; border-radius: 50%; background: var(--secondary); color: #fff; font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: var(--font-mono);
+  }
+  .stop-store { font-size: 17px; font-weight: 700; color: var(--ink); }
+  .stop-state-tag { font-size: 11.5px; font-weight: 600; margin-top: 3px; display: inline-flex; align-items: center; gap: 4px; }
+  .stop-state-tag.pending { color: var(--pending); }
+  .stop-state-tag.loaded { color: var(--primary-dark); }
+  .stop-state-tag.delivered { color: var(--success); }
+
+  .custom-location-box {
+    background: var(--warn-tint); border: 1px solid rgba(178,59,46,0.3); border-radius: var(--radius-md);
+    padding: 12px 14px; margin-bottom: 14px;
+  }
+  .custom-location-box .addr-label { font-size: 11.5px; font-weight: 600; color: #7A2A20; margin-bottom: 4px; }
+  .custom-location-box .addr-text { font-size: 13.5px; color: var(--ink); line-height: 1.5; margin-bottom: 10px; }
+  .maps-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+    background: var(--secondary); color: #fff; text-decoration: none; font-family: inherit; font-size: 13.5px; font-weight: 700;
+    padding: 12px; border-radius: var(--radius-sm);
+  }
+  .maps-btn:hover { background: #2E2015; }
+
+  .items-list { margin-bottom: 16px; }
+  .item-load-btn { border: none; font-family: inherit; font-size: 12.5px; font-weight: 600; padding: 8px 12px; border-radius: 999px; background: var(--secondary); color: #fff; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+  .item-load-btn:disabled { background: #B7ADA2; }
+  .item-load-btn.confirm-armed { background: var(--warn) !important; }
+  .item-loaded-tag { font-size: 12px; font-weight: 600; color: var(--success); white-space: nowrap; flex-shrink: 0; }
+  .item-none-tag { font-size: 11.5px; color: var(--ink-soft); flex-shrink: 0; }
+  .item-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .item-discrepancy-btn {
+    border: 1px solid var(--warn); background: transparent; color: var(--warn); font-family: inherit;
+    font-size: 11px; font-weight: 600; padding: 6px 9px; border-radius: 999px; cursor: pointer; white-space: nowrap;
+  }
+  .discrepancy-pending-tag { font-size: 11.5px; font-weight: 600; color: var(--pending); white-space: nowrap; flex-shrink: 0; }
+  .discrepancy-bar {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 10px 0 4px; margin-inline-start: 54px;
+    border-top: 1px dashed var(--line); margin-top: 6px;
+  }
+  .discrepancy-bar input[type="number"] {
+    width: 70px; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 7px 9px;
+    font-family: var(--font-mono); font-size: 13px; text-align: center; color: var(--ink); background: var(--surface);
+  }
+  .discrepancy-bar input[type="text"] {
+    flex: 1; min-width: 120px; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 7px 9px;
+    font-family: inherit; font-size: 12.5px; color: var(--ink); background: var(--surface);
+  }
+  .discrepancy-submit-btn { border: none; background: var(--warn); color: #fff; font-family: inherit; font-size: 12px; font-weight: 600; padding: 8px 12px; border-radius: 999px; cursor: pointer; white-space: nowrap; }
+  .discrepancy-cancel-btn { border: none; background: transparent; color: var(--ink-soft); font-family: inherit; font-size: 12px; padding: 8px 4px; cursor: pointer; }
+  .load-progress { font-size: 12.5px; color: var(--ink-soft); background: var(--surface); border: 1px dashed var(--line); border-radius: var(--radius-md); padding: 12px; text-align: center; }
+  .item-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px dashed var(--line); }
+  .item-row:last-child { border-bottom: none; }
+  .item-thumb {
+    width: 38px; height: 38px; border-radius: var(--radius-sm); flex-shrink: 0;
+    background: linear-gradient(135deg, #F3E9DC, #EDE1D0); display: flex; align-items: center; justify-content: center; font-size: 16px;
+  }
+  .item-name { flex: 1; font-size: 13.5px; font-weight: 600; color: var(--ink); }
+  .item-qty { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-soft); }
+
+  .big-action-btn {
+    width: 100%; border: none; font-family: inherit; font-size: 16px; font-weight: 700;
+    padding: 16px; border-radius: var(--radius-md); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .big-action-btn.load { background: var(--primary); color: #fff; }
+  .big-action-btn.load:hover { background: var(--primary-dark); }
+  .big-action-btn.deliver { background: var(--secondary); color: #fff; }
+  .big-action-btn.deliver:hover { background: #2E2015; }
+  .big-action-btn.confirm-armed { background: var(--warn) !important; animation: pulse-confirm 1s ease-in-out infinite; }
+  @keyframes pulse-confirm { 0%, 100% { opacity: 1; } 50% { opacity: 0.75; } }
+  .delivered-badge {
+    display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px;
+    background: var(--success-tint); color: var(--success); border-radius: var(--radius-md); font-size: 14px; font-weight: 700;
+  }
+
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--ink-soft); }
+  .empty-state .big { font-size: 40px; margin-bottom: 14px; }
+
+  .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(10px);
+    background: var(--secondary); color: #fff; font-size: 13.5px; padding: 11px 18px; border-radius: 999px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2); opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 60; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* SPEC v1.4 -- نفس حاجز الانتظار الكامل المُثبَت في شاشات الكاشير (انظر
+     split_cashier.py لتوثيق كامل السبب): مؤشر عنصر واحد غير كافٍ إطلاقًا. */
+  #globalBusyOverlay {
+    position: fixed; inset: 0; z-index: 999; cursor: wait; display: none;
+    background: rgba(0,0,0,0.02);
+  }
+  #globalBusyOverlay.show { display: block; }
+
+  .continue-btn {
+    background: var(--success) !important; color: #fff !important; animation: pulse-continue 1.1s ease-in-out infinite;
+    box-shadow: 0 0 0 3px rgba(75,122,79,0.25); border-radius: var(--radius-sm) !important;
+  }
+  @keyframes pulse-continue { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.01); } }
+  .refresh-btn { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; border-radius: 999px; background: rgba(255,255,255,0.18); border: 1.5px solid rgba(255,255,255,0.9); color: #fff; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; flex-shrink: 0; white-space: nowrap; transition: background 0.15s ease; }
+  .refresh-btn:hover { background: rgba(255,255,255,0.32); }
+  .refresh-btn:active { transform: scale(0.97); }
+  .refresh-btn.armed { background: #fff; color: var(--secondary); }
+  .refresh-btn.spin .ico { animation: masar-spin 0.8s linear infinite; }
+  @keyframes masar-spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <img src="asset-82d7b1e2.png" alt="ALAKER SWEETS" class="brand-logo">
+  <div class="brand-meta">
+    <span class="system-name">MASAR</span>
+    <span class="role-name" data-i18n="roleName"></span>
+    <span class="role-name" id="driverNameLine" style="font-size:12.5px; font-weight:400; opacity:.85;"></span>
+  </div>
+  <div class="topbar-spacer"></div>
+  <button class="refresh-btn" id="refreshBtn" type="button" title="تحديث / Refresh"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span class="rf-label">تحديث</span></button>
+  <button class="icon-btn" id="langToggle" title="AR / EN">AR</button>
+  <div class="user-menu">
+    <button class="icon-btn" id="userMenuBtn">⋮</button>
+    <div class="user-dropdown" id="userDropdown">
+      <button data-i18n="changePassword" data-toast="notReady"></button>
+      <button id="logoutBtn" data-i18n="logout"></button>
+    </div>
+  </div>
+</header>
+
+<main id="mainArea"></main>
+
+<div class="toast" id="toast"></div>
+<div id="globalBusyOverlay"></div>
+
+<script>
+  // SPEC v1.4 -- نفس آلية الحقن الخادمي الموثوقة المُستخدَمة في كل شاشات
+  // الكاشير/الأدمن (WebApp.gs doGet() تُحقنهما دون قيد لكل صفحة، لا حصريًا
+  // للكاشير) -- لا الاعتماد على قراءة رابط من طرف العميل إطلاقًا (خلل
+  // مُكتشَف ومُصحَّح سابقًا لشاشات أخرى، انظر KNOWN_ISSUES.md #2).
+  const APP_BASE_URL = MASAR_TPL.appBaseUrl;
+  var TIMEOUT_SCALE = MASAR_TPL.timeoutScale; // مضاعِف مُهَل الانتظار: ١ في الإنتاج، أكبر في DIV (مشروع بارد/شبكة اختبار)
+  // ===== شبكة الاتصال (١٠ أكتوبر ٢٠٢٦) =====
+  // مولَّد من tools/net_snippet.js بواسطة tools/build_client_snippets.js -- لا تعدّله يدويًا داخل الصفحات.
+  // (١) يتتبّع نداءات الحفظ (أي نداء لا يبدأ بـ get/list) ليعرف التحديث التلقائي أن الصفحة حفظت بنفسها.
+  // (٢) بلاغ "تعذّر تنفيذ العملية" المتكرر: بطء بدء Google (أو انقطاع لحظي) كان يُسقط النداء. للقراءات الصرفة فقط (قائمة مولَّدة آليًا من الخادم: دوال لا تكتب هي
+  // ولا ما تستدعيه) تُعاد المحاولة مرة واحدة عند الفشل/الردّ الفارغ، ويُرسَل نداء ثانٍ موازٍ إن تأخّر الأول ٦ ثوانٍ؛ يُسلَّم أول ردّ صالح. الحفظ والإنشاء لا يُكرَّران أبدًا.
+  const MASAR_RAW_RUN_ = (typeof google !== 'undefined' && google.script) ? google.script.run : null;
+  const MASAR_AR_INSTANCES_ = [];
+  const MASAR_PURE_READS_ = { getActiveDriversList:1,getActiveShipments:1,getActiveStoresWithOccupancy:1,getAllDepartments:1,getAllLists:1,getAllProducts:1,getAllRoles:1,getAllSettings:1,getAllStores:1,getAllUsers:1,getChangeTokens:1,getDepartmentStoreOrders:1,getDisposalFormData:1,getDistributionComparisonDetail:1,getDistributionManagerCancelEditRequests:1,getDistributionsReadyToPrepare:1,getFinishedGoodsQuarantineHistory:1,getFinishedGoodsStockBoard:1,getIssueToDepartmentFormData:1,getManagementReports:1,getMyNotifications:1,getMyShipments:1,getMySupplyRequests:1,getOffCatalogPurchaseRequests:1,getOrderDetails:1,getOrderEditStage:1,getOrderProductionApprovalDetail:1,getOrdersAwaitingInvoice:1,getOrdersAwaitingProductionApproval:1,getOrdersReadyForShipment:1,getOrdersReadyToReceive:1,getPendingLoadDiscrepancies:1,getPendingReturnItems:1,getPendingSupplyRequestsForRMS:1,getProductionManagerApprovals:1,getProductionManagerOrderFullDetail:1,getProductionManagerOrdersOverview:1,getPurchasingRawMaterialReports:1,getRawMaterialCatalog:1,getRawMaterialCatalogForRequest:1,getRawMaterialExpiryReport:1,getRawMaterialMovementSummary:1,getRawMaterialProductHistory:1,getRawMaterialQuarantineHistory:1,getRawMaterialShortageNotices:1,getRawMaterialStockBoard:1,getReceiveSurplusFormData:1,getReceivingDetails:1,getReferenceLists:1,getReturnReasons:1,getRolePermissionsMatrix:1,getShipmentPrepareDetail:1,getShortageReasons:1,getStoreDirectRawMaterialOrders:1,getStoreOrderDetail:1,getSuppliers:1,getSuppliersList:1,getTasksCatalog:1,getUnitsAndFamiliesList:1,getVehicleCoordinatorDriverStatus:1,getVehicleCoordinatorSpecialOrders:1,listOrders:1 };
+  (function masarTrackOwnCalls() {
+    try {
+      if (!MASAR_RAW_RUN_) return;
+      Object.defineProperty(google.script, 'run', {
+        configurable: true,
+        get() {
+          const handlers = { onSuccess: null, onFailure: null };
+          let proxy;
+          const chain = {
+            withSuccessHandler(fn) { handlers.onSuccess = fn; return proxy; },
+            withFailureHandler(fn) { handlers.onFailure = fn; return proxy; }
+          };
+          proxy = new Proxy(chain, {
+            get(target, prop) {
+              if (prop === 'withSuccessHandler' || prop === 'withFailureHandler') return target[prop];
+              return (...args) => {
+                // لقطة المعالجات لحظة النداء: غلاف حاجز الانشغال في الصفحات يمسك مرجعًا واحدًا من run فتتشارك النداءات المتزامنة كائن handlers، فلو قُرئ
+                // وقت الرد لاستلم كل رد معالج آخر نداء (بلاغ: "تعذّر فتح إنشاء رحلة" -- نداءا السائقين والجاهزة كانا يتبادلان معالجيهما)
+                const onS = handlers.onSuccess, onF = handlers.onFailure;
+                const name = String(prop);
+                if (Object.prototype.hasOwnProperty.call(MASAR_PURE_READS_, name)) {
+                  let settled = false, attempts = 0, pending = 0, hedge = null;
+                  const finish = (ok, v) => { if (settled) return; settled = true; clearTimeout(hedge); if (ok) { if (onS) onS(v); } else if (onF) onF(v); else { try { console.error(v); } catch (e) { /* تجاهل */ } } };
+                  const launch = () => {
+                    attempts++; pending++;
+                    const bad = v => {
+                      pending--;
+                      if (settled) return;
+                      if (attempts < 2) { setTimeout(launch, 700); return; }   // محاولة ثانية واحدة فقط
+                      if (pending === 0) finish(false, v);                       // الأخيرة فشلت ولا نداء آخر في الطريق
+                    };
+                    MASAR_RAW_RUN_
+                      .withSuccessHandler(r => { if (r === null || r === undefined) { bad(r); } else { pending--; finish(true, r); } })
+                      .withFailureHandler(e => bad(e))
+                      [name](...args);
+                  };
+                  hedge = setTimeout(() => { if (!settled && attempts < 2) launch(); }, 6000);
+                  launch();
+                  return;
+                }
+                const done = () => { if (!/^(get|list)/.test(name)) MASAR_AR_INSTANCES_.forEach(i => { try { i.ownDone(); } catch (e) { /* لا يعطّل النداء */ } }); };
+                return MASAR_RAW_RUN_
+                  .withSuccessHandler((...r) => { done(); if (onS) onS(...r); })
+                  .withFailureHandler((...r) => { done(); if (onF) onF(...r); else { try { console.error(r[0]); } catch (e) { /* تجاهل */ } } })
+                  [prop](...args);
+              };
+            }
+          });
+          return proxy;
+        }
+      });
+    } catch (e) { /* لا تتبّع: يبقى السلوك القديم كما هو */ }
+  })();
+  // يستعمله التحديث التلقائي الصامت: نفس طبقة الاتصال (إعادة المحاولة) لكن بلا غلاف حاجز الانشغال الذي تُركّبه الصفحة لاحقًا فوقها
+  let MASAR_NET_GETTER_ = null;
+  try { MASAR_NET_GETTER_ = Object.getOwnPropertyDescriptor(google.script, 'run').get || null; } catch (e) { MASAR_NET_GETTER_ = null; }
+  // ===== نهاية شبكة الاتصال =====
+  // ===== تحديث تلقائي بالتغيّر (٩ أكتوبر ٢٠٢٦، نُقّح ١٠ أكتوبر) =====
+  // كل ٣٠ ثانية تسأل الصفحة (نداء خفيف بلا قراءة جداول) هل تغيّر شيء في مجالاتها؛ إن تغيّر تُعيد جلب بياناتها مرة واحدة. تتوقف والتبويب مخفيّ، وتستأنف عند
+  // العودة. إن كان المستخدم يكتب أو توجد نافذة مفتوحة أو حقل معدَّل لا تُبدَّل الشاشة تحت يده: يظهر شريط "توجد تحديثات" ينقر عليه حين يشاء.
+  // النداء الخفيف يمرّ عبر مرجع google.script.run الأصلي (قبل غلاف حاجز الانشغال) فلا يحجب الشاشة، ولا يمدّ الجلسة.
+  // تنقيح (بلاغ ميداني: "ساعة رملية كل برهة" و"الشاشة تُعاد بعد كل حفظ"): (١) التحديث التلقائي صامت: لا حاجز انشغال ولا ومضة "جارٍ التحميل"،
+  // ويحفظ موضع التمرير؛ (٢) ما تحفظه هذه الصفحة نفسها (أي نداء لا يبدأ بـ get) لا يُحدِّثها هي: تُعاد قراءة الرمز بعده فيصير خط الأساس الجديد؛ (٣) شارة
+  // صغيرة أسفل الشاشة تُظهر وقت آخر فحص وتومض عند التحديث، ولون أحمر إن تعذّر الفحص.
+  // ينفّذ إعادة جلب بيانات الصفحة بصمت: بلا حاجز انشغال (النداءات داخلها تمرّ بالمرجع الأصلي)، بلا ومضة "جارٍ التحميل"، وبحفظ موضع التمرير
+  function masarRunSilently(fn) {
+    let desc = null, area = null, proto = null;
+    try { desc = Object.getOwnPropertyDescriptor(google.script, 'run'); Object.defineProperty(google.script, 'run', { configurable: true, get() { return MASAR_NET_GETTER_ ? MASAR_NET_GETTER_() : MASAR_RAW_RUN_; } }); } catch (e) { desc = null; }
+    try {
+      area = document.getElementById('mainArea');
+      if (area && typeof Element !== 'undefined') {
+        proto = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
+        Object.defineProperty(area, 'innerHTML', {
+          configurable: true,
+          get() { return proto.get.call(area); },
+          set(v) { const s = String(v); if (/empty-state/.test(s) && !/order-card|<table|<button/.test(s)) return; proto.set.call(area, v); }
+        });
+      }
+    } catch (e) { proto = null; }
+    let keep = null;
+    try {
+      if (area && typeof window !== 'undefined' && typeof MutationObserver !== 'undefined') {
+        const scrollers = [document.scrollingElement, area.parentElement].filter(Boolean).map(el => ({ el: el, top: el.scrollTop }));
+        let moved = false;
+        const mark = () => { moved = true; };
+        ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(ev => window.addEventListener(ev, mark, true));
+        const mo = new MutationObserver(() => { if (!moved) requestAnimationFrame(() => scrollers.forEach(s => { if (s.top > 0 && Math.abs(s.el.scrollTop - s.top) > 4) s.el.scrollTop = s.top; })); });
+        mo.observe(area, { childList: true });
+        keep = () => { try { mo.disconnect(); ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(ev => window.removeEventListener(ev, mark, true)); } catch (e) { /* تجاهل */ } };
+        setTimeout(keep, 9000);
+      }
+    } catch (e) { keep = null; }
+    try { fn(); }
+    finally {
+      if (desc) { try { Object.defineProperty(google.script, 'run', desc); } catch (e) { /* تجاهل */ } }
+      if (proto && area) { try { delete area.innerHTML; } catch (e) { /* تجاهل */ } }
+    }
+  }
+  function masarAutoRefresh(opts) {
+    if (!MASAR_RAW_RUN_ || !opts || typeof opts.refresh !== 'function') return null;
+    const domains = opts.domains || [];
+    const interval = (opts.intervalMs || 30000) + Math.floor(Math.random() * 4000); // تشتيت بسيط كي لا تتزامن شاشات كثيرة
+    let baseline = null, inflight = false, inflightSince = 0, stopped = false, banner = null, pill = null, ownDoneAt = 0, rebaseWanted = false, changes = 0;
+    const uid = () => (typeof CURRENT_USER_ID !== 'undefined' ? CURRENT_USER_ID : (typeof Core !== 'undefined' ? Core.currentUserId : ''));
+    const isAr = () => (document.documentElement.lang || 'ar') !== 'en';
+    function setPill(text, bad) {
+      try {
+        if (!pill) {
+          pill = document.createElement('div');
+          pill.style.cssText = 'position:fixed;right:8px;bottom:6px;z-index:2147482000;font:600 10px sans-serif;color:#fff;padding:2px 8px;border-radius:999px;pointer-events:none;opacity:0.85;';
+          document.body.appendChild(pill);
+        }
+        pill.style.background = bad ? 'rgba(176,42,42,0.9)' : 'rgba(61,43,30,0.55)';
+        pill.textContent = text;
+      } catch (e) { /* الشارة تكميلية */ }
+    }
+    function clock() { try { return new Date().toTimeString().slice(0, 8); } catch (e) { return ''; } }
+    function busy() {
+      try {
+        if (opts.isBusy && opts.isBusy()) return true;
+        const a = document.activeElement;
+        if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && !/^(button|checkbox|radio|submit)$/.test(a.type || '')) return true;
+        if (document.querySelector('.header-modal-overlay.open, [class*="overlay"].open, [class*="modal"].open')) return true;
+        const fields = document.querySelectorAll('main input, main textarea, main select, #mainArea input, #mainArea textarea, #mainArea select');
+        for (let i = 0; i < fields.length; i++) {
+          const f = fields[i];
+          if (f.type === 'checkbox' || f.type === 'radio') { if (f.checked !== f.defaultChecked) return true; }
+          else if (f.type !== 'hidden' && f.type !== 'button' && f.tagName !== 'SELECT' && f.value !== f.defaultValue) return true;
+        }
+      } catch (e) { /* عند الشك نعتبر الشاشة غير مشغولة */ }
+      return false;
+    }
+    function hideBanner() { if (banner) { banner.style.display = 'none'; } }
+    function showBanner() {
+      if (!banner) {
+        banner = document.createElement('button');
+        banner.type = 'button';
+        banner.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:76px;z-index:2147483000;border:none;border-radius:999px;padding:10px 18px;background:#3D2B1E;color:#fff;font:700 13px sans-serif;box-shadow:0 6px 20px rgba(0,0,0,0.3);cursor:pointer;';
+        banner.addEventListener('click', () => doRefresh());
+        document.body.appendChild(banner);
+      }
+      banner.textContent = isAr() ? '🔄 توجد تحديثات جديدة — اضغط للتحديث' : '🔄 New updates — tap to refresh';
+      banner.style.display = 'block';
+    }
+    function doRefresh() {
+      hideBanner();
+      setPill((isAr() ? '✅ تحديث ' : '✅ Updated ') + clock(), false);
+      try { masarRunSilently(opts.refresh); } catch (e) { /* لا يعطّل الصفحة */ }
+    }
+    function handle(r, startedAt) {
+      if (!r || !r.success) {
+        if (r && r.error && r.error.code === 'SESSION_EXPIRED') stopped = true;
+        setPill('⚠ ' + ((r && r.error && r.error.code) || (isAr() ? 'تعذّر الفحص' : 'check failed')), true);
+        return;
+      }
+      setPill((isAr() ? '🔄 آخر فحص ' : '🔄 Checked ') + clock() + (changes ? (isAr() ? ' · تغيّرات ' : ' · changes ') + changes : ''), false);
+      const sig = JSON.stringify(domains.map(d => r.data.tokens[d] || ''));
+      if (rebaseWanted) {
+        // هذه الصفحة حفظت شيئًا بنفسها: الرمز بعد حفظها هو خط الأساس الجديد (لا تُحدَّث هي بما كتبته). ردٌّ بدأ قبل انتهاء حفظها قديم: نعيد السؤال
+        if (startedAt >= ownDoneAt) { rebaseWanted = false; baseline = sig; } else { setTimeout(tick, 300); }
+        return;
+      }
+      if (baseline === null) { baseline = sig; return; }
+      if (sig === baseline) return;
+      baseline = sig; changes++;
+      if (busy()) { showBanner(); return; }
+      doRefresh();
+      // الكتابة قد لا تكون ظهرت للقراءة بعد لحظة الرمز: إن كان التغيّر حديثًا (<٨ ثوانٍ) نُعيد الجلب مرة ثانية بعد استقراره
+      const newest = Math.max.apply(null, domains.map(d => parseFloat(r.data.tokens[d]) || 0));
+      const age = (r.data.serverTime || Date.now()) - newest;
+      if (age < 8000) setTimeout(() => { if (!document.hidden && !busy()) doRefresh(); }, 8500 - Math.max(0, age));
+    }
+    function tick() {
+      if (stopped || document.hidden) return;
+      // نداء ضاع بلا ردّ (شبكة بطيئة/تبويب مجمَّد) كان يُبقي inflight=true فيتوقف التحديث للأبد: بعد ٢٥ ثانية نعدّه مفقودًا ونسأل من جديد
+      if (inflight && Date.now() - inflightSince < 25000) return;
+      inflight = true;
+      const startedAt = Date.now();
+      inflightSince = startedAt;
+      MASAR_RAW_RUN_.withSuccessHandler(r => { inflight = false; handle(r, startedAt); }).withFailureHandler(() => { inflight = false; setPill(isAr() ? '⚠ تعذّر الفحص' : '⚠ check failed', true); }).getChangeTokens(uid(), domains);
+    }
+    function ownDone() { ownDoneAt = Date.now(); rebaseWanted = true; hideBanner(); setTimeout(tick, 500); }
+    MASAR_AR_INSTANCES_.push({ ownDone: ownDone });
+    setInterval(tick, interval);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) { rebaseWanted = false; setTimeout(tick, 400); } });
+    setTimeout(tick, 1500); // يلتقط خط الأساس مبكرًا
+    return { tick: tick };
+  }
+  // تسجيل الخروج (٨ أكتوبر ٢٠٢٦، بلاغ مستخدم: "لا يأخذني دائمًا لشاشة الدخول حتى أضغط زرًا في الصفحة التي بقيت مفتوحة"): المتصفحات (خصوصًا
+  // الهاتف) تحجب التنقّل غير المرتبط بلمسة مباشرة، فكانت الصفحة تبقى ظاهرة بزر "اضغط للمتابعة" مخبّأ داخل قائمة مغلقة. الآن أول ما يُستدعى
+  // logout يُغطّى المحتوى بحاجز كامل الشاشة "تم تسجيل الخروج" بزر كبير ظاهر، مع محاولة تلقائية للانتقال حيث يسمح المتصفح.
+  function masarLogoutMarker() {
+    try {
+      if (document.getElementById('masarLoggedOutOverlay')) return null;
+      var ar = (document.documentElement.lang || 'ar') !== 'en';
+      var o = document.createElement('div');
+      o.id = 'masarLoggedOutOverlay';
+      o.dir = ar ? 'rtl' : 'ltr';
+      o.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:2147483646;background:#3D2B1E;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font:600 19px/1.6 sans-serif;text-align:center;padding:24px;';
+      o.innerHTML = '<div style="font-size:48px">\uD83D\uDD12</div><div>' + (ar ? 'تم تسجيل الخروج' : 'You have been logged out') + '</div>' +
+        '<button type="button" style="border:none;background:#EE7126;color:#fff;font:700 17px sans-serif;padding:15px 34px;border-radius:999px;cursor:pointer;">' + (ar ? 'العودة إلى شاشة الدخول' : 'Back to login') + '</button>';
+      document.body.appendChild(o);
+      var go = function () { try { window.top.location.href = APP_BASE_URL; } catch (e) { window.location.href = APP_BASE_URL; } };
+      o.getElementsByTagName('button')[0].addEventListener('click', go);
+      setTimeout(go, 700);
+    } catch (e) { /* عرض فقط */ }
+    return null;
+  }
+  const CURRENT_USER_ID = MASAR_TPL.currentUserId;
+
+  let MY_TRIPS = [];
+
+  const dict = {
+    ar: {
+      roleName: 'السائق',
+      changePassword: '🔑 تغيير كلمة المرور', logout: '↩ تسجيل الخروج',
+      screenTitle: 'شحناتي', dateLine: '',
+      tripTitle: 'الرحلة',
+      tabReceive: '📥 الاستلام', tabDeliver: '🚚 التسليم', deliveredSection: 'تم تسليمها',
+      emptyReceive: 'لا شيء بانتظار استلامك حاليًا', receiveAllDone: 'استلمتَ كل ما عليك — انتقل إلى التسليم', goDeliver: 'اذهب إلى التسليم 🚚',
+      emptyDeliver: 'لا توقفات جاهزة للتسليم — أكِّد استلامك أولًا من تبويب الاستلام', goReceive: 'اذهب إلى الاستلام 📥',
+      stPending: 'بانتظار استلامك من التوزيع', stLoaded: 'معك — بانتظار التسليم للمحل', stDelivered: 'تم التسليم ✓',
+      addressLabel: 'عنوان التسليم', openMaps: '📍 فتح في خرائط',
+      loadBtn: '📦 استلمت البضاعة', deliverBtn: (store) => `✅ تم التسليم لكاشير محل ${store}`,
+      itemLoadBtn: '✔ استلمت', itemLoadedTag: '✔ استلمته', notShippedTag: 'لا يُشحن',
+      reportDiscrepancyBtn: '⚠️ الكمية مختلفة', discrepancyPendingTag: (q) => `⏳ بانتظار اعتماد التوزيع (أبلغتَ: ${q})`,
+      discrepancyQtyLabel: 'الكمية الفعلية', discrepancyNotePlaceholder: 'سبب الفرق (اختياري)',
+      discrepancySubmitBtn: 'إرسال البلاغ', discrepancyCancelBtn: 'إلغاء',
+      toastDiscrepancyReported: 'أُرسل البلاغ — بانتظار اعتماد مسؤول التوزيع',
+      toastDiscrepancyNoDiff: 'الكمية مطابقة للنظري — أكِّد الاستلام مباشرة',
+      toastDiscrepancyInvalid: 'أدخل كمية صحيحة',
+      loadProgress: (a, b) => `استلمتَ ${a} من ${b} — أكِّد كل صنف تستلمه من مسؤول التوزيع`,
+      toastItemLoaded: 'سُجِّل استلامك للصنف',
+      tapAgainConfirm: '👆 اضغط مرة أخرى للتأكيد',
+      deliveredBadge: 'اكتمل هذا التوقف',
+      toastLoaded: (store) => `أُكِّد استلامك من ${store}`,
+      toastDelivered: (store) => `أُكِّد تسليم ${store} بنجاح`,
+      emptyTrips: 'لا توجد شحنات مُسندة لك حاليًا',
+      loadingText: 'جارٍ التحميل...', loadErrorText: 'تعذّر تنفيذ العملية — أعد المحاولة',
+      savingText: 'جارٍ الحفظ...', toastNotReady: 'هذه الميزة ستُبنى في خطوة قادمة', continueBtn: 'اضغط هنا للمتابعة'
+    },
+    en: {
+      roleName: 'Driver',
+      changePassword: '🔑 Change password', logout: '↩ Log out',
+      screenTitle: 'My shipments', dateLine: '',
+      tripTitle: 'Trip',
+      tabReceive: '📥 Pickup', tabDeliver: '🚚 Delivery', deliveredSection: 'Delivered',
+      emptyReceive: 'Nothing waiting for you to pick up', receiveAllDone: 'Everything is picked up — go to Delivery', goDeliver: 'Go to Delivery 🚚',
+      emptyDeliver: 'No stops ready to deliver — confirm your pickup in the Pickup tab first', goReceive: 'Go to Pickup 📥',
+      stPending: 'Awaiting your pickup from distribution', stLoaded: "With you — awaiting delivery to store", stDelivered: 'Delivered ✓',
+      addressLabel: 'Delivery address', openMaps: '📍 Open in maps',
+      loadBtn: '📦 Picked up', deliverBtn: (store) => `✅ Delivered to the cashier of ${store}`,
+      itemLoadBtn: '✔ Got it', itemLoadedTag: '✔ Received', notShippedTag: 'Not shipped',
+      reportDiscrepancyBtn: '⚠️ Quantity differs', discrepancyPendingTag: (q) => `⏳ Awaiting distribution's decision (you reported: ${q})`,
+      discrepancyQtyLabel: 'Actual quantity', discrepancyNotePlaceholder: 'Reason for the difference (optional)',
+      discrepancySubmitBtn: 'Send report', discrepancyCancelBtn: 'Cancel',
+      toastDiscrepancyReported: 'Report sent — awaiting the distribution officer\'s decision',
+      toastDiscrepancyNoDiff: 'The quantity matches the theoretical amount — confirm pickup directly',
+      toastDiscrepancyInvalid: 'Enter a valid quantity',
+      loadProgress: (a, b) => `You picked up ${a} of ${b} — confirm each item you take from distribution`,
+      toastItemLoaded: 'Item pickup recorded',
+      tapAgainConfirm: '👆 Tap again to confirm',
+      deliveredBadge: 'This stop is complete',
+      toastLoaded: (store) => `Pickup from ${store} confirmed`,
+      toastDelivered: (store) => `${store} delivery confirmed successfully`,
+      emptyTrips: 'No shipments assigned to you right now',
+      loadingText: 'Loading...', loadErrorText: 'Could not complete the operation — please try again',
+      savingText: 'Saving...', toastNotReady: 'This feature is coming up next', continueBtn: 'Tap here to continue'
+    }
+  };
+
+  const state = { lang: (MASAR_TPL.userLang === 'en' ? 'en' : 'ar') };
+  // لغة المستخدم المحفوظة على الخادم (Users.Language) -- طلب مباشر ٢٥ سبتمبر ٢٠٢٦: تُفتح بها كل الشاشات وتبقى عند التنقّل
+  (function () {
+    if (state.lang === 'en') { document.documentElement.lang = 'en'; document.documentElement.dir = 'ltr'; }
+    const langBtn = document.getElementById('langToggle');
+    if (!langBtn) return;
+    langBtn.textContent = state.lang === 'ar' ? 'EN' : 'AR';
+    langBtn.addEventListener('click', () => setTimeout(() => {
+      try { if (MASAR_TPL.currentUserId) google.script.run.withFailureHandler(() => {}).setUserLanguage(MASAR_TPL.currentUserId, state.lang); } catch (e) { /* لا يعطّل الشاشة */ }
+    }, 0));
+  })();
+  // ---- زر التحيين (طلب مباشر ٢٦ سبتمبر ٢٠٢٦): تحديث ناعم إن وُجد مُحمِّل للصفحة، وإلا إعادة تحميل الصفحة بنفس رابطها ----
+  (function () {
+    const btn = document.getElementById('refreshBtn');
+    if (!btn) return;
+    const CONFIRM = false;
+    const label = btn.querySelector('.rf-label');
+    const idleText = () => (state.lang === 'ar' ? 'تحديث' : 'Refresh');
+    const sureText = () => (state.lang === 'ar' ? 'اضغط للتأكيد' : 'Tap to confirm');
+    const setIdle = () => { btn.classList.remove('armed'); if (label) label.textContent = idleText(); };
+    setIdle();
+    const lt = document.getElementById('langToggle');
+    if (lt) lt.addEventListener('click', () => setTimeout(setIdle, 0));
+    let armed = false, timer = null;
+    const hardReload = () => {
+      try { window.top.location.href = APP_BASE_URL + '?' + MASAR_TPL.reloadQuery; } catch (e) { window.location.reload(); }
+    };
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      if (CONFIRM && !armed) {
+        armed = true; btn.classList.add('armed'); if (label) label.textContent = sureText();
+        clearTimeout(timer); timer = setTimeout(() => { armed = false; setIdle(); }, 2800);
+        return;
+      }
+      clearTimeout(timer); armed = false; setIdle();
+      const soft = () => loadShipments();
+      if (soft) {
+        btn.classList.add('spin');
+        try { soft(); setTimeout(() => btn.classList.remove('spin'), 1200); return; } catch (e) { btn.classList.remove('spin'); }
+      }
+      hardReload();
+    });
+  })();
+  function t(key) { return (dict[state.lang] && dict[state.lang][key]) || key; }
+  function itemName(it) { return state.lang === 'ar' ? it.nameAr : it.nameEn; }
+  // SPEC v1.4 -- الوحدة نصية حرة (UnitID)، لا ثنائية اللغة فعليًا -- نفس قرار
+  // سابق ثابت عبر المشروع (طلب مستخدم صريح: مرونة النص الحر بدل قائمة مقفلة).
+  function itemUnit(it) { return it.unit; }
+
+  /**
+   * transformShipments(rawShipments) -- SPEC v1.4: يُحوِّل استجابة
+   * getMyShipments() الحقيقية (DistributionWorkflow.gs) إلى نفس الشكل الذي
+   * تتوقّعه دوال العرض الأصلية (render/stopActionHtml/stopTagHtml) أدناه،
+   * المصمَّمة أصلًا بعناية في النموذج التجريبي -- بدل إعادة كتابتها بالكامل،
+   * تحويل واحد هنا يحافظ عليها كما هي دون المساس بجودتها المرئية.
+   */
+  function transformShipments(rawShipments) {
+    return rawShipments.map(s => ({
+      tripId: s.shipmentId,
+      stops: s.stops.map(stop => ({
+        orderId: stop.orderId,
+        shipmentOrderId: stop.shipmentOrderId, // SPEC v1.4 -- confirmLoaded/confirmDelivery الحقيقيتان تحتاجان هذا المعرِّف تحديدًا، لا orderId
+        store: state.lang === 'ar' ? stop.storeNameAR : stop.storeNameEN,
+        locationType: stop.deliveryLocationType,
+        state: stop.deliveryConfirmedAt ? 'DELIVERED' : (stop.loadedConfirmedAt ? 'LOADED' : 'PENDING'),
+        addressAr: stop.deliveryAddressText,
+        mapsLink: stop.deliveryLocationLink, // SPEC v1.4 -- رابط حقيقي مخزَّن، لا استعلام بحث عام مبني من اسم المحل
+        items: stop.items.map(it => ({ icon: '📦', orderItemId: it.orderItemId, shippable: it.shippable, loaded: it.loaded, pendingDiscrepancy: it.pendingDiscrepancy, reportedQty: it.reportedQty, nameAr: it.nameAR, nameEn: it.nameEN, unit: it.unitId, qty: it.qty }))
+      }))
+    }));
+  }
+
+  /**
+   * loadShipments(onDone) -- SPEC v1.4: نداء getMyShipments() الحقيقي.
+   * onceWithTimeout/forceHideBusyOverlay هنا مطابقان تمامًا للنمط المُثبَت
+   * في شاشات الكاشير (نفس السبب: بيئة حقيقية بطيئة أحيانًا، مؤكَّد مرارًا).
+   */
+  function onceWithTimeout(fn, timeoutMs) {
+    let fired = false;
+    const timer = setTimeout(() => { if (!fired) { fired = true; forceHideBusyOverlay(); fn(); } }, timeoutMs * (typeof TIMEOUT_SCALE === 'number' ? TIMEOUT_SCALE : 1));
+    return (...args) => { if (fired) return; fired = true; clearTimeout(timer); fn(...args); };
+  }
+
+  let DRIVER_NAME_AR = '', DRIVER_NAME_EN = '';
+  function showDriverName() {
+    const el = document.getElementById('driverNameLine');
+    if (el) el.textContent = state.lang === 'ar' ? DRIVER_NAME_AR : DRIVER_NAME_EN;
+  }
+  function loadShipments() {
+    document.getElementById('mainArea').innerHTML = `<div class="empty-state">${t('loadingText')}</div>`;
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(result => {
+        if (!result) { renderLoadError(t('loadErrorText')); return; }
+        if (!result.success) {
+          if (result.error && result.error.code === 'SHIFT_NOT_ACTIVE') { /* لا نوبات للسائق أصلًا -- لا ينطبق هنا، احتياط فقط */ }
+          let detail = '';
+          try { detail = JSON.stringify(result); } catch (e) { detail = String(result); }
+          renderLoadError(t('loadErrorText') + ' — ' + detail);
+          return;
+        }
+        DRIVER_NAME_AR = result.data.driverNameAR || ''; DRIVER_NAME_EN = result.data.driverNameEN || '';
+        showDriverName();
+        MY_TRIPS = transformShipments(result.data.shipments);
+        render();
+      }, 8000))
+      .withFailureHandler(error => {
+        let detail = '';
+        try { detail = (error && error.message) ? error.message : JSON.stringify(error); } catch (e) { detail = String(error); }
+        renderLoadError(t('loadErrorText') + ' (FAIL) — ' + detail);
+      })
+      .getMyShipments(CURRENT_USER_ID);
+  }
+
+  function renderLoadError(msg) {
+    document.getElementById('mainArea').innerHTML = `<div class="empty-state" style="color:var(--warn); word-break:break-all; font-size:12px;">${msg}</div>`;
+  }
+
+  function applyI18n(container) {
+    container.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (dict[state.lang][key] !== undefined) el.textContent = dict[state.lang][key];
+    });
+  }
+
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => el.classList.remove('show'), 2400);
+  }
+
+  function stopActionHtml(stop, mode) {
+    if (stop.state === 'DELIVERED') {
+      return `<div class="delivered-badge">✅ ${t('deliveredBadge')}</div>`;
+    }
+    // زر التسليم يظهر في تبويب التسليم فقط، ولا يظهر في تبويب الاستلام أبدًا (طلب مباشر ٨ أكتوبر ٢٠٢٦)
+    if (stop.state === 'LOADED') {
+      return mode === 'deliver' ? `<button class="big-action-btn deliver" data-deliver="${stop.shipmentOrderId}">${t('deliverBtn')(stop.store)}</button>` : '';
+    }
+    const need = stop.items.filter(it => it.shippable);
+    if (!need.length) return `<button class="big-action-btn load" data-load="${stop.shipmentOrderId}">${t('loadBtn')}</button>`; // لا أصناف تُشحن: قفل مباشر
+    return `<div class="load-progress">${t('loadProgress')(need.filter(it => it.loaded).length, need.length)}</div>`;
+  }
+
+  function stopTagHtml(stop) {
+    if (stop.state === 'DELIVERED') return `<span class="stop-state-tag delivered">✅ ${t('stDelivered')}</span>`;
+    if (stop.state === 'LOADED') return `<span class="stop-state-tag loaded">🚚 ${t('stLoaded')}</span>`;
+    return `<span class="stop-state-tag pending">⏳ ${t('stPending')}</span>`;
+  }
+
+  let activeTab = null; // 'receive' | 'deliver' -- يُحدَّد عند أول عرض ويبقى عبر إعادة التحميل
+
+  function allStops() {
+    const out = [];
+    MY_TRIPS.forEach(trip => trip.stops.forEach((stop, idx) => out.push({ trip: trip, stop: stop, idx: idx })));
+    return out;
+  }
+
+  function stopCardHtml(entry, mode) {
+    const stop = entry.stop, idx = entry.idx;
+    const showAddress = mode === 'deliver' && stop.locationType === 'CUSTOM_LOCATION';
+    const items = mode === 'deliver' ? stop.items.filter(it => it.shippable) : stop.items;
+    return `
+      <div class="stop-card ${stop.state === 'DELIVERED' ? 'delivered' : ''}" data-stop="${stop.orderId}">
+        <div class="stop-top">
+          <div class="stop-num">${idx + 1}</div>
+          <div>
+            <div class="stop-store">${stop.store}</div>
+            ${stopTagHtml(stop)}
+          </div>
+          <span class="trip-id" style="margin-inline-start:auto; font-family:var(--font-mono); font-size:11px; color:var(--ink-soft);">${entry.trip.tripId}</span>
+        </div>
+        ${showAddress ? `
+          <div class="custom-location-box">
+            <div class="addr-label">📍 ${t('addressLabel')}</div>
+            <div class="addr-text">${stop.addressAr}</div>
+            <a class="maps-btn" href="${stop.mapsLink}" target="_blank" rel="noopener">${t('openMaps')}</a>
+          </div>` : ''}
+        <div class="items-list ${mode === 'deliver' ? 'deliver-items' : ''}">
+          ${items.map(it => {
+            const canAct = mode === 'receive' && it.shippable && !it.loaded && stop.state === 'PENDING' && !it.pendingDiscrepancy;
+            const actionsHtml = mode === 'deliver' ? ''
+              : !it.shippable ? `<span class="item-none-tag">${t('notShippedTag')}</span>`
+              : it.pendingDiscrepancy ? `<span class="discrepancy-pending-tag">${t('discrepancyPendingTag')(it.reportedQty)}</span>`
+              : (it.loaded || stop.state !== 'PENDING') ? `<span class="item-loaded-tag">${t('itemLoadedTag')}</span>`
+              : `<div class="item-actions">
+                   <button class="item-load-btn" type="button" data-load-item="${stop.shipmentOrderId}" data-item="${it.orderItemId}">${t('itemLoadBtn')}</button>
+                   <button class="item-discrepancy-btn" type="button" data-discrepancy-toggle="${it.orderItemId}">${t('reportDiscrepancyBtn')}</button>
+                 </div>`;
+            return `
+            <div class="item-row-wrap">
+              <div class="item-row">
+                <div class="item-thumb">${it.icon}</div>
+                <div class="item-name">${itemName(it)}</div>
+                <div class="item-qty">${it.qty} ${itemUnit(it)}</div>
+                ${actionsHtml}
+              </div>
+              ${canAct ? `
+              <div class="discrepancy-bar" id="discBar-${it.orderItemId}" style="display:none;">
+                <label style="font-size:11.5px; color:var(--ink-soft);">${t('discrepancyQtyLabel')}</label>
+                <input type="number" id="discQty-${it.orderItemId}" min="0" step="0.5" value="${it.qty}">
+                <span class="item-unit">${itemUnit(it)}</span>
+                <input type="text" id="discNote-${it.orderItemId}" placeholder="${t('discrepancyNotePlaceholder')}">
+                <button class="discrepancy-submit-btn" type="button" data-discrepancy-submit="${it.orderItemId}" data-shipment-order="${stop.shipmentOrderId}">${t('discrepancySubmitBtn')}</button>
+                <button class="discrepancy-cancel-btn" type="button" data-discrepancy-cancel="${it.orderItemId}">${t('discrepancyCancelBtn')}</button>
+              </div>` : ''}
+            </div>`;
+          }).join('')}
+        </div>
+        ${stopActionHtml(stop, mode)}
+      </div>`;
+  }
+
+  function render() {
+    // حفظ موضع التمرير: الشاشة تُعاد رسمها بعد كل حفظ صنف، فلا يعود السائق لأعلى القائمة في كل مرة (بلاغ ميداني ١٠ أكتوبر ٢٠٢٦)
+    const keepY = window.pageYOffset || document.documentElement.scrollTop || 0;
+    renderNow();
+    if (keepY > 0) window.scrollTo(0, keepY);
+  }
+  function renderNow() {
+    const now = new Date();
+    const locale = state.lang === 'ar' ? 'ar-QA-u-nu-latn' : 'en-US';
+    const fmt = new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    const head = `<div class="greeting-card"><h1 data-i18n="screenTitle"></h1><div class="date-line">${fmt.format(now)}</div></div>`;
+
+    if (!MY_TRIPS.length) {
+      document.getElementById('mainArea').innerHTML = head + `<div class="empty-state"><div class="big">🚚</div>${t('emptyTrips')}</div>`;
+      applyI18n(document.getElementById('mainArea'));
+      return;
+    }
+
+    const stops = allStops();
+    const toReceive = stops.filter(e => e.stop.state === 'PENDING');
+    const toDeliver = stops.filter(e => e.stop.state === 'LOADED');
+    const delivered = stops.filter(e => e.stop.state === 'DELIVERED');
+    if (!activeTab) activeTab = toReceive.length ? 'receive' : 'deliver';
+
+    let body;
+    if (activeTab === 'receive') {
+      body = toReceive.length
+        ? toReceive.map(e => stopCardHtml(e, 'receive')).join('')
+        : `<div class="tab-empty"><div class="big">✅</div>${toDeliver.length ? t('receiveAllDone') : t('emptyReceive')}${toDeliver.length ? `<div><button class="go-btn" type="button" data-go-tab="deliver">${t('goDeliver')}</button></div>` : ''}</div>`;
+    } else {
+      body = toDeliver.length
+        ? toDeliver.map(e => stopCardHtml(e, 'deliver')).join('')
+        : `<div class="tab-empty"><div class="big">📭</div>${t('emptyDeliver')}${toReceive.length ? `<div><button class="go-btn" type="button" data-go-tab="receive">${t('goReceive')}</button></div>` : ''}</div>`;
+      if (delivered.length) body += `<div class="section-label">✅ ${t('deliveredSection')} (${delivered.length})</div>` + delivered.map(e => stopCardHtml(e, 'deliver')).join('');
+    }
+
+    document.getElementById('mainArea').innerHTML = head + `
+      <div class="driver-tabs" role="tablist">
+        <button class="driver-tab ${activeTab === 'receive' ? 'active' : ''}" type="button" role="tab" data-tab="receive">${t('tabReceive')}<span class="cnt ${toReceive.length ? '' : 'zero'}">${toReceive.length}</span></button>
+        <button class="driver-tab ${activeTab === 'deliver' ? 'active' : ''}" type="button" role="tab" data-tab="deliver">${t('tabDeliver')}<span class="cnt ${toDeliver.length ? '' : 'zero'}">${toDeliver.length}</span></button>
+      </div>
+      ${body}`;
+    document.querySelectorAll('[data-tab], [data-go-tab]').forEach(el => {
+      el.addEventListener('click', () => { activeTab = el.getAttribute('data-tab') || el.getAttribute('data-go-tab'); render(); });
+    });
+    applyI18n(document.getElementById('mainArea'));
+    wireActions();
+  }
+
+  // Guards a big single-tap action (physical, hard-to-reverse confirmations)
+  // against accidental or rapid-double taps: first tap only arms the button
+  // (visual "tap again" state, no side effect yet); the real action fires
+  // only on a second, deliberate tap within the window, and the button is
+  // disabled immediately after to prevent double-firing. If the person
+  // doesn't tap again, it silently reverts -- no harm done.
+  function wireConfirmableClick(btn, onConfirm) {
+    let armed = false;
+    let timer = null;
+    const original = btn.innerHTML;
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      if (!armed) {
+        armed = true;
+        btn.classList.add('confirm-armed');
+        btn.innerHTML = t('tapAgainConfirm');
+        timer = setTimeout(() => {
+          armed = false;
+          btn.classList.remove('confirm-armed');
+          btn.innerHTML = original;
+        }, 2800);
+      } else {
+        clearTimeout(timer);
+        btn.disabled = true;
+        onConfirm();
+      }
+    });
+  }
+
+  function wireActions() {
+    document.querySelectorAll('[data-load]').forEach(btn => {
+      wireConfirmableClick(btn, () => {
+        const shipmentOrderId = btn.getAttribute('data-load');
+        const stop = findStop(shipmentOrderId);
+        const storeName = stop ? stop.store : '';
+        const originalContent = btn.innerHTML;
+        btn.innerHTML = t('savingText');
+        google.script.run
+          .withSuccessHandler(onceWithTimeout(result => {
+            // SPEC v1.4 (نفس تصحيح شاشات الكاشير بالضبط -- انظر تعليقها في
+            // new-order.module.js): عند انتهاء مهلة الأمان، result يصل بلا
+            // وسيطة (undefined) -- نجاح مفترض لا فشل. الفشل الحقيقي الوحيد
+            // نتيجة *فعلية* تحمل success:false صراحة.
+            if (result && !result.success) {
+              btn.disabled = false; btn.innerHTML = originalContent;
+              showToast(t('loadErrorText')); return;
+            }
+            if (stop) stop.state = 'LOADED';
+            showToast(t('toastLoaded')(storeName));
+            render();
+          }, 8000))
+          .withFailureHandler(() => { btn.disabled = false; btn.innerHTML = originalContent; showToast(t('loadErrorText')); })
+          .confirmLoaded(CURRENT_USER_ID, shipmentOrderId);
+      });
+    });
+    document.querySelectorAll('[data-load-item]').forEach(btn => {
+      wireConfirmableClick(btn, () => {
+        const shipmentOrderId = btn.getAttribute('data-load-item');
+        const orderItemId = btn.getAttribute('data-item');
+        const stop = findStop(shipmentOrderId);
+        const originalContent = btn.innerHTML;
+        btn.innerHTML = t('savingText');
+        google.script.run
+          .withSuccessHandler(onceWithTimeout(result => {
+            if (!result || !result.success) {
+              btn.disabled = false; btn.innerHTML = originalContent;
+              showToast(t('loadErrorText')); return;
+            }
+            if (stop) {
+              const it = stop.items.find(x => x.orderItemId === orderItemId);
+              if (it) it.loaded = true;
+              if (result.data && result.data.stopLoaded) { stop.state = 'LOADED'; showToast(t('toastLoaded')(stop.store)); }
+              else showToast(t('toastItemLoaded'));
+            }
+            render();
+          }, 8000))
+          .withFailureHandler(() => { btn.disabled = false; btn.innerHTML = originalContent; showToast(t('loadErrorText')); })
+          .confirmItemLoaded(CURRENT_USER_ID, shipmentOrderId, orderItemId);
+      });
+    });
+    // "الحمولة لا تطابق النظري": فتح/إغلاق شريط الإبلاغ عن فرق كمية (SPEC v1.4، ٢٢ سبتمبر ٢٠٢٦)
+    document.querySelectorAll('[data-discrepancy-toggle]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-discrepancy-toggle');
+        const bar = document.getElementById('discBar-' + id);
+        if (bar) bar.style.display = bar.style.display === 'none' ? 'flex' : 'none';
+      });
+    });
+    document.querySelectorAll('[data-discrepancy-cancel]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-discrepancy-cancel');
+        const bar = document.getElementById('discBar-' + id);
+        if (bar) bar.style.display = 'none';
+      });
+    });
+    document.querySelectorAll('[data-discrepancy-submit]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const orderItemId = btn.getAttribute('data-discrepancy-submit');
+        const shipmentOrderId = btn.getAttribute('data-shipment-order');
+        const qtyInput = document.getElementById('discQty-' + orderItemId);
+        const noteInput = document.getElementById('discNote-' + orderItemId);
+        const parsed = parseFloat(qtyInput.value);
+        if (isNaN(parsed) || parsed < 0) { showToast(t('toastDiscrepancyInvalid')); return; }
+        const stop = findStop(shipmentOrderId);
+        btn.disabled = true;
+        const original = btn.textContent;
+        btn.textContent = t('savingText');
+        google.script.run
+          .withSuccessHandler(onceWithTimeout(result => {
+            btn.disabled = false; btn.textContent = original;
+            if (!result || !result.success) {
+              const code = result && result.error && result.error.code;
+              if (code === 'NO_DIFFERENCE') showToast(t('toastDiscrepancyNoDiff'));
+              else showToast(t('loadErrorText'));
+              return;
+            }
+            if (stop) {
+              const it = stop.items.find(x => x.orderItemId === orderItemId);
+              if (it) { it.pendingDiscrepancy = true; it.reportedQty = parsed; }
+            }
+            showToast(t('toastDiscrepancyReported'));
+            render();
+          }, 8000))
+          .withFailureHandler(() => { btn.disabled = false; btn.textContent = original; showToast(t('loadErrorText')); })
+          .reportLoadDiscrepancy(CURRENT_USER_ID, shipmentOrderId, orderItemId, parsed, noteInput.value);
+      });
+    });
+    document.querySelectorAll('[data-deliver]').forEach(btn => {
+      wireConfirmableClick(btn, () => {
+        const shipmentOrderId = btn.getAttribute('data-deliver');
+        const stop = findStop(shipmentOrderId);
+        const storeName = stop ? stop.store : '';
+        const originalContent = btn.innerHTML;
+        btn.innerHTML = t('savingText');
+        google.script.run
+          .withSuccessHandler(onceWithTimeout(result => {
+            if (result && !result.success) {
+              btn.disabled = false; btn.innerHTML = originalContent;
+              showToast(t('loadErrorText')); return;
+            }
+            if (stop) stop.state = 'DELIVERED';
+            showToast(t('toastDelivered')(storeName));
+            render();
+          }, 8000))
+          .withFailureHandler(() => { btn.disabled = false; btn.innerHTML = originalContent; showToast(t('loadErrorText')); })
+          .confirmDelivery(CURRENT_USER_ID, shipmentOrderId);
+      });
+    });
+  }
+
+  function findStop(shipmentOrderId) {
+    for (const trip of MY_TRIPS) {
+      const stop = trip.stops.find(s => s.shipmentOrderId === shipmentOrderId);
+      if (stop) return stop;
+    }
+    return null;
+  }
+
+  // *** إصلاح (بلاغ مستخدم مباشر، ٢٢ سبتمبر ٢٠٢٦): بعد اعتماد مسؤول التوزيع لفرق كمية أبلغه السائق،
+  // كان لا شيء يظهر في صفحة السائق -- ليس خللًا في البيانات (تأكَّد بالاختبار: استدعاء جديد لـ
+  // getMyShipments يعكس القرار فورًا وبدقة)، بل غياب أي وسيلة لإعادة الجلب: الصفحة تُحمَّل مرة واحدة
+  // فقط عند الفتح، فلا يرى السائق التحديث أبدًا بلا إعادة فتح الصفحة يدويًا -- ما دفع لإعادة برمجة
+  // الشحنة كحل بديل (مضيعة وقت كبيرة، كما وصف المستخدم بدقة). زر تحديث صريح + تحديث تلقائي عند عودة
+  // السائق للتطبيق (لا استطلاع دوري مستمر، تفاديًا لتفاقم مشكلة البطء العامة المُوثَّقة KNOWN_ISSUES #14). ***
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') masarRunSilently(loadShipments); });
+
+  document.getElementById('langToggle').addEventListener('click', () => {
+    state.lang = state.lang === 'ar' ? 'en' : 'ar';
+    document.documentElement.lang = state.lang;
+    document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+    document.getElementById('langToggle').textContent = state.lang === 'ar' ? 'EN' : 'AR';
+    applyI18n(document.querySelector('header.topbar'));
+    showDriverName();
+    render();
+  });
+  document.getElementById('userMenuBtn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('userDropdown').classList.toggle('open'); });
+  document.addEventListener('click', () => document.getElementById('userDropdown').classList.remove('open'));
+  document.querySelectorAll('[data-toast="notReady"]').forEach(el => {
+    el.addEventListener('click', (e) => { e.stopPropagation(); showToast(t('toastNotReady')); });
+  });
+
+  /**
+   * تسجيل الخروج -- SPEC v1.4 (نفس نمط "اضغط للمتابعة" المُثبَت في كل شاشات
+   * الكاشير بعد اكتشاف ميداني حاسم: "Redirect blocked" من متصفح الهاتف،
+   * يمنع أي تنقّل غير مرتبط مباشرة وفوريًا بلمسة مستخدم -- انظر التوثيق
+   * الكامل في split_cashier.py/common.css). الانتقال الفعلي يحتاج لمسة
+   * ثانية مباشرة بعد اكتمال logout(), لا تلقائيًا داخل رد الخادم.
+   */
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    const btn = document.getElementById('logoutBtn');
+    if (btn.classList.contains('continue-btn')) { window.top.location.href = APP_BASE_URL; return; }
+    document.getElementById('userDropdown').classList.remove('open');
+    btn.disabled = true;
+    const originalContent = btn.textContent;
+    btn.textContent = t('savingText');
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(() => {
+        btn.disabled = false;
+        btn.classList.add('continue-btn');
+        btn.textContent = '👆 ' + t('continueBtn');
+      }, 8000))
+      .withFailureHandler(() => {
+        btn.disabled = false;
+        btn.classList.add('continue-btn');
+        btn.textContent = '👆 ' + t('continueBtn');
+      })
+      .logout(CURRENT_USER_ID, masarLogoutMarker());
+  });
+
+  /**
+   * wrapGoogleScriptRunWithBusyOverlay() -- نفس الحاجز الكامل المُثبَت في
+   * شاشات الكاشير حرفيًا (انظر split_cashier.py للتوثيق الكامل).
+   * forceHideBusyOverlay() تُستدعى من onceWithTimeout أعلاه لمزامنة إخفاء
+   * الحاجز مع تحديث الواجهة بالضبط -- لا اعتماد على مهلة الحاجز المستقلة.
+   */
+  let forceHideOverlayFn = () => {};
+  function forceHideBusyOverlay() { forceHideOverlayFn(); }
+  function wrapGoogleScriptRunWithBusyOverlay() {
+    if (typeof google === 'undefined' || !google.script || !google.script.run) return;
+    const realRun = google.script.run;
+    const overlay = document.getElementById('globalBusyOverlay');
+    let busyCount = 0;
+    function showBusy() { busyCount++; overlay.classList.add('show'); }
+    function hideBusy() { busyCount = Math.max(0, busyCount - 1); if (busyCount === 0) overlay.classList.remove('show'); }
+    forceHideOverlayFn = () => { busyCount = 0; overlay.classList.remove('show'); };
+    Object.defineProperty(google.script, 'run', {
+      configurable: true,
+      get() {
+        const handlers = { onSuccess: null, onFailure: null };
+        let proxy;
+        const chain = {
+          withSuccessHandler(fn) { handlers.onSuccess = fn; return proxy; },
+          withFailureHandler(fn) { handlers.onFailure = fn; return proxy; }
+        };
+        proxy = new Proxy(chain, {
+          get(target, prop) {
+            if (prop === 'withSuccessHandler' || prop === 'withFailureHandler') return target[prop];
+            return (...args) => {
+              showBusy();
+              return realRun
+                .withSuccessHandler((...r) => { hideBusy(); if (handlers.onSuccess) handlers.onSuccess(...r); })
+                .withFailureHandler((...r) => { hideBusy(); if (handlers.onFailure) handlers.onFailure(...r); })
+                [prop](...args);
+            };
+          }
+        });
+        return proxy;
+      }
+    });
+  }
+
+  wrapGoogleScriptRunWithBusyOverlay();
+  applyI18n(document.querySelector('header.topbar'));
+  loadShipments();
+  masarAutoRefresh({ domains: ['SHIPMENTS', 'DISTRIBUTION'], refresh: () => loadShipments(), isBusy: () => (!!document.querySelector('.discrepancy-bar:not([style*="display:none"]):not([style*="display: none"])')) });
+</script>
+
+</body>
+</html>

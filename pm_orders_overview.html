@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#3D2B1E">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="مسار">
+<link rel="apple-touch-icon" href="icon-180.png">
+<script src="masar-config.js?v=67ea158b"></script>
+<script src="masar-runtime.js?v=67ea158b"></script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALAKER SWEETS — دورة الطلبيات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Markazi+Text:wght@600;700&family=Fraunces:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #EE7126; --primary-dark: #C85A18; --primary-tint: #FCE8D8;
+    --secondary: #3D2B1E; --ink: #2B211B; --ink-soft: #6B5D52;
+    --bg: #FAF7F1; --surface: #FFFFFF; --line: #E7DFD2;
+    --success: #4B7A4F; --success-tint: #E7EFE6;
+    --warn: #B23B2E; --warn-tint: #F7E6E2;
+    --pending: #B4802A; --pending-tint: #F5EAD9;
+    --locked: #8A7A6B; --locked-tint: #ECE7E0;
+    --radius-lg: 16px; --radius-md: 12px; --radius-sm: 8px;
+    --shadow-card: 0 1px 2px rgba(43,33,27,0.06), 0 4px 16px rgba(43,33,27,0.05);
+    --font-ar: 'IBM Plex Sans Arabic', sans-serif; --font-en: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { overflow-x: hidden; max-width: 100vw; }
+  html[lang="ar"] body { font-family: var(--font-ar); }
+  html[lang="en"] body { font-family: var(--font-en); }
+  body {
+    background-color: var(--bg);
+    background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 38px, rgba(61,43,30,0.035) 38px, rgba(61,43,30,0.035) 39px);
+    color: var(--ink); min-height: 100vh; -webkit-font-smoothing: antialiased; padding-bottom: 30px;
+  }
+
+  header.topbar {
+    display: flex; align-items: center; gap: 16px; background: var(--secondary); color: #fff;
+    padding: 10px 20px; position: sticky; top: 0; z-index: 30; box-shadow: 0 2px 10px rgba(0,0,0,0.15); max-width: 100%;
+  }
+  .brand-logo { height: 40px; width: auto; display: block; flex-shrink: 0; }
+  .brand-meta { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; overflow: hidden; }
+  .brand-meta .system-name { font-size: 11px; letter-spacing: 0.14em; color: rgba(255,255,255,0.55); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .brand-meta .role-name { font-size: 15px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .topbar-spacer { flex: 1; min-width: 8px; }
+  .dept-pill {
+    display: inline-flex; align-items: center; gap: 6px; min-width: 0;
+    background: rgba(238,113,38,0.18); border: 1px solid rgba(238,113,38,0.45);
+    color: #FBCBA0; font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 999px; white-space: nowrap;
+  }
+  .icon-btn {
+    display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #fff; cursor: pointer;
+    font-size: 14px; font-weight: 600; transition: background 0.15s ease; position: relative; flex-shrink: 0;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,0.16); }
+  .user-menu { position: relative; flex-shrink: 0; }
+  .user-dropdown {
+    position: absolute; top: calc(100% + 8px); inset-inline-end: 0; background: var(--surface); color: var(--ink);
+    border: 1px solid var(--line); border-radius: var(--radius-md); box-shadow: var(--shadow-card);
+    min-width: 200px; padding: 6px; display: none; z-index: 40;
+  }
+  .user-dropdown.open { display: block; }
+  .user-dropdown button {
+    display: flex; align-items: center; gap: 10px; width: 100%; text-align: start; background: none; border: none;
+    padding: 10px 12px; border-radius: var(--radius-sm); font-size: 14px; font-family: inherit; color: var(--ink); cursor: pointer;
+  }
+  .user-dropdown button:hover { background: var(--bg); }
+
+  @media (max-width: 420px) {
+    header.topbar { flex-wrap: wrap; row-gap: 8px; padding: 10px 12px; gap: 8px; }
+    .topbar-spacer { flex: 0 0 100%; height: 0; }
+    .brand-meta .system-name { display: none; }
+  }
+
+  main { max-width: 880px; margin: 0 auto; padding: 20px 20px 20px; }
+
+  .subheader { display: flex; align-items: center; gap: 12px; max-width: 880px; margin: 0 auto; padding: 16px 20px 4px; }
+  .pm-nav-row { display: flex; gap: 6px; max-width: 880px; margin: 10px auto 0; padding: 0 20px; overflow-x: auto; scrollbar-width: none; }
+  .pm-nav-row::-webkit-scrollbar { display: none; }
+  .pm-nav-btn {
+    flex-shrink: 0; padding: 9px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface);
+    color: var(--ink-soft); font-family: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; white-space: nowrap;
+  }
+  .pm-nav-btn.active { background: var(--secondary); color: #fff; border-color: var(--secondary); }
+  .back-btn {
+    display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 10px;
+    background: var(--surface); border: 1px solid var(--line); color: var(--secondary); cursor: pointer; font-size: 16px;
+    flex-shrink: 0; box-shadow: var(--shadow-card);
+  }
+  html[dir="rtl"] .back-btn .arrow { transform: scaleX(-1); display: inline-block; }
+  .subheader h1 { font-size: 19px; font-weight: 600; color: var(--secondary); flex: 1; }
+  .filter-bar { display: flex; gap: 8px; max-width: 880px; margin: 10px auto 0; padding: 0 20px; }
+  .filter-bar select {
+    flex: 1; padding: 9px 10px; border-radius: var(--radius-md); border: 1px solid var(--line); background: var(--surface);
+    color: var(--ink); font-family: inherit; font-size: 12.5px; font-weight: 600;
+  }
+  .greeting-card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-card);
+    padding: 20px 22px; margin-bottom: 18px;
+  }
+  .greeting-card h1 { font-size: 22px; font-weight: 600; color: var(--secondary); }
+  .greeting-card .date-line { color: var(--ink-soft); font-size: 13.5px; margin-top: 4px; }
+
+  .section-title { font-size: 13px; font-weight: 600; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; padding-inline-start: 4px; }
+  .search-input { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-md); font-family: inherit; font-size: 13.5px; background: var(--surface); color: var(--ink); box-sizing: border-box; margin-bottom: 10px; }
+  .submit-btn {
+    display: block; width: 100%; padding: 12px; background: var(--secondary); color: #fff; border: none;
+    font-family: inherit; font-size: 14px; font-weight: 600; border-radius: var(--radius-md); cursor: pointer;
+  }
+  .confirm-armed { background: var(--warn) !important; animation: pulse-confirm 1s ease-in-out infinite; }
+  @keyframes pulse-confirm { 0%, 100% { opacity: 1; } 50% { opacity: 0.75; } }
+  .catalog-row, .cart-row { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px dashed var(--line); }
+  .catalog-row:last-child, .cart-row:last-child { border-bottom: none; }
+  .catalog-main { flex: 1; min-width: 0; }
+  .catalog-name { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+  .catalog-available { font-size: 11.5px; color: var(--success); margin-top: 2px; }
+  .mini-add-btn { padding: 7px 14px; border-radius: 999px; border: 1px solid var(--primary); background: var(--primary-tint); color: var(--primary-dark); font-family: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; flex-shrink: 0; }
+  .qty-stepper { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .qty-stepper button { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: 14px; cursor: pointer; }
+  .cq-input { width: 44px; padding: 5px; border: 1px solid var(--line); border-radius: var(--radius-sm); text-align: center; font-family: inherit; }
+  .item-unit { font-size: 11px; color: var(--ink-soft); flex-shrink: 0; }
+  .cart-remove-btn { background: none; border: none; color: var(--warn); font-size: 16px; cursor: pointer; padding: 4px; flex-shrink: 0; }
+  .request-card { padding: 14px; margin-bottom: 10px; }
+  .request-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .request-time { font-size: 11px; color: var(--ink-soft); }
+  .request-items-count { font-size: 12px; color: var(--ink-soft); margin-bottom: 8px; }
+  .request-item-row { display: flex; flex-direction: column; gap: 2px; padding: 6px 0; border-top: 1px dashed var(--line); font-size: 13px; }
+  .request-item-row:first-of-type { border-top: none; }
+  .request-item-qty { font-size: 11.5px; color: var(--ink-soft); font-family: var(--font-mono); }
+  .expiry-badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
+  .expiry-badge.pending { background: var(--pending-tint); color: var(--pending); }
+  .expiry-badge.near { background: var(--success-tint); color: var(--success); }
+  .expiry-badge.rejected { background: var(--warn-tint); color: var(--warn); }
+  .expiry-badge.success { background: var(--locked-tint); color: var(--locked); }
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--ink-soft); font-size: 13.5px; }
+
+  .store-card {
+    width: 100%; display: block; text-align: start; font-family: inherit; color: inherit;
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card); padding: 16px 18px; margin-bottom: 12px; cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .store-card.received { background: var(--primary-tint); border-color: rgba(238,113,38,0.35); }
+  .store-card:hover { box-shadow: 0 4px 16px rgba(43,33,27,0.1); }
+
+  .store-top { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .store-name { font-size: 15.5px; font-weight: 700; color: var(--ink); }
+  .new-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); flex-shrink: 0; box-shadow: 0 0 0 3px rgba(238,113,38,0.25); }
+  .store-spacer { flex: 1; }
+  .order-id-tag { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-soft); }
+  .chevron { color: var(--ink-soft); font-size: 15px; flex-shrink: 0; }
+  html[dir="rtl"] .chevron { transform: scaleX(-1); display: inline-block; }
+
+  .store-stats { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+  .stat-chip { font-size: 12px; color: var(--ink-soft); background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; }
+  .stat-chip strong { color: var(--ink); font-family: var(--font-mono); }
+  .stat-chip.shortage-chip { background: var(--warn-tint); color: var(--warn); border-color: rgba(178,59,46,0.3); }
+  .stat-chip.shortage-chip strong { color: var(--warn); }
+
+  .status-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; padding: 5px 11px; border-radius: 999px; }
+  .locked-sent-time { display: block; font-size: 11px; color: var(--ink-soft); margin-top: 6px; }
+  .load-archive-btn {
+    display: block; width: 100%; margin-top: 4px; padding: 12px; background: var(--surface); border: 1px dashed var(--line);
+    border-radius: var(--radius-md); color: var(--ink-soft); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .status-badge.locked { background: var(--locked-tint); color: var(--locked); }
+  .status-badge.progress { background: var(--pending-tint); color: var(--pending); }
+  .status-badge.done { background: var(--success-tint); color: var(--success); }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--ink-soft); font-size: 13.5px; }
+
+  .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(10px);
+    background: var(--secondary); color: #fff; font-size: 13.5px; padding: 11px 18px; border-radius: 999px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2); opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 60; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  #globalBusyOverlay { position: fixed; inset: 0; z-index: 999; cursor: wait; display: none; background: rgba(0,0,0,0.02); }
+  #globalBusyOverlay.show { display: block; }
+  .refresh-btn { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; border-radius: 999px; background: rgba(255,255,255,0.18); border: 1.5px solid rgba(255,255,255,0.9); color: #fff; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; flex-shrink: 0; white-space: nowrap; transition: background 0.15s ease; }
+  .refresh-btn:hover { background: rgba(255,255,255,0.32); }
+  .refresh-btn:active { transform: scale(0.97); }
+  .refresh-btn.armed { background: #fff; color: var(--secondary); }
+  .refresh-btn.spin .ico { animation: masar-spin 0.8s linear infinite; }
+  @keyframes masar-spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <img src="asset-82d7b1e2.png" alt="ALAKER SWEETS" class="brand-logo">
+  <div class="brand-meta">
+    <span class="system-name">MASAR</span>
+    <span class="role-name" data-i18n="roleName"></span>
+  </div>
+  <div class="topbar-spacer"></div>
+  <button class="refresh-btn" id="refreshBtn" type="button" title="تحديث / Refresh"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span class="rf-label">تحديث</span></button>
+  <button class="icon-btn" id="langToggle" title="AR / EN">AR</button>
+  <div class="user-menu">
+    <button class="icon-btn" id="userMenuBtn">⋮</button>
+    <div class="user-dropdown" id="userDropdown">
+      <button data-i18n="changePassword" data-toast="notReady"></button>
+      <button id="logoutBtn" data-i18n="logout"></button>
+    </div>
+  </div>
+</header>
+
+<!-- طلب مباشر (٢٢ سبتمبر ٢٠٢٦): شريط تنقّل موحَّد بين شاشات مدير الإنتاج الأربع، نفس شريط pm_approvals.html بالضبط -->
+<div class="pm-nav-row">
+  <button class="pm-nav-btn" id="pmNavApprovals" data-i18n="pmNavApprovals"></button>
+  <button class="pm-nav-btn active" id="pmNavOrders" data-i18n="pmNavOrders"></button>
+  <button class="pm-nav-btn" id="pmNavStock" data-i18n="pmNavStock"></button>
+  <button class="pm-nav-btn" id="pmNavQuarantine" data-i18n="pmNavQuarantine"></button>
+</div>
+
+<div class="subheader">
+  <button class="back-btn" id="backBtn"><span class="arrow">←</span></button>
+  <h1 data-i18n="screenTitle"></h1>
+</div>
+
+<div class="filter-bar">
+  <select id="statusFilterSelect"></select>
+  <select id="storeFilterSelect"></select>
+</div>
+
+<main>
+  <div id="mainArea"></div>
+</main>
+
+<div class="toast" id="toast"></div>
+<div id="globalBusyOverlay"></div>
+
+<script>
+  const APP_BASE_URL = MASAR_TPL.appBaseUrl;
+  var TIMEOUT_SCALE = MASAR_TPL.timeoutScale; // مضاعِف مُهَل الانتظار: ١ في الإنتاج، أكبر في DIV (مشروع بارد/شبكة اختبار)
+  // ===== شبكة الاتصال (١٠ أكتوبر ٢٠٢٦) =====
+  // مولَّد من tools/net_snippet.js بواسطة tools/build_client_snippets.js -- لا تعدّله يدويًا داخل الصفحات.
+  // (١) يتتبّع نداءات الحفظ (أي نداء لا يبدأ بـ get/list) ليعرف التحديث التلقائي أن الصفحة حفظت بنفسها.
+  // (٢) بلاغ "تعذّر تنفيذ العملية" المتكرر: بطء بدء Google (أو انقطاع لحظي) كان يُسقط النداء. للقراءات الصرفة فقط (قائمة مولَّدة آليًا من الخادم: دوال لا تكتب هي
+  // ولا ما تستدعيه) تُعاد المحاولة مرة واحدة عند الفشل/الردّ الفارغ، ويُرسَل نداء ثانٍ موازٍ إن تأخّر الأول ٦ ثوانٍ؛ يُسلَّم أول ردّ صالح. الحفظ والإنشاء لا يُكرَّران أبدًا.
+  const MASAR_RAW_RUN_ = (typeof google !== 'undefined' && google.script) ? google.script.run : null;
+  const MASAR_AR_INSTANCES_ = [];
+  const MASAR_PURE_READS_ = { getActiveDriversList:1,getActiveShipments:1,getActiveStoresWithOccupancy:1,getAllDepartments:1,getAllLists:1,getAllProducts:1,getAllRoles:1,getAllSettings:1,getAllStores:1,getAllUsers:1,getChangeTokens:1,getDepartmentStoreOrders:1,getDisposalFormData:1,getDistributionComparisonDetail:1,getDistributionManagerCancelEditRequests:1,getDistributionsReadyToPrepare:1,getFinishedGoodsQuarantineHistory:1,getFinishedGoodsStockBoard:1,getIssueToDepartmentFormData:1,getManagementReports:1,getMyNotifications:1,getMyShipments:1,getMySupplyRequests:1,getOffCatalogPurchaseRequests:1,getOrderDetails:1,getOrderEditStage:1,getOrderProductionApprovalDetail:1,getOrdersAwaitingInvoice:1,getOrdersAwaitingProductionApproval:1,getOrdersReadyForShipment:1,getOrdersReadyToReceive:1,getPendingLoadDiscrepancies:1,getPendingReturnItems:1,getPendingSupplyRequestsForRMS:1,getProductionManagerApprovals:1,getProductionManagerOrderFullDetail:1,getProductionManagerOrdersOverview:1,getPurchasingRawMaterialReports:1,getRawMaterialCatalog:1,getRawMaterialCatalogForRequest:1,getRawMaterialExpiryReport:1,getRawMaterialMovementSummary:1,getRawMaterialProductHistory:1,getRawMaterialQuarantineHistory:1,getRawMaterialShortageNotices:1,getRawMaterialStockBoard:1,getReceiveSurplusFormData:1,getReceivingDetails:1,getReferenceLists:1,getReturnReasons:1,getRolePermissionsMatrix:1,getShipmentPrepareDetail:1,getShortageReasons:1,getStoreDirectRawMaterialOrders:1,getStoreOrderDetail:1,getSuppliers:1,getSuppliersList:1,getTasksCatalog:1,getUnitsAndFamiliesList:1,getVehicleCoordinatorDriverStatus:1,getVehicleCoordinatorSpecialOrders:1,listOrders:1 };
+  (function masarTrackOwnCalls() {
+    try {
+      if (!MASAR_RAW_RUN_) return;
+      Object.defineProperty(google.script, 'run', {
+        configurable: true,
+        get() {
+          const handlers = { onSuccess: null, onFailure: null };
+          let proxy;
+          const chain = {
+            withSuccessHandler(fn) { handlers.onSuccess = fn; return proxy; },
+            withFailureHandler(fn) { handlers.onFailure = fn; return proxy; }
+          };
+          proxy = new Proxy(chain, {
+            get(target, prop) {
+              if (prop === 'withSuccessHandler' || prop === 'withFailureHandler') return target[prop];
+              return (...args) => {
+                // لقطة المعالجات لحظة النداء: غلاف حاجز الانشغال في الصفحات يمسك مرجعًا واحدًا من run فتتشارك النداءات المتزامنة كائن handlers، فلو قُرئ
+                // وقت الرد لاستلم كل رد معالج آخر نداء (بلاغ: "تعذّر فتح إنشاء رحلة" -- نداءا السائقين والجاهزة كانا يتبادلان معالجيهما)
+                const onS = handlers.onSuccess, onF = handlers.onFailure;
+                const name = String(prop);
+                if (Object.prototype.hasOwnProperty.call(MASAR_PURE_READS_, name)) {
+                  let settled = false, attempts = 0, pending = 0, hedge = null;
+                  const finish = (ok, v) => { if (settled) return; settled = true; clearTimeout(hedge); if (ok) { if (onS) onS(v); } else if (onF) onF(v); else { try { console.error(v); } catch (e) { /* تجاهل */ } } };
+                  const launch = () => {
+                    attempts++; pending++;
+                    const bad = v => {
+                      pending--;
+                      if (settled) return;
+                      if (attempts < 2) { setTimeout(launch, 700); return; }   // محاولة ثانية واحدة فقط
+                      if (pending === 0) finish(false, v);                       // الأخيرة فشلت ولا نداء آخر في الطريق
+                    };
+                    MASAR_RAW_RUN_
+                      .withSuccessHandler(r => { if (r === null || r === undefined) { bad(r); } else { pending--; finish(true, r); } })
+                      .withFailureHandler(e => bad(e))
+                      [name](...args);
+                  };
+                  hedge = setTimeout(() => { if (!settled && attempts < 2) launch(); }, 6000);
+                  launch();
+                  return;
+                }
+                const done = () => { if (!/^(get|list)/.test(name)) MASAR_AR_INSTANCES_.forEach(i => { try { i.ownDone(); } catch (e) { /* لا يعطّل النداء */ } }); };
+                return MASAR_RAW_RUN_
+                  .withSuccessHandler((...r) => { done(); if (onS) onS(...r); })
+                  .withFailureHandler((...r) => { done(); if (onF) onF(...r); else { try { console.error(r[0]); } catch (e) { /* تجاهل */ } } })
+                  [prop](...args);
+              };
+            }
+          });
+          return proxy;
+        }
+      });
+    } catch (e) { /* لا تتبّع: يبقى السلوك القديم كما هو */ }
+  })();
+  // يستعمله التحديث التلقائي الصامت: نفس طبقة الاتصال (إعادة المحاولة) لكن بلا غلاف حاجز الانشغال الذي تُركّبه الصفحة لاحقًا فوقها
+  let MASAR_NET_GETTER_ = null;
+  try { MASAR_NET_GETTER_ = Object.getOwnPropertyDescriptor(google.script, 'run').get || null; } catch (e) { MASAR_NET_GETTER_ = null; }
+  // ===== نهاية شبكة الاتصال =====
+  // ===== تحديث تلقائي بالتغيّر (٩ أكتوبر ٢٠٢٦، نُقّح ١٠ أكتوبر) =====
+  // كل ٣٠ ثانية تسأل الصفحة (نداء خفيف بلا قراءة جداول) هل تغيّر شيء في مجالاتها؛ إن تغيّر تُعيد جلب بياناتها مرة واحدة. تتوقف والتبويب مخفيّ، وتستأنف عند
+  // العودة. إن كان المستخدم يكتب أو توجد نافذة مفتوحة أو حقل معدَّل لا تُبدَّل الشاشة تحت يده: يظهر شريط "توجد تحديثات" ينقر عليه حين يشاء.
+  // النداء الخفيف يمرّ عبر مرجع google.script.run الأصلي (قبل غلاف حاجز الانشغال) فلا يحجب الشاشة، ولا يمدّ الجلسة.
+  // تنقيح (بلاغ ميداني: "ساعة رملية كل برهة" و"الشاشة تُعاد بعد كل حفظ"): (١) التحديث التلقائي صامت: لا حاجز انشغال ولا ومضة "جارٍ التحميل"،
+  // ويحفظ موضع التمرير؛ (٢) ما تحفظه هذه الصفحة نفسها (أي نداء لا يبدأ بـ get) لا يُحدِّثها هي: تُعاد قراءة الرمز بعده فيصير خط الأساس الجديد؛ (٣) شارة
+  // صغيرة أسفل الشاشة تُظهر وقت آخر فحص وتومض عند التحديث، ولون أحمر إن تعذّر الفحص.
+  // ينفّذ إعادة جلب بيانات الصفحة بصمت: بلا حاجز انشغال (النداءات داخلها تمرّ بالمرجع الأصلي)، بلا ومضة "جارٍ التحميل"، وبحفظ موضع التمرير
+  function masarRunSilently(fn) {
+    let desc = null, area = null, proto = null;
+    try { desc = Object.getOwnPropertyDescriptor(google.script, 'run'); Object.defineProperty(google.script, 'run', { configurable: true, get() { return MASAR_NET_GETTER_ ? MASAR_NET_GETTER_() : MASAR_RAW_RUN_; } }); } catch (e) { desc = null; }
+    try {
+      area = document.getElementById('mainArea');
+      if (area && typeof Element !== 'undefined') {
+        proto = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
+        Object.defineProperty(area, 'innerHTML', {
+          configurable: true,
+          get() { return proto.get.call(area); },
+          set(v) { const s = String(v); if (/empty-state/.test(s) && !/order-card|<table|<button/.test(s)) return; proto.set.call(area, v); }
+        });
+      }
+    } catch (e) { proto = null; }
+    let keep = null;
+    try {
+      if (area && typeof window !== 'undefined' && typeof MutationObserver !== 'undefined') {
+        const scrollers = [document.scrollingElement, area.parentElement].filter(Boolean).map(el => ({ el: el, top: el.scrollTop }));
+        let moved = false;
+        const mark = () => { moved = true; };
+        ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(ev => window.addEventListener(ev, mark, true));
+        const mo = new MutationObserver(() => { if (!moved) requestAnimationFrame(() => scrollers.forEach(s => { if (s.top > 0 && Math.abs(s.el.scrollTop - s.top) > 4) s.el.scrollTop = s.top; })); });
+        mo.observe(area, { childList: true });
+        keep = () => { try { mo.disconnect(); ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(ev => window.removeEventListener(ev, mark, true)); } catch (e) { /* تجاهل */ } };
+        setTimeout(keep, 9000);
+      }
+    } catch (e) { keep = null; }
+    try { fn(); }
+    finally {
+      if (desc) { try { Object.defineProperty(google.script, 'run', desc); } catch (e) { /* تجاهل */ } }
+      if (proto && area) { try { delete area.innerHTML; } catch (e) { /* تجاهل */ } }
+    }
+  }
+  function masarAutoRefresh(opts) {
+    if (!MASAR_RAW_RUN_ || !opts || typeof opts.refresh !== 'function') return null;
+    const domains = opts.domains || [];
+    const interval = (opts.intervalMs || 30000) + Math.floor(Math.random() * 4000); // تشتيت بسيط كي لا تتزامن شاشات كثيرة
+    let baseline = null, inflight = false, inflightSince = 0, stopped = false, banner = null, pill = null, ownDoneAt = 0, rebaseWanted = false, changes = 0;
+    const uid = () => (typeof CURRENT_USER_ID !== 'undefined' ? CURRENT_USER_ID : (typeof Core !== 'undefined' ? Core.currentUserId : ''));
+    const isAr = () => (document.documentElement.lang || 'ar') !== 'en';
+    function setPill(text, bad) {
+      try {
+        if (!pill) {
+          pill = document.createElement('div');
+          pill.style.cssText = 'position:fixed;right:8px;bottom:6px;z-index:2147482000;font:600 10px sans-serif;color:#fff;padding:2px 8px;border-radius:999px;pointer-events:none;opacity:0.85;';
+          document.body.appendChild(pill);
+        }
+        pill.style.background = bad ? 'rgba(176,42,42,0.9)' : 'rgba(61,43,30,0.55)';
+        pill.textContent = text;
+      } catch (e) { /* الشارة تكميلية */ }
+    }
+    function clock() { try { return new Date().toTimeString().slice(0, 8); } catch (e) { return ''; } }
+    function busy() {
+      try {
+        if (opts.isBusy && opts.isBusy()) return true;
+        const a = document.activeElement;
+        if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && !/^(button|checkbox|radio|submit)$/.test(a.type || '')) return true;
+        if (document.querySelector('.header-modal-overlay.open, [class*="overlay"].open, [class*="modal"].open')) return true;
+        const fields = document.querySelectorAll('main input, main textarea, main select, #mainArea input, #mainArea textarea, #mainArea select');
+        for (let i = 0; i < fields.length; i++) {
+          const f = fields[i];
+          if (f.type === 'checkbox' || f.type === 'radio') { if (f.checked !== f.defaultChecked) return true; }
+          else if (f.type !== 'hidden' && f.type !== 'button' && f.tagName !== 'SELECT' && f.value !== f.defaultValue) return true;
+        }
+      } catch (e) { /* عند الشك نعتبر الشاشة غير مشغولة */ }
+      return false;
+    }
+    function hideBanner() { if (banner) { banner.style.display = 'none'; } }
+    function showBanner() {
+      if (!banner) {
+        banner = document.createElement('button');
+        banner.type = 'button';
+        banner.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:76px;z-index:2147483000;border:none;border-radius:999px;padding:10px 18px;background:#3D2B1E;color:#fff;font:700 13px sans-serif;box-shadow:0 6px 20px rgba(0,0,0,0.3);cursor:pointer;';
+        banner.addEventListener('click', () => doRefresh());
+        document.body.appendChild(banner);
+      }
+      banner.textContent = isAr() ? '🔄 توجد تحديثات جديدة — اضغط للتحديث' : '🔄 New updates — tap to refresh';
+      banner.style.display = 'block';
+    }
+    function doRefresh() {
+      hideBanner();
+      setPill((isAr() ? '✅ تحديث ' : '✅ Updated ') + clock(), false);
+      try { masarRunSilently(opts.refresh); } catch (e) { /* لا يعطّل الصفحة */ }
+    }
+    function handle(r, startedAt) {
+      if (!r || !r.success) {
+        if (r && r.error && r.error.code === 'SESSION_EXPIRED') stopped = true;
+        setPill('⚠ ' + ((r && r.error && r.error.code) || (isAr() ? 'تعذّر الفحص' : 'check failed')), true);
+        return;
+      }
+      setPill((isAr() ? '🔄 آخر فحص ' : '🔄 Checked ') + clock() + (changes ? (isAr() ? ' · تغيّرات ' : ' · changes ') + changes : ''), false);
+      const sig = JSON.stringify(domains.map(d => r.data.tokens[d] || ''));
+      if (rebaseWanted) {
+        // هذه الصفحة حفظت شيئًا بنفسها: الرمز بعد حفظها هو خط الأساس الجديد (لا تُحدَّث هي بما كتبته). ردٌّ بدأ قبل انتهاء حفظها قديم: نعيد السؤال
+        if (startedAt >= ownDoneAt) { rebaseWanted = false; baseline = sig; } else { setTimeout(tick, 300); }
+        return;
+      }
+      if (baseline === null) { baseline = sig; return; }
+      if (sig === baseline) return;
+      baseline = sig; changes++;
+      if (busy()) { showBanner(); return; }
+      doRefresh();
+      // الكتابة قد لا تكون ظهرت للقراءة بعد لحظة الرمز: إن كان التغيّر حديثًا (<٨ ثوانٍ) نُعيد الجلب مرة ثانية بعد استقراره
+      const newest = Math.max.apply(null, domains.map(d => parseFloat(r.data.tokens[d]) || 0));
+      const age = (r.data.serverTime || Date.now()) - newest;
+      if (age < 8000) setTimeout(() => { if (!document.hidden && !busy()) doRefresh(); }, 8500 - Math.max(0, age));
+    }
+    function tick() {
+      if (stopped || document.hidden) return;
+      // نداء ضاع بلا ردّ (شبكة بطيئة/تبويب مجمَّد) كان يُبقي inflight=true فيتوقف التحديث للأبد: بعد ٢٥ ثانية نعدّه مفقودًا ونسأل من جديد
+      if (inflight && Date.now() - inflightSince < 25000) return;
+      inflight = true;
+      const startedAt = Date.now();
+      inflightSince = startedAt;
+      MASAR_RAW_RUN_.withSuccessHandler(r => { inflight = false; handle(r, startedAt); }).withFailureHandler(() => { inflight = false; setPill(isAr() ? '⚠ تعذّر الفحص' : '⚠ check failed', true); }).getChangeTokens(uid(), domains);
+    }
+    function ownDone() { ownDoneAt = Date.now(); rebaseWanted = true; hideBanner(); setTimeout(tick, 500); }
+    MASAR_AR_INSTANCES_.push({ ownDone: ownDone });
+    setInterval(tick, interval);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) { rebaseWanted = false; setTimeout(tick, 400); } });
+    setTimeout(tick, 1500); // يلتقط خط الأساس مبكرًا
+    return { tick: tick };
+  }
+  const CURRENT_USER_ID = MASAR_TPL.currentUserId;
+
+  function formatSentAgo(iso) {
+    if (!iso) return '';
+    const diffMin = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
+    if (diffMin < 60) return state.lang === 'ar' ? `قبل ${diffMin} دقيقة` : `${diffMin}m ago`;
+    const diffH = Math.round(diffMin / 60);
+    if (diffH < 24) return state.lang === 'ar' ? `قبل ${diffH} ساعة` : `${diffH}h ago`;
+    return new Date(iso).toLocaleDateString(state.lang === 'ar' ? 'ar-QA-u-nu-latn' : 'en-US');
+  }
+  function round1(n) { return Math.round(n * 100) / 100; }
+
+  function onceWithTimeout(fn, timeoutMs) {
+    let fired = false;
+    const timer = setTimeout(() => { if (!fired) { fired = true; forceHideBusyOverlay(); fn(); } }, timeoutMs * (typeof TIMEOUT_SCALE === 'number' ? TIMEOUT_SCALE : 1));
+    return (...args) => { if (fired) return; fired = true; clearTimeout(timer); fn(...args); };
+  }
+
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => el.classList.remove('show'), 2400);
+  }
+
+  const dict = {
+    ar: {
+      screenTitle: 'دورة الطلبيات', backBtn: '←', roleName: 'مدير الإنتاج',
+      pmNavApprovals: 'الموافقات', pmNavOrders: 'دورة الطلبيات', pmNavStock: 'نظرة عامة على المخزون', pmNavQuarantine: 'متابعة Quarantine',
+      filterAll: 'كل الحالات', filterPending: 'بانتظار اعتماد التوزيع', filterExecuting: 'قيد التنفيذ', filterDone: 'مكتملة',
+      filterAllStores: 'كل المحلات',
+      loadingText: 'جارٍ التحميل...', loadErrorText: 'تعذّر تنفيذ العملية — أعد المحاولة',
+      emptyList: 'لا توجد طلبيات مطابقة حاليًا', loadArchiveBtn: 'عرض أرشيف أقدم (30 يومًا) ⌄',
+      cashierRequestedLbl: (n) => `${n} صنف طلبه الكاشير`, distributionPendingLbl: 'بانتظار اعتماد التوزيع',
+      distributionApprovedLbl: (t) => `اعتمدها التوزيع — ${t}`,
+      execSummaryLbl: (c, s, p) => `مُكتمِل: ${c} · تعذَّر: ${s} · قيد التنفيذ: ${p}`,
+      requestedRefLbl: 'مطلوب', approvedRefLbl: 'مُعتمَد', executedRefLbl: 'مُنفَّذ فعليًا',
+      statusStockConfirmed: '🏬 متوفر من المخزون', statusPendingFirstApproval: 'بانتظار الموافقة الأولى',
+      statusPending: 'لم يبدأ التنفيذ بعد', statusInProgress: 'قيد التنفيذ', statusCompleted: '✅ مُكتمِل',
+      statusShortage: '⚠️ تعذّر التوفير', statusPartial: '⚠️ جزئي'
+    },
+    en: {
+      screenTitle: 'Order lifecycle', backBtn: '←', roleName: 'Production manager',
+      pmNavApprovals: 'Approvals', pmNavOrders: 'Order lifecycle', pmNavStock: 'Stock overview', pmNavQuarantine: 'Quarantine tracking',
+      filterAll: 'All statuses', filterPending: 'Awaiting distribution approval', filterExecuting: 'Executing', filterDone: 'Done',
+      filterAllStores: 'All stores',
+      loadingText: 'Loading...', loadErrorText: 'Could not complete the operation — please try again',
+      emptyList: 'No matching orders right now', loadArchiveBtn: 'Show older archive (30 days) ⌄',
+      cashierRequestedLbl: (n) => `${n} item${n === 1 ? '' : 's'} requested by cashier`, distributionPendingLbl: 'Awaiting distribution approval',
+      distributionApprovedLbl: (t) => `Approved by distribution — ${t}`,
+      execSummaryLbl: (c, s, p) => `Completed: ${c} · Shortage: ${s} · In progress: ${p}`,
+      requestedRefLbl: 'Requested', approvedRefLbl: 'Approved', executedRefLbl: 'Actually executed',
+      statusStockConfirmed: '🏬 Available from stock', statusPendingFirstApproval: 'Awaiting first-level approval',
+      statusPending: 'Not started yet', statusInProgress: 'In progress', statusCompleted: '✅ Completed',
+      statusShortage: '⚠️ Could not be fulfilled', statusPartial: '⚠️ Partial'
+    }
+  };
+
+  const state = { lang: (MASAR_TPL.userLang === 'en' ? 'en' : 'ar'), statusFilter: 'ALL', storeFilter: '', hoursWindow: 48 };
+  // لغة المستخدم المحفوظة على الخادم (Users.Language) -- طلب مباشر ٢٥ سبتمبر ٢٠٢٦: تُفتح بها كل الشاشات وتبقى عند التنقّل
+  (function () {
+    if (state.lang === 'en') { document.documentElement.lang = 'en'; document.documentElement.dir = 'ltr'; }
+    const langBtn = document.getElementById('langToggle');
+    if (!langBtn) return;
+    langBtn.textContent = state.lang === 'ar' ? 'EN' : 'AR';
+    langBtn.addEventListener('click', () => setTimeout(() => {
+      try { if (MASAR_TPL.currentUserId) google.script.run.withFailureHandler(() => {}).setUserLanguage(MASAR_TPL.currentUserId, state.lang); } catch (e) { /* لا يعطّل الشاشة */ }
+    }, 0));
+  })();
+  // ---- زر التحيين (طلب مباشر ٢٦ سبتمبر ٢٠٢٦): تحديث ناعم إن وُجد مُحمِّل للصفحة، وإلا إعادة تحميل الصفحة بنفس رابطها ----
+  (function () {
+    const btn = document.getElementById('refreshBtn');
+    if (!btn) return;
+    const CONFIRM = false;
+    const label = btn.querySelector('.rf-label');
+    const idleText = () => (state.lang === 'ar' ? 'تحديث' : 'Refresh');
+    const sureText = () => (state.lang === 'ar' ? 'اضغط للتأكيد' : 'Tap to confirm');
+    const setIdle = () => { btn.classList.remove('armed'); if (label) label.textContent = idleText(); };
+    setIdle();
+    const lt = document.getElementById('langToggle');
+    if (lt) lt.addEventListener('click', () => setTimeout(setIdle, 0));
+    let armed = false, timer = null;
+    const hardReload = () => {
+      try { window.top.location.href = APP_BASE_URL + '?' + MASAR_TPL.reloadQuery; } catch (e) { window.location.reload(); }
+    };
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      if (CONFIRM && !armed) {
+        armed = true; btn.classList.add('armed'); if (label) label.textContent = sureText();
+        clearTimeout(timer); timer = setTimeout(() => { armed = false; setIdle(); }, 2800);
+        return;
+      }
+      clearTimeout(timer); armed = false; setIdle();
+      const soft = () => loadOverview();
+      if (soft) {
+        btn.classList.add('spin');
+        try { soft(); setTimeout(() => btn.classList.remove('spin'), 1200); return; } catch (e) { btn.classList.remove('spin'); }
+      }
+      hardReload();
+    });
+  })();
+  function t(key) { return (dict[state.lang] && dict[state.lang][key]) || key; }
+
+  function applyI18n() {
+    document.documentElement.lang = state.lang;
+    document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+    document.getElementById('langToggle').textContent = state.lang === 'ar' ? 'EN' : 'AR';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (dict[state.lang][key] !== undefined) el.textContent = dict[state.lang][key];
+    });
+  }
+
+  document.getElementById('backBtn').addEventListener('click', () => {
+    window.top.location.href = APP_BASE_URL + '?page=production_manager&uid=' + encodeURIComponent(CURRENT_USER_ID);
+  });
+
+  document.getElementById('pmNavApprovals').addEventListener('click', () => {
+    window.top.location.href = APP_BASE_URL + '?page=production_manager&uid=' + encodeURIComponent(CURRENT_USER_ID);
+  });
+  document.getElementById('pmNavStock').addEventListener('click', () => {
+    window.top.location.href = APP_BASE_URL + '?page=production_manager_overview&uid=' + encodeURIComponent(CURRENT_USER_ID);
+  });
+  document.getElementById('pmNavQuarantine').addEventListener('click', () => {
+    window.top.location.href = APP_BASE_URL + '?page=production_manager_quarantine&uid=' + encodeURIComponent(CURRENT_USER_ID);
+  });
+
+  let STORES_LIST = [];
+  function populateFilters() {
+    const statusSel = document.getElementById('statusFilterSelect');
+    statusSel.innerHTML = `
+      <option value="ALL">${t('filterAll')}</option>
+      <option value="PENDING_DISTRIBUTION">${t('filterPending')}</option>
+      <option value="EXECUTING">${t('filterExecuting')}</option>
+      <option value="DONE">${t('filterDone')}</option>`;
+    statusSel.value = state.statusFilter;
+    const storeSel = document.getElementById('storeFilterSelect');
+    storeSel.innerHTML = `<option value="">${t('filterAllStores')}</option>` +
+      STORES_LIST.map(s => `<option value="${s.storeId}">${state.lang === 'ar' ? s.nameAR : s.nameEN}</option>`).join('');
+    storeSel.value = state.storeFilter;
+    statusSel.addEventListener('change', () => { state.statusFilter = statusSel.value; loadOverview(); });
+    storeSel.addEventListener('change', () => { state.storeFilter = storeSel.value; loadOverview(); });
+  }
+
+  /**
+   * loadOverview() -- SPEC v1.4 (طلب مباشر، بند 24): "ما طلبه الكاشير، وما
+   * اعتمده التوزيع، وما سلَّمه القسم" في جدول واحد بفلاتر.
+   */
+  function loadOverview() {
+    document.getElementById('mainArea').innerHTML = `<div class="empty-state">${t('loadingText')}</div>`;
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(result => {
+        if (!result || !result.success) {
+          document.getElementById('mainArea').innerHTML = `<div class="empty-state" style="color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} — ${JSON.stringify(result)}</div>`;
+          return;
+        }
+        STORES_LIST = result.data.stores;
+        populateFilters();
+        renderOverviewList(result.data.orders);
+      }, 8000))
+      .withFailureHandler(() => { document.getElementById('mainArea').innerHTML = `<div class="empty-state" style="color:var(--warn);">${t('loadErrorText')}</div>`; })
+      .getProductionManagerOrdersOverview(CURRENT_USER_ID, state.hoursWindow, state.statusFilter, state.storeFilter || null);
+  }
+
+  function renderOverviewList(orders) {
+    if (!orders.length) { document.getElementById('mainArea').innerHTML = `<div class="empty-state">${t('emptyList')}</div>`; return; }
+    const stageBadge = { PENDING_DISTRIBUTION: 'locked', EXECUTING: 'progress', DONE: 'done' };
+    document.getElementById('mainArea').innerHTML = orders.map((o, idx) => `
+      <div class="card" style="margin-bottom:10px;">
+        <button class="order-row-btn" type="button" data-order-idx="${idx}" style="width:100%; text-align:${state.lang === 'ar' ? 'right' : 'left'}; border:none; background:none; padding:14px; cursor:pointer;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <strong style="font-family:var(--font-mono); font-size:13px;">${o.orderId}</strong>
+            <span class="status-badge ${stageBadge[o.overallStage]}">${o.overallStage === 'PENDING_DISTRIBUTION' ? '🔒' : o.overallStage === 'EXECUTING' ? '🛠️' : '✅'} ${t('filter' + (o.overallStage === 'PENDING_DISTRIBUTION' ? 'Pending' : o.overallStage === 'EXECUTING' ? 'Executing' : 'Done'))}</span>
+          </div>
+          <div style="font-size:13.5px; color:var(--ink);">${state.lang === 'ar' ? o.storeNameAR : o.storeNameEN}</div>
+          <div style="font-size:12px; color:var(--ink-soft); margin-top:4px;">${t('cashierRequestedLbl')(o.cashierRequestedCount)}</div>
+          <div style="font-size:12px; color:${o.distributionApproved ? 'var(--success)' : 'var(--pending)'}; margin-top:2px;">
+            ${o.distributionApproved ? t('distributionApprovedLbl')(formatSentAgo(o.distributionApprovedAt)) : t('distributionPendingLbl')}
+          </div>
+          ${o.execSummary.total > 0 ? `<div style="font-size:12px; color:var(--ink-soft); margin-top:2px;">${t('execSummaryLbl')(o.execSummary.completed, o.execSummary.shortage, o.execSummary.pending)}</div>` : ''}
+        </button>
+        <div id="orderDetail-${idx}" style="display:none; padding:0 14px 14px;"></div>
+      </div>`).join('') + (state.hoursWindow === 48 ? `<button class="load-archive-btn" type="button" id="pmLoadArchiveBtn">${t('loadArchiveBtn')}</button>` : '');
+
+    orders.forEach((o, idx) => {
+      document.querySelector(`[data-order-idx="${idx}"]`).addEventListener('click', () => toggleOrderDetail(idx, o.orderId));
+    });
+    const archiveBtn = document.getElementById('pmLoadArchiveBtn');
+    if (archiveBtn) archiveBtn.addEventListener('click', () => { state.hoursWindow = 720; loadOverview(); });
+  }
+
+  const detailCache = {};
+  function toggleOrderDetail(idx, orderId) {
+    const box = document.getElementById(`orderDetail-${idx}`);
+    const isOpen = box.style.display !== 'none';
+    document.querySelectorAll('[id^="orderDetail-"]').forEach(el => { el.style.display = 'none'; });
+    if (isOpen) return;
+    box.style.display = 'block';
+    if (detailCache[orderId]) { renderOrderDetailItems(box, detailCache[orderId]); return; }
+    box.innerHTML = `<div class="empty-state" style="padding:12px;">${t('loadingText')}</div>`;
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(result => {
+        if (!result || !result.success) { box.innerHTML = `<div class="empty-state" style="color:var(--warn);">${t('loadErrorText')}</div>`; return; }
+        detailCache[orderId] = result.data.items;
+        renderOrderDetailItems(box, result.data.items);
+      }, 8000))
+      .withFailureHandler(() => { box.innerHTML = `<div class="empty-state" style="color:var(--warn);">${t('loadErrorText')}</div>`; })
+      .getProductionManagerOrderFullDetail(CURRENT_USER_ID, orderId);
+  }
+
+  function renderOrderDetailItems(box, items) {
+    const statusLabelMap = {
+      STOCK_CONFIRMED: t('statusStockConfirmed'), PENDING_FIRST_APPROVAL: t('statusPendingFirstApproval'),
+      PENDING: t('statusPending'), IN_PROGRESS: t('statusInProgress'), COMPLETED: t('statusCompleted'),
+      SHORTAGE: t('statusShortage'), PARTIAL: t('statusPartial')
+    };
+    box.innerHTML = `<div style="border-top:1px dashed var(--line); padding-top:10px;">` + items.map(it => `
+      <div style="padding:8px 0; border-bottom:1px dashed var(--line); font-size:12.5px;">
+        <div style="font-weight:600; color:var(--ink);">${state.lang === 'ar' ? it.nameAR : it.nameEN}</div>
+        ${(it.sourceNameAR || it.sourceNameEN) ? `<div style="color:var(--primary-dark); font-size:11px; margin-top:2px;">${state.lang === 'ar' ? it.sourceNameAR : it.sourceNameEN}</div>` : ''}
+        <div style="color:var(--ink-soft); font-family:var(--font-mono); font-size:11px; margin-top:2px;">
+          ${t('requestedRefLbl')}: ${it.requestedQty} ${it.unitId}
+          ${it.approvedQty !== null ? ` · ${t('approvedRefLbl')}: ${it.approvedQty}` : ''}
+          ${it.executedQty !== null ? ` · ${t('executedRefLbl')}: ${it.executedQty}` : ''}
+        </div>
+        <div style="margin-top:3px; font-size:11px; color:var(--ink-soft);">${statusLabelMap[it.executionStatus] || it.executionStatus}</div>
+      </div>`).join('') + `</div>`;
+  }
+
+  let forceHideOverlayFn = () => {};
+  function forceHideBusyOverlay() { forceHideOverlayFn(); }
+  function wrapGoogleScriptRunWithBusyOverlay() {
+    if (typeof google === 'undefined' || !google.script || !google.script.run) return;
+    const realRun = google.script.run;
+    const overlay = document.getElementById('globalBusyOverlay');
+    let busyCount = 0;
+    function showBusy() { busyCount++; overlay.classList.add('show'); }
+    function hideBusy() { busyCount = Math.max(0, busyCount - 1); if (busyCount === 0) overlay.classList.remove('show'); }
+    forceHideOverlayFn = () => { busyCount = 0; overlay.classList.remove('show'); };
+    Object.defineProperty(google.script, 'run', {
+      configurable: true,
+      get() {
+        const handlers = { onSuccess: null, onFailure: null };
+        let proxy;
+        const chain = {
+          withSuccessHandler(fn) { handlers.onSuccess = fn; return proxy; },
+          withFailureHandler(fn) { handlers.onFailure = fn; return proxy; }
+        };
+        proxy = new Proxy(chain, {
+          get(target, prop) {
+            if (prop === 'withSuccessHandler' || prop === 'withFailureHandler') return target[prop];
+            return (...args) => {
+              showBusy();
+              return realRun
+                .withSuccessHandler((...r) => { hideBusy(); if (handlers.onSuccess) handlers.onSuccess(...r); })
+                .withFailureHandler((...r) => { hideBusy(); if (handlers.onFailure) handlers.onFailure(...r); })
+                [prop](...args);
+            };
+          }
+        });
+        return proxy;
+      }
+    });
+  }
+
+  wrapGoogleScriptRunWithBusyOverlay();
+  applyI18n();
+  loadOverview();
+  masarAutoRefresh({ domains: ['ORDERS', 'PRODUCTION', 'APPROVALS'], refresh: () => loadOverview() });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#3D2B1E">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="مسار">
+<link rel="apple-touch-icon" href="icon-180.png">
+<script src="masar-config.js?v=67ea158b"></script>
+<script src="masar-runtime.js?v=67ea158b"></script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALAKER SWEETS — استلام بضاعة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Markazi+Text:wght@600;700&family=Fraunces:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+
+:root {
+  /* SPEC v1.4 -- إعادة تصميم بصري مقصودة (طلب مستخدم مباشر: أهمية خاصة
+     للشكل الجمالي). البرتقالي السابق (#EE7126) كان لونًا عامًا يشبه أي
+     تطبيق طعام تقريبًا. النخب الجديدة مستمدة من مواد الحلويات الشرقية
+     فعليًا: نحاسي مُحرَّق (سكر/عسل)، وردي ماء الورد، فستقي مُخفَّف. */
+  --primary: #C1791F; --primary-dark: #9C5F15; --primary-tint: #F5E4CC;
+  --secondary: #35231A; --ink: #2A1F17; --ink-soft: #71594A;
+  --bg: #FBF6EC; --surface: #FFFFFF; --line: #E8DDC8;
+  --success: #6B8F5C; --success-tint: #E9EEE3;
+  --warn: #B23B2E; --warn-tint: #F7E6E2;
+  --pending: #A8842A; --pending-tint: #F2E9D3;
+  --locked: #8A7A6B; --locked-tint: #ECE7E0;
+  --accent-rose: #C97B85; --accent-rose-tint: #F5E4E6;
+  --radius-lg: 16px; --radius-md: 12px; --radius-sm: 8px;
+  --shadow-card: 0 1px 2px rgba(43,33,27,0.06), 0 4px 16px rgba(43,33,27,0.05);
+  --font-ar: 'IBM Plex Sans Arabic', sans-serif; --font-en: 'IBM Plex Sans', sans-serif;
+  --font-display-ar: 'Markazi Text', serif; --font-display-en: 'Fraunces', serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { overflow-x: hidden; max-width: 100vw; }
+html[lang="ar"] body { font-family: var(--font-ar); }
+html[lang="en"] body { font-family: var(--font-en); }
+html[lang="ar"] .display { font-family: var(--font-display-ar); }
+html[lang="en"] .display { font-family: var(--font-display-en); }
+body {
+  background-color: var(--bg);
+  background-image: repeating-linear-gradient(
+    to bottom, transparent 0, transparent 38px,
+    rgba(53,35,26,0.035) 38px, rgba(53,35,26,0.035) 39px
+  );
+  color: var(--ink); min-height: 100vh; -webkit-font-smoothing: antialiased;
+}
+.view { display: none; }
+.view.active { display: block; }
+
+/* SPEC v1.4 (ملاحظة مستخدم مباشرة) -- مؤشر انتظار واضح أثناء أي عملية غير
+   متزامنة. كل زر يُعطَّل فعليًا أثناء انتظار استجابة google.script.run في
+   هذا المشروع بالكامل (button.disabled = true) -- ربط المؤشر بهذه الحالة
+   الموجودة أصلًا يُغطي كل زر بلا استثناء بلا أي تعديل JS إضافي. */
+/* SPEC v1.4 -- تصحيح جوهري (ملاحظة مستخدم مباشرة، مرتين): القاعدة السابقة
+   (button:disabled { cursor: wait }) كانت غير كافية جوهريًا -- مؤشر عنصر
+   واحد يختفي بمجرد إبعاد الفأرة عنه، ولا يمنع الضغط على أي زر آخر أثناء
+   انتظار الأول (قد يُطلق عمليتين متزامنتين). حاجز حقيقي على مستوى الصفحة
+   كاملة بدلًا منه -- انظر wrapGoogleScriptRunWithBusyOverlay() في الأسفل. */
+#globalBusyOverlay {
+  position: fixed; inset: 0; z-index: 999; cursor: wait; display: none;
+  background: rgba(0,0,0,0.02);
+}
+#globalBusyOverlay.show { display: block; }
+
+/* SPEC v1.4 -- طلب مستخدم مباشر: مزامنة متعددة الأجهزة. عند إغلاق النوبة
+   من جهاز/مصدر آخر، الضغط على أي زر في هذا الجهاز يجب أن يُظهر رسالة كاملة
+   الشاشة (إلا الشريط العلوي) توضح إغلاق النوبة وتطلب تسجيل دخول جديد --
+   بدل استمرار الأزرار بالعمل ظاهريًا بينما تفشل صامتًا في الخلفية. top
+   يُضبَط ديناميكيًا عبر JS (ارتفاع الشريط العلوي متغيّر، لا قيمة ثابتة).
+*/
+#shiftEndedOverlay {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 1000; display: none;
+  background: var(--bg); flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 32px 24px;
+}
+/* SPEC v1.4 (طلب مستخدم مباشر: "لمسة جمالية تشبه غلق ستائر النوافذ") --
+   clip-path يكشف المحتوى تدريجيًا من الأعلى للأسفل، كستارة تسقط لتغطية
+   النافذة -- بخلاف scale الذي كان سيُشوِّه النص والأيقونة داخل الرسالة. */
+#shiftEndedOverlay.show { display: flex; animation: curtain-fall 0.5s ease-out forwards; }
+@keyframes curtain-fall {
+  from { clip-path: inset(0 0 100% 0); }
+  to { clip-path: inset(0 0 0% 0); }
+}
+#shiftEndedOverlay .icon { font-size: 48px; margin-bottom: 16px; }
+#shiftEndedOverlay .title { font-size: 17px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+#shiftEndedOverlay .desc { font-size: 13.5px; color: var(--ink-soft); margin-bottom: 24px; max-width: 320px; line-height: 1.6; }
+#shiftEndedOverlay button {
+  background: var(--secondary); color: #fff; border: none; font-family: inherit;
+  font-size: 14.5px; font-weight: 600; padding: 12px 28px; border-radius: var(--radius-md); cursor: pointer;
+}
+
+/* SPEC v1.4 -- shared header-account modal (change password / logout confirm) */
+.header-modal-overlay { position: fixed; inset: 0; background: rgba(43,33,27,0.45); display: none; align-items: center; justify-content: center; z-index: 90; padding: 20px; }
+.header-modal-overlay.open { display: flex; }
+.header-modal-box { background: var(--surface); border-radius: var(--radius-lg); padding: 22px; max-width: 360px; width: 100%; box-shadow: var(--shadow-card); }
+.header-modal-box h3 { font-size: 15px; font-weight: 700; color: var(--secondary); margin-bottom: 14px; }
+.header-modal-box .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.header-modal-box .field label { font-size: 12px; font-weight: 600; color: var(--ink-soft); }
+.header-modal-box .field input { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 9px 11px; font-family: inherit; font-size: 13px; }
+.header-modal-box .error-banner { display: none; background: var(--warn-tint); color: var(--warn); border: 1px solid rgba(178,59,46,0.3); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 12px; margin-bottom: 10px; }
+.header-modal-box .error-banner.show { display: block; }
+.header-modal-actions { display: flex; gap: 8px; margin-top: 6px; }
+.header-modal-actions button { flex: 1; font-family: inherit; font-size: 13px; font-weight: 600; padding: 10px; border-radius: var(--radius-sm); cursor: pointer; border: none; }
+.header-modal-cancel { background: var(--bg); color: var(--ink); }
+.header-modal-save { background: var(--secondary); color: #fff; }
+.header-modal-save:disabled { background: #B7ADA2; cursor: not-allowed; }
+
+/* ========================================================
+   ALAKER SWEETS — Shared design tokens & components
+   Reused across every role screen. Screen-specific CSS goes
+   in the screen's own <style> block, not here.
+
+   Design tokens (:root, body texture, .display font-switching)
+   now live in split_cashier.py's canonical common_css block —
+   this file previously had its own duplicate copy that
+   silently overrode the real one later in the cascade, which
+   is why palette/font changes made here never took effect.
+   ======================================================== */
+
+/* ---------- Header (identical on every screen) ---------- */
+header.topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--secondary);
+  color: #fff;
+  padding: 10px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  max-width: 100%;
+}
+.brand-logo { height: 44px; width: auto; display: block; flex-shrink: 0; }
+.brand-meta { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; overflow: hidden; }
+.brand-meta .system-name {
+  font-family: var(--font-display-en); font-size: 12px; letter-spacing: 0.02em; color: rgba(255,255,255,0.6);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.brand-meta .store-name {
+  font-size: 16px; font-weight: 600; color: #fff;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+html[lang="ar"] .brand-meta .store-name { font-family: var(--font-display-ar); }
+html[lang="en"] .brand-meta .store-name { font-family: var(--font-display-en); }
+.topbar-spacer { flex: 1; min-width: 8px; }
+.shift-pill {
+  display: inline-flex; align-items: center; gap: 6px; min-width: 0; flex-shrink: 1;
+  background: rgba(193,121,31,0.22); border: 1px solid rgba(193,121,31,0.5);
+  color: #F0CD9B; font-size: 13px; font-weight: 500; padding: 6px 12px;
+  border-radius: 999px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.shift-pill .dot {
+  width: 7px; height: 7px; border-radius: 50%; background: #A8C99A;
+  box-shadow: 0 0 0 3px rgba(168,201,154,0.25); flex-shrink: 0;
+}
+.icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; border-radius: 10px;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+  color: #fff; cursor: pointer; font-size: 14px; font-weight: 600;
+  transition: background 0.15s ease; position: relative; flex-shrink: 0;
+}
+.icon-btn:hover { background: rgba(255,255,255,0.16); }
+.user-menu { position: relative; flex-shrink: 0; }
+
+/* Narrow phones: the system-name label is redundant with the logo right next
+   to it -- drop it first to give the store name and shift status room, and
+   tighten spacing before anything is forced to truncate. */
+@media (max-width: 420px) {
+  header.topbar { flex-wrap: wrap; row-gap: 8px; padding: 10px 12px; gap: 8px; }
+  .topbar-spacer { flex: 0 0 100%; height: 0; }
+  .brand-meta .system-name { display: none; }
+  .brand-meta { overflow: visible; }
+  .brand-meta .store-name { overflow: visible; white-space: normal; }
+}
+.user-dropdown {
+  position: absolute; top: calc(100% + 8px); inset-inline-end: 0;
+  background: var(--surface); color: var(--ink); border: 1px solid var(--line);
+  border-radius: var(--radius-md); box-shadow: var(--shadow-card);
+  min-width: 200px; padding: 6px; display: none; z-index: 40;
+}
+.user-dropdown.open { display: block; }
+.user-dropdown button {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: start;
+  background: none; border: none; padding: 10px 12px; border-radius: var(--radius-sm);
+  font-size: 14px; font-family: inherit; color: var(--ink); cursor: pointer;
+}
+.user-dropdown button:hover { background: var(--bg); }
+
+/* ---------- Sub-header (back button + screen title) ---------- */
+.subheader {
+  display: flex; align-items: center; gap: 12px;
+  max-width: 880px; margin: 0 auto; padding: 16px 20px 4px;
+}
+.back-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--line);
+  color: var(--secondary); cursor: pointer; font-size: 16px; flex-shrink: 0;
+  box-shadow: var(--shadow-card);
+}
+/* SPEC v1.4 -- back-btn هو زر أيقونة مربّع صغير (34px) بالتصميم الأصلي؛
+   نص "اضغط هنا للمتابعة" الطويل لا يتّسع فيه إطلاقًا. حالة ready-to-leave
+   تُوسِّعه ليلائم النص بدل حشره في مساحة الأيقونة الضيّقة. */
+.back-btn.ready-to-leave { width: auto; padding: 0 14px; border-radius: 999px; white-space: nowrap; }
+/* SPEC v1.4 (طلب مستخدم مباشر): "جارٍ الحفظ" على زر الرجوع تحتاج نفس معاملة
+   "اضغط مرة أخرى للتأكيد" (confirm-armed) -- اتساع تلقائي + تأثير لوني نابض،
+   لا نص صغير مضغوط بلا تمييز. لون مختلف عن ready-to-leave (أخضر=انتهى) وعن
+   confirm-armed (أصفر=تأكيد) -- نحاسي أساسي نابض يعني "قيد التنفيذ الآن". */
+.back-btn.saving-state {
+  width: auto; padding: 0 14px; border-radius: 999px; white-space: nowrap;
+  background: var(--primary) !important; color: #fff; border-color: var(--primary);
+  animation: pulse-confirm 1s ease-in-out infinite;
+}
+html[dir="rtl"] .back-btn .arrow { transform: scaleX(-1); display: inline-block; }
+.subheader h1 { font-size: 20px; font-weight: 600; color: var(--secondary); flex: 1; }
+html[lang="ar"] .subheader h1 { font-family: var(--font-display-ar); font-size: 22px; }
+html[lang="en"] .subheader h1 { font-family: var(--font-display-en); }
+.subheader .meta-badge {
+  font-size: 12.5px; font-weight: 600; color: var(--primary-dark);
+  background: var(--primary-tint); border: 1px solid rgba(193,121,31,0.35);
+  padding: 5px 11px; border-radius: 999px; white-space: nowrap;
+}
+
+main { max-width: 880px; margin: 0 auto; padding: 12px 20px 20px; }
+
+/* ---------- Badges / status (shared vocabulary) ---------- */
+.badge {
+  display: inline-flex; align-items: center; font-size: 11.5px; font-weight: 600;
+  padding: 3px 9px; border-radius: 999px; white-space: nowrap;
+}
+.badge.normal { color: var(--primary-dark); background: var(--primary-tint); border: 1px solid rgba(193,121,31,0.35); }
+.badge.special { color: #fff; background: var(--secondary); }
+
+.chevron { color: var(--ink-soft); font-size: 15px; }
+html[dir="rtl"] .chevron { transform: scaleX(-1); display: inline-block; }
+
+/* ---------- Picker list (قائمة الطلبيات المُسلَّمة) ----------
+   هذه الأنماط كانت مكتوبة في cashier_edit.html فقط ومحصورة بـ#view-edit، فظهرت القائمة هنا نصًّا خامًا بلا شكل أزرار. */
+#view-receive .picker-row {
+  display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px dashed var(--line);
+}
+#view-receive .picker-row:last-child { border-bottom: none; }
+#view-receive .picker-row.enabled { cursor: pointer; transition: background 0.12s ease; }
+#view-receive .picker-row.enabled:hover { background: rgba(193,121,31,0.05); }
+#view-receive .picker-id { font-family: var(--font-mono); font-size: 14px; font-weight: 600; color: var(--secondary); min-width: 92px; }
+#view-receive .picker-spacer { flex: 1; }
+#view-receive .picker-cta {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 10px; font-size: 13px; font-weight: 600;
+  background: var(--secondary); color: #fff; border: none; cursor: pointer; font-family: inherit;
+}
+#view-receive .picker-hint { font-size: 12.5px; color: var(--ink-soft); line-height: 1.7; margin: 0 4px 12px; }
+
+.section-title {
+  font-size: 14px; font-weight: 600; color: var(--ink-soft);
+  margin-bottom: 10px; padding-inline-start: 4px;
+}
+
+/* ---------- Generic sticky bottom bar w/ torn-receipt edge (signature) ---------- */
+.sticky-bar-wrap { position: fixed; bottom: 0; left: 0; right: 0; z-index: 25; }
+.scallop {
+  height: 11px;
+  background-image: radial-gradient(circle at 10px 0, transparent 9px, var(--bg) 9.5px);
+  background-size: 20px 11px;
+  background-repeat: repeat-x;
+}
+.sticky-bar {
+  background: var(--surface); border-top: 1px solid var(--line);
+  box-shadow: 0 -6px 20px rgba(43,33,27,0.08); padding: 12px 20px 16px;
+}
+.sticky-bar-inner { max-width: 880px; margin: 0 auto; }
+
+.notice {
+  display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.5;
+  padding: 10px 12px; border-radius: var(--radius-sm); margin-bottom: 10px;
+}
+.notice.blocking { background: var(--warn-tint); color: #7A2A20; border: 1px solid rgba(178,59,46,0.25); }
+.notice.info { background: var(--pending-tint); color: #7A5A1C; border: 1px solid rgba(180,128,42,0.25); }
+.notice .notice-text { flex: 1; }
+.notice .notice-action {
+  background: var(--secondary); color: #fff; border: none; font-family: inherit;
+  font-size: 12.5px; font-weight: 600; padding: 6px 12px; border-radius: 999px;
+  cursor: pointer; white-space: nowrap; margin-top: 2px;
+}
+.notice.hidden { display: none; }
+.hidden { display: none !important; }
+.btn-secondary {
+  background: var(--surface); color: var(--warn); border: 1px solid var(--warn);
+  border-radius: var(--radius-md); padding: 12px; font-family: inherit; font-size: 14px;
+  font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+
+.btn-primary {
+  width: 100%; background: var(--secondary); color: #fff; border: none; font-family: inherit;
+  font-size: 15px; font-weight: 600; padding: 13px; border-radius: var(--radius-md);
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: background 0.15s ease;
+}
+.btn-primary:hover { background: #2E2015; }
+.btn-primary:disabled { background: #B7ADA2; cursor: not-allowed; }
+.confirm-armed { background: var(--warn) !important; animation: pulse-confirm 1s ease-in-out infinite; }
+/* SPEC v1.4 (بلاغ مستخدم مباشر: حالة "تم -- اضغط للمتابعة" لم تكن واضحة
+   بما يكفي -- نفس لون ونمط الزر العادي، بلا تمييز حقيقي). لون أخضر نجاح
+   واضح + نبض مستمر، متمايز تمامًا عن الحالة العادية وعن confirm-armed
+   (أصفر/تحذيري) معًا -- لا التباس بين "لا يزال يحمِّل" و"جاهز للمتابعة". */
+.ready-to-leave {
+  background: var(--success) !important; animation: pulse-continue 1.1s ease-in-out infinite;
+  box-shadow: 0 0 0 3px rgba(107,143,92,0.25);
+}
+@keyframes pulse-continue { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+@keyframes pulse-confirm { 0%, 100% { opacity: 1; } 50% { opacity: 0.75; } }
+
+/* ---------- Toast ---------- */
+.toast {
+  position: fixed; bottom: 128px; left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--secondary); color: #fff; font-size: 13.5px; padding: 11px 18px;
+  border-radius: 999px; box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 60; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ---------- Card surface ---------- */
+.card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.empty-state { padding: 34px 20px; text-align: center; color: var(--ink-soft); font-size: 14px; }
+
+
+.view { display: none; }
+.view.active { display: block; }
+
+button.tile, button.order-row {
+  font-family: inherit; color: inherit; text-decoration: none; margin: 0;
+  border: none; background: var(--surface); width: 100%; display: flex;
+}
+button.order-row { border-bottom: 1px dashed var(--line); }
+button.order-row:last-child { border-bottom: none; }
+
+
+/* SPEC v1.4 -- نافذة عرض صورة الصنف عند الطلب (new-order.html وnew-special.html معًا) */
+.image-peek-overlay {
+  position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.75);
+  display: flex; align-items: center; justify-content: center; padding: 24px; cursor: zoom-out;
+}
+.image-peek-overlay img { max-width: 100%; max-height: 100%; border-radius: 12px; }
+
+  .refresh-btn { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; border-radius: 999px; background: rgba(255,255,255,0.18); border: 1.5px solid rgba(255,255,255,0.9); color: #fff; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; flex-shrink: 0; white-space: nowrap; transition: background 0.15s ease; }
+  .refresh-btn:hover { background: rgba(255,255,255,0.32); }
+  .refresh-btn:active { transform: scale(0.97); }
+  .refresh-btn.armed { background: #fff; color: var(--secondary); }
+  .refresh-btn.spin .ico { animation: masar-spin 0.8s linear infinite; }
+  @keyframes masar-spin { to { transform: rotate(360deg); } }
+</style>
+<style>
+/* ===== receive ===== */
+/* ===== receive ===== */
+#view-receive .live-banner {
+    display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--success);
+    background: var(--success-tint); border: 1px solid rgba(75,122,79,0.3); border-radius: var(--radius-sm);
+    padding: 10px 14px; margin: 16px 0;
+  }
+#view-receive .live-banner .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 3px rgba(75,122,79,0.2); }
+#view-receive .dept-card { padding: 16px 18px; margin-bottom: 14px; }
+#view-receive .dept-card h2 { font-size: 13.5px; font-weight: 600; color: var(--secondary); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+#view-receive .recv-item { padding: 12px 0; border-bottom: 1px dashed var(--line); }
+#view-receive .recv-item:last-child { border-bottom: none; }
+#view-receive .recv-item-top { display: flex; align-items: center; gap: 12px; }
+#view-receive .recv-thumb {
+    width: 40px; height: 40px; border-radius: var(--radius-sm); flex-shrink: 0;
+    background: linear-gradient(135deg, #F3E9DC, #EDE1D0); display: flex; align-items: center; justify-content: center; font-size: 17px;
+  }
+#view-receive .recv-name { flex: 1; }
+#view-receive .recv-name .n { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+#view-receive .recv-name .ref { font-size: 11px; color: var(--ink-soft); font-family: var(--font-mono); margin-top: 1px; }
+#view-receive .recv-qty-input {
+    width: 76px; text-align: center; border: 1px solid var(--line); border-radius: var(--radius-sm);
+    padding: 8px 6px; font-family: var(--font-mono); font-size: 14px; font-weight: 600; color: var(--ink);
+  }
+#view-receive .recv-qty-input:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
+#view-receive .recv-unit { font-size: 11.5px; color: var(--ink-soft); font-weight: 600; min-width: 30px; }
+#view-receive .condition-chip {
+    font-size: 11px; border: 1px solid var(--line); border-radius: 999px; padding: 4px 9px;
+    background: var(--surface); color: var(--ink-soft); font-family: inherit;
+  }
+#view-receive .diff-panel {
+    margin-top: 10px; padding: 12px; border-radius: var(--radius-sm); display: none;
+  }
+#view-receive .diff-panel.show { display: block; }
+#view-receive .diff-panel.positive { background: var(--pending-tint); border: 1px solid rgba(180,128,42,0.25); }
+#view-receive .diff-panel.negative { background: var(--warn-tint); border: 1px solid rgba(178,59,46,0.25); }
+#view-receive .diff-panel .diff-headline { font-size: 12.5px; font-weight: 600; margin-bottom: 8px; }
+#view-receive .diff-panel.positive .diff-headline { color: #7A5A1C; }
+#view-receive .diff-panel.negative .diff-headline { color: #7A2A20; }
+#view-receive .decision-row { display: flex; gap: 8px; margin-bottom: 8px; }
+#view-receive .decision-btn {
+    flex: 1; font-family: inherit; font-size: 12px; font-weight: 600; padding: 9px 6px;
+    border-radius: var(--radius-sm); border: 1px solid var(--line); background: var(--surface);
+    color: var(--ink-soft); cursor: pointer; text-align: center; line-height: 1.3;
+  }
+#view-receive .decision-btn.active.pos { background: var(--pending); border-color: var(--pending); color: #fff; }
+#view-receive .decision-btn.active.neg { background: var(--warn); border-color: var(--warn); color: #fff; }
+#view-receive .reason-select {
+    width: 100%; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px 10px;
+    font-family: inherit; font-size: 12.5px; color: var(--ink); background: var(--surface);
+  }
+#view-receive .reason-select.needs-choice { border-color: var(--warn); }
+#view-receive .no-price-note { text-align: center; font-size: 11.5px; color: var(--ink-soft); margin-top: 4px; }
+/* SPEC v1.4 -- restores the original core.js viewPadding value (dropped when
+   building the split-page Core shim -- a real regression, caught by direct
+   user feedback: content was hidden under the fixed sticky bar). */
+#view-receive { display: block; }
+body { padding-bottom: 110px; }
+
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <img src="asset-82d7b1e2.png" alt="ALAKER SWEETS" class="brand-logo">
+  <div class="brand-meta">
+    <span class="system-name">MASAR</span>
+    <span class="store-name" id="storeNameDisplay"></span>
+  </div>
+  <div class="topbar-spacer"></div>
+  <div class="shift-pill"><span class="dot"></span><span data-i18n="shiftOpen"></span></div>
+  <button class="refresh-btn" id="refreshBtn" type="button" title="تحديث / Refresh"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span class="rf-label">تحديث</span></button>
+  <button class="icon-btn" id="langToggle" title="AR / EN">AR</button>
+  <div class="user-menu">
+    <button class="icon-btn" id="userMenuBtn">⋮</button>
+    <div class="user-dropdown" id="userDropdown">
+      <button data-i18n="changePassword"></button>
+      <button data-i18n="logout"></button>
+    </div>
+  </div>
+</header>
+
+<div class="header-modal-overlay" id="changePasswordOverlay">
+  <div class="header-modal-box">
+    <h3 id="cp-title"></h3>
+    <div class="error-banner" id="cp-errorBanner"></div>
+    <div class="field"><label id="cp-oldLabel"></label><input type="password" id="cp-fOldPassword"></div>
+    <div class="field"><label id="cp-newLabel"></label><input type="password" id="cp-fNewPassword"></div>
+    <div class="header-modal-actions">
+      <button class="header-modal-cancel" id="cp-cancelBtn"></button>
+      <button class="header-modal-save" id="cp-saveBtn"></button>
+    </div>
+  </div>
+</div>
+
+<div id="view-receive" class="view active">
+
+<div class="subheader">
+  <button class="back-btn" id="rc-backBtn"><span class="arrow">←</span></button>
+  <h1 data-i18n="screenTitle"></h1>
+  <span class="meta-badge" id="rc-orderIdBadge"></span>
+</div>
+
+<main id="rc-content">
+  <div class="live-banner"><span class="dot"></span><span data-i18n="liveBanner"></span></div>
+  <div id="rc-deptCards"></div>
+</main>
+
+<div class="sticky-bar-wrap">
+  <div class="scallop"></div>
+  <div class="sticky-bar">
+    <div class="sticky-bar-inner">
+      <button class="btn-primary" id="rc-confirmBtn" disabled>
+        <span>✅</span><span data-i18n="confirmReceive"></span>
+      </button>
+      <div class="no-price-note" data-i18n="noPriceNote"></div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="globalBusyOverlay"></div>
+<div id="shiftEndedOverlay">
+  <div class="icon">🔒</div>
+  <div class="title" data-i18n="shiftEndedTitle"></div>
+  <div class="desc" data-i18n="shiftEndedDesc"></div>
+  <button id="shiftEndedLoginBtn" data-i18n="shiftEndedLoginBtn"></button>
+</div>
+
+<script>
+  // ===== شبكة الاتصال (١٠ أكتوبر ٢٠٢٦) =====
+  // مولَّد من tools/net_snippet.js بواسطة tools/build_client_snippets.js -- لا تعدّله يدويًا داخل الصفحات.
+  // (١) يتتبّع نداءات الحفظ (أي نداء لا يبدأ بـ get/list) ليعرف التحديث التلقائي أن الصفحة حفظت بنفسها.
+  // (٢) بلاغ "تعذّر تنفيذ العملية" المتكرر: بطء بدء Google (أو انقطاع لحظي) كان يُسقط النداء. للقراءات الصرفة فقط (قائمة مولَّدة آليًا من الخادم: دوال لا تكتب هي
+  // ولا ما تستدعيه) تُعاد المحاولة مرة واحدة عند الفشل/الردّ الفارغ، ويُرسَل نداء ثانٍ موازٍ إن تأخّر الأول ٦ ثوانٍ؛ يُسلَّم أول ردّ صالح. الحفظ والإنشاء لا يُكرَّران أبدًا.
+  const MASAR_RAW_RUN_ = (typeof google !== 'undefined' && google.script) ? google.script.run : null;
+  const MASAR_AR_INSTANCES_ = [];
+  const MASAR_PURE_READS_ = { getActiveDriversList:1,getActiveShipments:1,getActiveStoresWithOccupancy:1,getAllDepartments:1,getAllLists:1,getAllProducts:1,getAllRoles:1,getAllSettings:1,getAllStores:1,getAllUsers:1,getChangeTokens:1,getDepartmentStoreOrders:1,getDisposalFormData:1,getDistributionComparisonDetail:1,getDistributionManagerCancelEditRequests:1,getDistributionsReadyToPrepare:1,getFinishedGoodsQuarantineHistory:1,getFinishedGoodsStockBoard:1,getIssueToDepartmentFormData:1,getManagementReports:1,getMyNotifications:1,getMyShipments:1,getMySupplyRequests:1,getOffCatalogPurchaseRequests:1,getOrderDetails:1,getOrderEditStage:1,getOrderProductionApprovalDetail:1,getOrdersAwaitingInvoice:1,getOrdersAwaitingProductionApproval:1,getOrdersReadyForShipment:1,getOrdersReadyToReceive:1,getPendingLoadDiscrepancies:1,getPendingReturnItems:1,getPendingSupplyRequestsForRMS:1,getProductionManagerApprovals:1,getProductionManagerOrderFullDetail:1,getProductionManagerOrdersOverview:1,getPurchasingRawMaterialReports:1,getRawMaterialCatalog:1,getRawMaterialCatalogForRequest:1,getRawMaterialExpiryReport:1,getRawMaterialMovementSummary:1,getRawMaterialProductHistory:1,getRawMaterialQuarantineHistory:1,getRawMaterialShortageNotices:1,getRawMaterialStockBoard:1,getReceiveSurplusFormData:1,getReceivingDetails:1,getReferenceLists:1,getReturnReasons:1,getRolePermissionsMatrix:1,getShipmentPrepareDetail:1,getShortageReasons:1,getStoreDirectRawMaterialOrders:1,getStoreOrderDetail:1,getSuppliers:1,getSuppliersList:1,getTasksCatalog:1,getUnitsAndFamiliesList:1,getVehicleCoordinatorDriverStatus:1,getVehicleCoordinatorSpecialOrders:1,listOrders:1 };
+  (function masarTrackOwnCalls() {
+    try {
+      if (!MASAR_RAW_RUN_) return;
+      Object.defineProperty(google.script, 'run', {
+        configurable: true,
+        get() {
+          const handlers = { onSuccess: null, onFailure: null };
+          let proxy;
+          const chain = {
+            withSuccessHandler(fn) { handlers.onSuccess = fn; return proxy; },
+            withFailureHandler(fn) { handlers.onFailure = fn; return proxy; }
+          };
+          proxy = new Proxy(chain, {
+            get(target, prop) {
+              if (prop === 'withSuccessHandler' || prop === 'withFailureHandler') return target[prop];
+              return (...args) => {
+                // لقطة المعالجات لحظة النداء: غلاف حاجز الانشغال في الصفحات يمسك مرجعًا واحدًا من run فتتشارك النداءات المتزامنة كائن handlers، فلو قُرئ
+                // وقت الرد لاستلم كل رد معالج آخر نداء (بلاغ: "تعذّر فتح إنشاء رحلة" -- نداءا السائقين والجاهزة كانا يتبادلان معالجيهما)
+                const onS = handlers.onSuccess, onF = handlers.onFailure;
+                const name = String(prop);
+                if (Object.prototype.hasOwnProperty.call(MASAR_PURE_READS_, name)) {
+                  let settled = false, attempts = 0, pending = 0, hedge = null;
+                  const finish = (ok, v) => { if (settled) return; settled = true; clearTimeout(hedge); if (ok) { if (onS) onS(v); } else if (onF) onF(v); else { try { console.error(v); } catch (e) { /* تجاهل */ } } };
+                  const launch = () => {
+                    attempts++; pending++;
+                    const bad = v => {
+                      pending--;
+                      if (settled) return;
+                      if (attempts < 2) { setTimeout(launch, 700); return; }   // محاولة ثانية واحدة فقط
+                      if (pending === 0) finish(false, v);                       // الأخيرة فشلت ولا نداء آخر في الطريق
+                    };
+                    MASAR_RAW_RUN_
+                      .withSuccessHandler(r => { if (r === null || r === undefined) { bad(r); } else { pending--; finish(true, r); } })
+                      .withFailureHandler(e => bad(e))
+                      [name](...args);
+                  };
+                  hedge = setTimeout(() => { if (!settled && attempts < 2) launch(); }, 6000);
+                  launch();
+                  return;
+                }
+                const done = () => { if (!/^(get|list)/.test(name)) MASAR_AR_INSTANCES_.forEach(i => { try { i.ownDone(); } catch (e) { /* لا يعطّل النداء */ } }); };
+                return MASAR_RAW_RUN_
+                  .withSuccessHandler((...r) => { done(); if (onS) onS(...r); })
+                  .withFailureHandler((...r) => { done(); if (onF) onF(...r); else { try { console.error(r[0]); } catch (e) { /* تجاهل */ } } })
+                  [prop](...args);
+              };
+            }
+          });
+          return proxy;
+        }
+      });
+    } catch (e) { /* لا تتبّع: يبقى السلوك القديم كما هو */ }
+  })();
+  // يستعمله التحديث التلقائي الصامت: نفس طبقة الاتصال (إعادة المحاولة) لكن بلا غلاف حاجز الانشغال الذي تُركّبه الصفحة لاحقًا فوقها
+  let MASAR_NET_GETTER_ = null;
+  try { MASAR_NET_GETTER_ = Object.getOwnPropertyDescriptor(google.script, 'run').get || null; } catch (e) { MASAR_NET_GETTER_ = null; }
+  // ===== نهاية شبكة الاتصال =====
+
+const Core = (() => {
+  let forceHideOverlayFn = () => {}; // wrapGoogleScriptRunWithBusyOverlay() تملأها فعليًا -- انظر تعليقها
+  const commonDict = {
+    ar: {
+      changePassword: '🔑 تغيير كلمة المرور', logout: '↩ تسجيل الخروج',
+      changePasswordTitle: 'تغيير كلمة المرور', oldPasswordLbl: 'كلمة المرور الحالية', newPasswordLbl: 'كلمة المرور الجديدة',
+      cancelBtn: 'إلغاء', saveBtn: 'حفظ',
+      changePasswordMissing: 'الرجاء إدخال كلمتَي المرور معًا', changePasswordSuccess: 'تم تغيير كلمة المرور بنجاح',
+      loadErrorText: 'تعذّر تنفيذ العملية — أعد المحاولة',
+      toastNotReady: 'هذه الميزة ستُبنى في خطوة قادمة',
+      shiftEndedTitle: 'أُغلقت هذه النوبة', shiftEndedDesc: 'أُغلقت من جهاز آخر أو من الإدارة — الرجاء تسجيل الدخول من جديد للمتابعة.', shiftEndedLoginBtn: 'تسجيل الدخول من جديد'
+    },
+    en: {
+      changePassword: '🔑 Change password', logout: '↩ Log out',
+      changePasswordTitle: 'Change password', oldPasswordLbl: 'Current password', newPasswordLbl: 'New password',
+      cancelBtn: 'Cancel', saveBtn: 'Save',
+      changePasswordMissing: 'Please enter both passwords', changePasswordSuccess: 'Password changed successfully',
+      loadErrorText: 'Could not complete the operation — please try again',
+      toastNotReady: 'This feature is coming up next',
+      shiftEndedTitle: 'This shift has ended', shiftEndedDesc: 'It was closed from another device or by an admin — please log in again to continue.', shiftEndedLoginBtn: 'Log in again'
+    }
+  };
+
+  // SPEC v1.4 -- injected server-side (WebApp.gs doGet(), HtmlTemplate) --
+  // see admin_dashboard.html/login.html for the full rationale on both.
+  const APP_BASE_URL = MASAR_TPL.appBaseUrl;
+  var TIMEOUT_SCALE = MASAR_TPL.timeoutScale; // مضاعِف مُهَل الانتظار: ١ في الإنتاج، أكبر في DIV (مشروع بارد/شبكة اختبار)
+  // تسجيل الخروج (٨ أكتوبر ٢٠٢٦، بلاغ مستخدم: "لا يأخذني دائمًا لشاشة الدخول حتى أضغط زرًا في الصفحة التي بقيت مفتوحة"): المتصفحات (خصوصًا
+  // الهاتف) تحجب التنقّل غير المرتبط بلمسة مباشرة، فكانت الصفحة تبقى ظاهرة بزر "اضغط للمتابعة" مخبّأ داخل قائمة مغلقة. الآن أول ما يُستدعى
+  // logout يُغطّى المحتوى بحاجز كامل الشاشة "تم تسجيل الخروج" بزر كبير ظاهر، مع محاولة تلقائية للانتقال حيث يسمح المتصفح.
+  function masarLogoutMarker() {
+    try {
+      if (document.getElementById('masarLoggedOutOverlay')) return null;
+      var ar = (document.documentElement.lang || 'ar') !== 'en';
+      var o = document.createElement('div');
+      o.id = 'masarLoggedOutOverlay';
+      o.dir = ar ? 'rtl' : 'ltr';
+      o.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:2147483646;background:#3D2B1E;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font:600 19px/1.6 sans-serif;text-align:center;padding:24px;';
+      o.innerHTML = '<div style="font-size:48px">\uD83D\uDD12</div><div>' + (ar ? 'تم تسجيل الخروج' : 'You have been logged out') + '</div>' +
+        '<button type="button" style="border:none;background:#EE7126;color:#fff;font:700 17px sans-serif;padding:15px 34px;border-radius:999px;cursor:pointer;">' + (ar ? 'العودة إلى شاشة الدخول' : 'Back to login') + '</button>';
+      document.body.appendChild(o);
+      var go = function () { try { window.top.location.href = APP_BASE_URL; } catch (e) { window.location.href = APP_BASE_URL; } };
+      o.getElementsByTagName('button')[0].addEventListener('click', go);
+      setTimeout(go, 700);
+    } catch (e) { /* عرض فقط */ }
+    return null;
+  }
+  const CURRENT_USER_ID = MASAR_TPL.currentUserId;
+  const CURRENT_STORE_ID = MASAR_TPL.currentStoreId;
+  const CURRENT_STORE_NAME = MASAR_TPL.currentStoreName;
+  const CURRENT_ASSIGNMENT_ID = MASAR_TPL.currentAssignmentId;
+  const CURRENT_FULL_NAME = MASAR_TPL.currentFullName;
+  const CURRENT_ORDER_ID = MASAR_TPL.currentOrderId;
+
+  const state = { lang: (MASAR_TPL.userLang === 'en' ? 'en' : 'ar') };
+  // لغة المستخدم المحفوظة على الخادم (Users.Language) -- طلب مباشر ٢٥ سبتمبر ٢٠٢٦: تُفتح بها كل الشاشات وتبقى عند التنقّل
+  (function () {
+    if (state.lang === 'en') { document.documentElement.lang = 'en'; document.documentElement.dir = 'ltr'; }
+    const langBtn = document.getElementById('langToggle');
+    if (!langBtn) return;
+    langBtn.textContent = state.lang === 'ar' ? 'EN' : 'AR';
+    langBtn.addEventListener('click', () => setTimeout(() => {
+      try { if (MASAR_TPL.currentUserId) google.script.run.withFailureHandler(() => {}).setUserLanguage(MASAR_TPL.currentUserId, state.lang); } catch (e) { /* لا يعطّل الشاشة */ }
+    }, 0));
+  })();
+  // ---- زر التحيين (طلب مباشر ٢٦ سبتمبر ٢٠٢٦): تحديث ناعم إن وُجد مُحمِّل للصفحة، وإلا إعادة تحميل الصفحة بنفس رابطها ----
+  (function () {
+    const btn = document.getElementById('refreshBtn');
+    if (!btn) return;
+    const CONFIRM = true;
+    const label = btn.querySelector('.rf-label');
+    const idleText = () => (state.lang === 'ar' ? 'تحديث' : 'Refresh');
+    const sureText = () => (state.lang === 'ar' ? 'اضغط للتأكيد' : 'Tap to confirm');
+    const setIdle = () => { btn.classList.remove('armed'); if (label) label.textContent = idleText(); };
+    setIdle();
+    const lt = document.getElementById('langToggle');
+    if (lt) lt.addEventListener('click', () => setTimeout(setIdle, 0));
+    let armed = false, timer = null;
+    const hardReload = () => {
+      try { window.top.location.href = APP_BASE_URL + '?' + MASAR_TPL.reloadQuery; } catch (e) { window.location.reload(); }
+    };
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      if (CONFIRM && !armed) {
+        armed = true; btn.classList.add('armed'); if (label) label.textContent = sureText();
+        clearTimeout(timer); timer = setTimeout(() => { armed = false; setIdle(); }, 2800);
+        return;
+      }
+      clearTimeout(timer); armed = false; setIdle();
+      const soft = null;
+      if (soft) {
+        btn.classList.add('spin');
+        try { soft(); setTimeout(() => btn.classList.remove('spin'), 1200); return; } catch (e) { btn.classList.remove('spin'); }
+      }
+      hardReload();
+    });
+  })();
+  const UID_SUFFIX = '&uid=' + encodeURIComponent(CURRENT_USER_ID) + '&storeId=' + encodeURIComponent(CURRENT_STORE_ID) + '&storeName=' + encodeURIComponent(CURRENT_STORE_NAME) + '&assignmentId=' + encodeURIComponent(CURRENT_ASSIGNMENT_ID) + '&fullName=' + encodeURIComponent(CURRENT_FULL_NAME);
+  const PAGE_MAP = {
+    dashboard: APP_BASE_URL + '?page=cashier' + UID_SUFFIX,
+    'new-order': APP_BASE_URL + '?page=cashier_new_order' + UID_SUFFIX,
+    'new-special': APP_BASE_URL + '?page=cashier_new_special' + UID_SUFFIX,
+    tracking: APP_BASE_URL + '?page=cashier_tracking' + UID_SUFFIX,
+    receive: APP_BASE_URL + '?page=cashier_receive' + UID_SUFFIX,
+    return: APP_BASE_URL + '?page=cashier_return' + UID_SUFFIX,
+    edit: APP_BASE_URL + '?page=cashier_edit' + UID_SUFFIX
+  };
+
+  function t(key) { return (commonDict[state.lang] && commonDict[state.lang][key]) || key; }
+
+  function applyI18n(container, dict) {
+    if (!container) return;
+    container.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      const val = dict[state.lang] && dict[state.lang][key];
+      if (val !== undefined) el.textContent = val;
+    });
+  }
+
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => el.classList.remove('show'), 2400);
+  }
+
+  function attachNotReadyToasts(container) {
+    container.querySelectorAll('[data-toast="notReady"]').forEach(el => {
+      if (el._notReadyWired) return;
+      el._notReadyWired = true;
+      el.addEventListener('click', (e) => { e.stopPropagation(); showToast(t('toastNotReady')); });
+    });
+  }
+
+  function register() {} // no-op here -- single-view pages don't need a registry
+
+  /**
+   * registerBeforeLeaveHook(fn)/runBeforeLeaveHooks(callback) -- SPEC v1.4
+   * (طلب مستخدم مباشر بعد نقد بنّاء لتصميم سابق): بناء الطلبية يبقى محليًا
+   * بالكامل أثناء الإضافة/التعديل (لا مزامنة لكل نقرة -- كانت تجربة كارثية
+   * فعليًا مع كميات كبيرة)، والمزامنة الفعلية الوحيدة تحدث *عند المغادرة*
+   * فقط (رجوع، أو تسجيل خروج) -- الزر الخاص بكل شاشة (رجوع) يستدعي مزامنته
+   * مباشرة، لكن "تسجيل الخروج" في الرأس المشترك لا يعرف تفاصيل أي شاشة --
+   * هذا السجل يسمح للشاشة الحالية بتسجيل دالة "أنهِ عملي أولًا" يستدعيها
+   * زر الخروج قبل تنفيذ logout() الفعلي.
+   */
+  let beforeLeaveHook = null;
+  function registerBeforeLeaveHook(fn) { beforeLeaveHook = fn; }
+  function runBeforeLeaveHooks(callback) {
+    if (beforeLeaveHook) beforeLeaveHook(callback); else callback();
+  }
+
+  // SPEC v1.4 -- real page navigation (see admin's Core-shim for the full
+  // window.top + absolute-URL rationale). params (e.g. {id: orderId}) are
+  // threaded onto the URL as extra query params for the target page to read.
+  function showView(name, params) {
+    let url = PAGE_MAP[name] || (APP_BASE_URL + '?page=cashier' + UID_SUFFIX);
+    if (params) {
+      Object.keys(params).forEach(k => { url += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(params[k]); });
+    }
+    window.top.location.href = url;
+  }
+
+  function wireConfirmableClick(btn, onConfirm, confirmLabel) {
+    let armed = false;
+    let timer = null;
+    const original = btn.innerHTML;
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      if (!armed) {
+        armed = true;
+        btn.classList.add('confirm-armed');
+        btn.innerHTML = confirmLabel || (state.lang === 'ar' ? '👆 اضغط مرة أخرى للتأكيد' : '👆 Tap again to confirm');
+        timer = setTimeout(() => {
+          armed = false;
+          btn.classList.remove('confirm-armed');
+          btn.innerHTML = original;
+        }, 2800);
+      } else {
+        clearTimeout(timer);
+        armed = false;
+        btn.classList.remove('confirm-armed');
+        btn.innerHTML = original; // SPEC v1.4 (بلاغ مستخدم مباشر) -- كان يبقى عالقًا على "اضغط مرة أخرى" حتى بعد نجاح العملية؛ يُعاد فورًا هنا قبل أي استدعاء فعلي
+        btn.disabled = true;
+        onConfirm();
+      }
+    });
+  }
+
+  function wireHeader() {
+    document.getElementById('storeNameDisplay').textContent = CURRENT_STORE_NAME;
+    document.getElementById('langToggle').addEventListener('click', () => {
+      state.lang = state.lang === 'ar' ? 'en' : 'ar';
+      document.documentElement.lang = state.lang;
+      document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+      document.getElementById('langToggle').textContent = state.lang === 'ar' ? 'EN' : 'AR';
+      applyI18n(document.querySelector('header.topbar'), commonDict);
+      applyI18n(document.getElementById('view-receive'), ReceiveView.dict);
+      ReceiveView.render({ id: CURRENT_ORDER_ID });
+    });
+    const userMenuBtn = document.getElementById('userMenuBtn');
+    const userDropdown = document.getElementById('userDropdown');
+    userMenuBtn.addEventListener('click', (e) => { e.stopPropagation(); userDropdown.classList.toggle('open'); });
+    document.addEventListener('click', () => userDropdown.classList.remove('open'));
+    attachNotReadyToasts(document.querySelector('header.topbar'));
+
+    const dropdownButtons = userDropdown.querySelectorAll('button');
+    dropdownButtons[0].addEventListener('click', () => {
+      userDropdown.classList.remove('open');
+      openChangePasswordModal();
+    });
+    dropdownButtons[1].addEventListener('click', () => {
+      userDropdown.classList.remove('open');
+      dropdownButtons[1].disabled = true;
+      // ملاحظة: الحاجز المرئي أثناء هذا النداء يأتي تلقائيًا الآن من
+      // wrapGoogleScriptRunWithBusyOverlay() -- لا حاجة لإدارة مؤشر يدويًا هنا.
+      // SPEC v1.4 -- runBeforeLeaveHooks تُنهي مزامنة أي مسودة قيد البناء
+      // في الشاشة الحالية أولًا (إن وُجدت) قبل تنفيذ logout() الفعلي.
+      runBeforeLeaveHooks(() => {
+        google.script.run
+          .withSuccessHandler(() => { window.top.location.href = APP_BASE_URL; })
+          .withFailureHandler(() => { window.top.location.href = APP_BASE_URL; })
+          .logout(CURRENT_USER_ID, masarLogoutMarker());
+      });
+    });
+    wireChangePasswordModal();
+  }
+
+  function openChangePasswordModal() {
+    document.getElementById('cp-title').textContent = t('changePasswordTitle');
+    document.getElementById('cp-oldLabel').textContent = t('oldPasswordLbl');
+    document.getElementById('cp-newLabel').textContent = t('newPasswordLbl');
+    document.getElementById('cp-cancelBtn').textContent = t('cancelBtn');
+    document.getElementById('cp-saveBtn').textContent = t('saveBtn');
+    document.getElementById('cp-fOldPassword').value = '';
+    document.getElementById('cp-fNewPassword').value = '';
+    document.getElementById('cp-errorBanner').classList.remove('show');
+    document.getElementById('changePasswordOverlay').classList.add('open');
+  }
+
+  function wireChangePasswordModal() {
+    document.getElementById('cp-cancelBtn').addEventListener('click', () => {
+      document.getElementById('changePasswordOverlay').classList.remove('open');
+    });
+    document.getElementById('cp-saveBtn').addEventListener('click', () => {
+      const oldPassword = document.getElementById('cp-fOldPassword').value;
+      const newPassword = document.getElementById('cp-fNewPassword').value;
+      const errBanner = document.getElementById('cp-errorBanner');
+      if (!oldPassword || !newPassword) {
+        errBanner.textContent = t('changePasswordMissing');
+        errBanner.classList.add('show');
+        return;
+      }
+      const btn = document.getElementById('cp-saveBtn');
+      btn.disabled = true;
+      google.script.run
+        .withSuccessHandler(result => {
+          btn.disabled = false;
+          if (!result || !result.success) {
+            errBanner.textContent = state.lang === 'ar' ? (result && result.error ? result.error.messageAR : t('loadErrorText')) : (result && result.error ? result.error.messageEN : t('loadErrorText'));
+            errBanner.classList.add('show');
+            return;
+          }
+          document.getElementById('changePasswordOverlay').classList.remove('open');
+          showToast(t('changePasswordSuccess'));
+        })
+        .withFailureHandler(() => {
+          btn.disabled = false;
+          errBanner.textContent = t('loadErrorText');
+          errBanner.classList.add('show');
+        })
+        .changePassword(CURRENT_USER_ID, oldPassword, newPassword);
+    });
+  }
+
+  /**
+   * wrapGoogleScriptRunWithBusyOverlay() -- SPEC v1.4 (تصحيح جوهري بعد
+   * ملاحظة مستخدم مباشرة مرتين): يستبدل google.script.run بنسخة مُغلَّفة
+   * عبر Proxy تُظهر/تُخفي حاجزًا حقيقيًا على مستوى الصفحة كاملة تلقائيًا
+   * حول كل نداء -- بلا أي تعديل على أي من نقاط الاستدعاء الفعلية في كل
+   * ملفات الشاشات (بناء الجملة `google.script.run.withSuccessHandler(...)
+   * .withFailureHandler(...).دالة(...)` يبقى كما هو تمامًا). عدّاد لا علم
+   * منطقي (busyCount) يدعم نداءات متزامنة متعددة بشكل صحيح (كما في render()
+   * التي تُطلق أكثر من نداء معًا) -- الحاجز لا يختفي إلا بعد اكتمال الجميع.
+   */
+  /**
+   * showShiftEndedOverlay() -- SPEC v1.4 (طلب مستخدم مباشر): يُحسَب ارتفاع
+   * الشريط العلوي فعليًا عند كل استدعاء (لا قيمة CSS ثابتة -- الشريط قد
+   * يلتفّ لسطرين على شاشات ضيّقة جدًا، فارتفاعه متغيّر فعليًا)، فتُغطّي
+   * الرسالة كل ما تحته فقط، تاركة الشريط العلوي ظاهرًا كما طُلب صراحة.
+   */
+  function showShiftEndedOverlay() {
+    const overlay = document.getElementById('shiftEndedOverlay');
+    const topbar = document.querySelector('header.topbar');
+    if (topbar) overlay.style.top = topbar.getBoundingClientRect().height + 'px';
+    overlay.classList.add('show');
+  }
+
+  function wrapGoogleScriptRunWithBusyOverlay() {
+    if (typeof google === 'undefined' || !google.script || !google.script.run) return; // بيئة اختبار محلية بلا Apps Script حقيقي
+    const realRun = google.script.run;
+    const overlay = document.getElementById('globalBusyOverlay');
+    let busyCount = 0;
+    function showBusy() { busyCount++; overlay.classList.add('show'); }
+    function hideBusy() { busyCount = Math.max(0, busyCount - 1); if (busyCount === 0) overlay.classList.remove('show'); }
+    /**
+     * SPEC v1.4 (تصحيح جوهري -- بلاغ ميداني مباشر من الهاتف: "اضغط هنا
+     * للمتابعة" يظهر لكن يبقى بلا استجابة فعلية لفترة): مهلة أمان هذا
+     * الحاجز العام مضبوطة هنا على 20 ثانية، بينما مهلة أمان كل شاشة على
+     * حدة (onceWithTimeout في new-order/new-special) مضبوطة على 8 ثوانٍ
+     * فقط -- توقيتان منفصلان بلا أي تنسيق بينهما! عند الثانية 8، الشاشة
+     * تُحدِّث الزر ليصبح "جاهزًا للمتابعة" (disabled=false فعليًا) -- لكن
+     * الحاجز الشفّاف الكامل للصفحة (z-index:999) يبقى ظاهرًا فوق كل شيء
+     * حتى الثانية 20 (أو وصول رد حقيقي)، فيمتص أي لمسة فعليًا رغم أن الزر
+     * تحته أصبح مفعَّلًا! الحل: forceHideOverlayFn تُتيح لكود الشاشة إخفاء
+     * الحاجز صراحة *في نفس لحظة* تحديث الزر، لا الاعتماد على توقيت مستقل.
+     */
+    forceHideOverlayFn = () => { busyCount = 0; overlay.classList.remove('show'); };
+    /**
+     * كل سلسلة نداء في هذا المشروع تبدأ دائمًا من google.script.run نفسها
+     * طازجة (لا إعادة استخدام سلسلة جزئية محفوظة) -- لذا Object.defineProperty
+     * بمُسترجِع (getter) يُنشئ حالة (state) جديدة مستقلة عند كل قراءة لـ
+     * google.script.run هو الأبسط والأضمن، بدل محاولة تمرير حالة عبر Proxy
+     * متداخل (نسخة سابقة من هذا الإصلاح كانت تحتوي خللًا فعليًا في تمرير
+     * معرِّف المهلة عبر حلقات chainObj المتغيّرة).
+     */
+    function makeChain(state) {
+      return {
+        withSuccessHandler(fn) {
+          return Object.assign({}, makeChain(state), {
+            _onSuccess: (...args) => { finishOnce(state); fn(...args); }
+          });
+        },
+        withFailureHandler(fn) {
+          return Object.assign({}, makeChain(state), {
+            _onFailure: (...args) => { finishOnce(state); fn(...args); }
+          });
+        }
+      };
+    }
+    function finishOnce(state) {
+      if (state.done) return;
+      state.done = true;
+      clearTimeout(state.safetyTimerId);
+      hideBusy();
+    }
+    Object.defineProperty(google.script, 'run', {
+      configurable: true,
+      get() {
+        const state = { done: false, safetyTimerId: null };
+        const handlers = { onSuccess: null, onFailure: null };
+        let proxy; // مرجع ذاتي -- withSuccessHandler/withFailureHandler يجب أن تُعيدا الكائن المُغلَّف (proxy) نفسه، لا الكائن الخام، وإلا فقدت أي استدعاء تالٍ (مثل .getOrderDetails) اعتراض get trap
+        const chain = {
+          withSuccessHandler(fn) { handlers.onSuccess = fn; return proxy; },
+          withFailureHandler(fn) { handlers.onFailure = fn; return proxy; }
+        };
+        proxy = new Proxy(chain, {
+          get(target, prop) {
+            if (prop === 'withSuccessHandler' || prop === 'withFailureHandler') return target[prop];
+            // أي اسم آخر = الدالة الفعلية المطلوب استدعاؤها فعليًا على الخادم
+            return (...args) => {
+              showBusy();
+              // SPEC v1.4 (شبكة أمان -- بلاغ مستخدم مباشر: زر الرجوع/الإلغاء
+              // بدا "معطَّلًا" أحيانًا عند استئناف مسودة، بلا أي خطأ ظاهر في
+              // الكونسول -- لم أستطع إعادة إنتاج السبب الجذري الدقيق محليًا،
+              // لكن نداءً واحدًا لا يستجيب أبدًا لأي سبب بنيوي يُبقي الحاجز
+              // ظاهرًا للأبد بصمت، يمنع أي نقرة أخرى حتى لو لا علاقة لها
+              // بالنداء العالق. مهلة أمان 20 ثانية تمنع قفل الواجهة نهائيًا.
+              state.safetyTimerId = setTimeout(() => finishOnce(state), 20000);
+              return realRun
+                .withSuccessHandler((...r) => {
+                  finishOnce(state);
+                  // SPEC v1.4 (طلب مستخدم مباشر -- مزامنة متعددة الأجهزة):
+                  // اعتراض عام لكل استجابة، بصرف النظر عن الدالة المُستدعاة
+                  // -- أي رد يحمل SHIFT_NOT_ACTIVE أو SESSION_EXPIRED يعني
+                  // هذا الجهاز لم يعد صالحًا للعمل إطلاقًا (نوبة أُغلقت من
+                  // مكان آخر، أو جلسة انتهت) -- رسالة كاملة الشاشة فورية
+                  // بدل تمرير الخطأ لمعالج الشاشة العادي (الذي كان سيعرض
+                  // توست عامًا مبهمًا لا يوضّح للمستخدم ما يجب فعله فعليًا).
+                  const errCode = r[0] && r[0].error && r[0].error.code;
+                  if (errCode === 'SHIFT_NOT_ACTIVE' || errCode === 'SESSION_EXPIRED') {
+                    showShiftEndedOverlay();
+                    return;
+                  }
+                  if (handlers.onSuccess) handlers.onSuccess(...r);
+                })
+                .withFailureHandler((...r) => { finishOnce(state); if (handlers.onFailure) handlers.onFailure(...r); })
+                [prop](...args);
+            };
+          }
+        });
+        return proxy;
+      }
+    });
+  }
+
+  function start() {
+    wrapGoogleScriptRunWithBusyOverlay();
+    wireHeader();
+    applyI18n(document.querySelector('header.topbar'), commonDict);
+    applyI18n(document.getElementById('shiftEndedOverlay'), commonDict);
+    document.getElementById('shiftEndedLoginBtn').addEventListener('click', () => { window.top.location.href = APP_BASE_URL; });
+    applyI18n(document.getElementById('view-receive'), ReceiveView.dict);
+    attachNotReadyToasts(document.getElementById('view-receive'));
+    ReceiveView.render({ id: CURRENT_ORDER_ID });
+  }
+
+  return { register, showView, showToast, state, t, start, applyI18n, attachNotReadyToasts, wireConfirmableClick, registerBeforeLeaveHook,
+    forceHideBusyOverlay: () => forceHideOverlayFn(),
+    currentUserId: CURRENT_USER_ID, currentStoreId: CURRENT_STORE_ID, currentStoreName: CURRENT_STORE_NAME,
+    currentAssignmentId: CURRENT_ASSIGNMENT_ID, currentFullName: CURRENT_FULL_NAME, currentOrderId: CURRENT_ORDER_ID, appBaseUrl: APP_BASE_URL };
+})();
+
+</script>
+<script>
+const ReceiveView = (function () {
+  const root = document.getElementById('view-receive');
+
+  // SPEC v1.4 -- with no orderId, this screen now shows a picker (real
+  // listOrders() filtered to Status=DELIVERED -- the only status
+  // receiveOrder() itself accepts). With an orderId, getReceivingDetails()
+  // (new -- see StoreReceiving.gs) supplies requestedQty AND the real
+  // deliveredQty (DistributionItems.FinalDecisionQty), which getOrderDetails
+  // alone doesn't carry. Reason/condition options come from getAllLists()
+  // (DIFFERENCE_REASON/PRODUCT_CONDITION) -- the mock's hardcoded codes
+  // didn't actually match what's seeded server-side (SHORT_FROM_SOURCE vs
+  // the real SHORTAGE_AT_SOURCE), and these lists are admin-editable via
+  // admin_lists_settings, so hardcoding them again here would drift.
+  let pickerOrders = [];
+  let orderId = null;
+  let items = [];
+  let orderStatus = 'DELIVERED';
+  let reasonOptions = [];
+  let conditionOptions = [];
+
+  const recvState = {}; // orderItemId -> { receivedQty, decision, reasonCode, condition }
+
+  const dict = {
+    ar: {
+      screenTitle: 'استلام بضاعة',
+      pickerIntro: 'اختر طلبية لاستلامها', emptyPicker: 'لا توجد طلبيات جاهزة للاستلام حاليًا',
+      receiveBtn: 'استلام', pickerHint: 'اضغط "استلام" لتحديد الكمية التي وصلتك فعليًا من كل صنف وحالتها. تُصدَر الفاتورة وفق ما استلمتَه فقط.',
+      normal: 'عادي', special: 'خاص',
+      liveBanner: 'وصلت الشحنة من السائق — جاهزة للاستلام الآن',
+      receivedBanner: '✅ تم استلام هذه الطلبية — لا استلام آخر عليها',
+      requestedLabel: 'مطلوب', deliveredLabel: 'مرسَل',
+      diffPositiveHeadline: '➕ زيادة عن المُرسَل — اختر مسارًا',
+      diffNegativeHeadline: '➖ نقص عن المُرسَل — اختر مسارًا',
+      decisionReturnExcess: 'إرجاع الزيادة', decisionAcceptAll: 'قبول الكل',
+      decisionAcceptShort: 'قبول الناقص فقط', decisionAcceptShortCompletion: 'قبول + طلب تكملة تلقائي',
+      reasonPlaceholder: 'سبب الفرق (إلزامي)',
+      confirmReceive: 'تأكيد الاستلام',
+      noPriceNote: 'لا تظهر أسعار في هذه الشاشة',
+      toastConfirmed: 'تم تأكيد الاستلام بنجاح',
+      toastConfirmedWithCompletion: 'تم تأكيد الاستلام، وأُرسلت طلبية تكملة تلقائية للنقص',
+      toastConfirmedWithReturn: 'تم تأكيد الاستلام، وسيُنشأ سند إرجاع للفروقات',
+      loadingText: 'جارٍ التحميل...', loadErrorText: 'تعذّر تنفيذ العملية — أعد المحاولة'
+    },
+    en: {
+      screenTitle: 'Receive goods',
+      pickerIntro: 'Choose an order to receive', emptyPicker: 'No orders are currently ready to receive',
+      receiveBtn: 'Receive', pickerHint: 'Tap "Receive" to enter the quantity that actually arrived for each item and its condition. The invoice is issued according to what you received only.',
+      normal: 'Normal', special: 'Special',
+      liveBanner: 'The shipment arrived from the driver — ready to receive now',
+      receivedBanner: '✅ This order has already been received — nothing more to receive',
+      requestedLabel: 'Requested', deliveredLabel: 'Sent',
+      diffPositiveHeadline: '➕ More than what was sent — choose a path',
+      diffNegativeHeadline: '➖ Less than what was sent — choose a path',
+      decisionReturnExcess: 'Return the excess', decisionAcceptAll: 'Accept it all',
+      decisionAcceptShort: 'Accept the shortfall only', decisionAcceptShortCompletion: 'Accept + auto-request completion',
+      reasonPlaceholder: 'Reason for the difference (required)',
+      confirmReceive: 'Confirm receipt',
+      noPriceNote: 'No prices are shown on this screen',
+      toastConfirmed: 'Receipt confirmed successfully',
+      toastConfirmedWithCompletion: 'Receipt confirmed, and an automatic completion order was sent for the shortfall',
+      toastConfirmedWithReturn: 'Receipt confirmed, and a return slip will be created for the differences',
+      loadingText: 'Loading...', loadErrorText: 'Could not complete the operation — please try again'
+    }
+  };
+
+  function t(key) { const v = dict[Core.state.lang] && dict[Core.state.lang][key]; return v !== undefined ? v : Core.t(key); }
+  function itemName(it) { return Core.state.lang === 'ar' ? it.nameAR : it.nameEN; }
+  function round1(n) { return Math.round(n * 100) / 100; }
+  function optionLabel(opt) { return Core.state.lang === 'ar' ? opt.valueAR : opt.valueEN; }
+
+  function setStickyBarVisible(visible) {
+    const bar = document.querySelector('.sticky-bar-wrap');
+    if (bar) bar.style.display = visible ? '' : 'none';
+  }
+
+  // ============ PICKER VIEW ============
+  function renderPicker() {
+    setStickyBarVisible(false);
+    root.querySelector('#rc-content').innerHTML = `
+      <div class="section-title">${t('pickerIntro')}</div>
+      <div class="picker-hint">${t('pickerHint')}</div>
+      <div class="card" id="rc-pickerList"></div>`;
+    const list = root.querySelector('#rc-pickerList');
+    if (!pickerOrders.length) { list.innerHTML = `<div class="empty-state">${t('emptyPicker')}</div>`; return; }
+    list.innerHTML = pickerOrders.map(o => {
+      const badgeClass = o.OrderType === 'NORMAL' ? 'normal' : 'special';
+      const timeStr = new Date(o.CreatedAt).toLocaleTimeString(Core.state.lang === 'ar' ? 'ar-QA-u-nu-latn' : 'en-US', { hour: '2-digit', minute: '2-digit' });
+      return `
+        <div class="picker-row enabled" data-goto="${o.OrderID}">
+          <span class="picker-id">${o.OrderID}</span>
+          <span class="badge ${badgeClass}">${o.OrderType === 'NORMAL' ? t('normal') : t('special')}</span>
+          <span class="picker-spacer"></span>
+          <span class="order-time" style="font-family:var(--font-mono); font-size:12.5px; color:var(--ink-soft);">${timeStr}</span>
+          <span class="picker-cta">📥 ${t('receiveBtn')}</span>
+        </div>`;
+    }).join('');
+    list.querySelectorAll('[data-goto]').forEach(el => {
+      el.addEventListener('click', () => Core.showView('receive', { id: el.getAttribute('data-goto') }));
+    });
+  }
+
+  // ============ RECEIVING FORM VIEW ============
+  function renderDeptCards() {
+    // الحالة الفعلية للطلبية: اللافتة "جاهزة للاستلام الآن" صحيحة فقط ما دامت DELIVERED؛ بعد تأكيد الاستلام (RECEIVED فما بعد) تتغير ولا يبقى زر تأكيد
+    const stillReceivable = orderStatus === 'DELIVERED';
+    setStickyBarVisible(stillReceivable);
+    root.querySelector('#rc-orderIdBadge').textContent = orderId;
+
+    // تجميع الأصناف حسب القسم -- بطاقة منفصلة لكل قسم (استعادة النمط
+    // الأصلي بعد تدقيق مباشر كشف أن الإصدار السابق كان يعرض كل شيء في
+    // قائمة مسطَّحة واحدة بلا تمييز الأقسام).
+    const deptGroups = [];
+    items.forEach(it => {
+      let group = deptGroups.find(g => g.departmentId === it.departmentId);
+      if (!group) {
+        group = { departmentId: it.departmentId, nameAR: it.departmentNameAR, nameEN: it.departmentNameEN, items: [] };
+        deptGroups.push(group);
+      }
+      group.items.push(it);
+    });
+
+    root.querySelector('#rc-content').innerHTML = `
+      <div class="live-banner"><span class="dot"></span><span>${t(stillReceivable ? 'liveBanner' : 'receivedBanner')}</span></div>
+      ${deptGroups.map(g => `
+        <div class="card dept-card">
+          <h2>${Core.state.lang === 'ar' ? g.nameAR : g.nameEN}</h2>
+          ${g.items.map(it => itemRowHtml(it)).join('')}
+        </div>`).join('')}`;
+
+    items.forEach(it => wireItem(it));
+    updateConfirmState();
+  }
+
+  function itemRowHtml(it) {
+    const st = recvState[it.orderItemId];
+    return `
+      <div class="recv-item" data-item="${it.orderItemId}">
+        <div class="recv-item-top">
+          <div class="recv-thumb">🍰</div>
+          <div class="recv-name">
+            <div class="n">${itemName(it)}</div>
+            <div class="ref">${t('requestedLabel')} ${it.requestedQty} · ${t('deliveredLabel')} ${it.deliveredQty} ${it.unitId}</div>
+          </div>
+          <input type="number" class="recv-qty-input" value="${st.receivedQty}" min="0" step="0.5">
+          <span class="recv-unit">${it.unitId}</span>
+          <select class="condition-chip">
+            ${conditionOptions.map(c => `<option value="${c.itemCode}" ${st.condition === c.itemCode ? 'selected' : ''}>${optionLabel(c)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="diff-panel" data-diff-panel></div>
+      </div>`;
+  }
+
+  function diffPanelInnerHtml(it, diff) {
+    const st = recvState[it.orderItemId];
+    if (diff > 0) {
+      return `
+        <div class="diff-headline">${t('diffPositiveHeadline')}</div>
+        <div class="decision-row">
+          <button class="decision-btn ${st.decision === 'RETURN_EXCESS' ? 'active pos' : ''}" data-decision="RETURN_EXCESS">${t('decisionReturnExcess')}</button>
+          <button class="decision-btn ${st.decision === 'ACCEPT_ALL' ? 'active pos' : ''}" data-decision="ACCEPT_ALL">${t('decisionAcceptAll')}</button>
+        </div>
+        ${reasonSelectHtml(it)}`;
+    }
+    if (diff < 0) {
+      return `
+        <div class="diff-headline">${t('diffNegativeHeadline')}</div>
+        <div class="decision-row">
+          <button class="decision-btn ${st.decision === 'ACCEPT_SHORT' ? 'active neg' : ''}" data-decision="ACCEPT_SHORT">${t('decisionAcceptShort')}</button>
+          <button class="decision-btn ${st.decision === 'ACCEPT_SHORT_REQUEST_COMPLETION' ? 'active neg' : ''}" data-decision="ACCEPT_SHORT_REQUEST_COMPLETION">${t('decisionAcceptShortCompletion')}</button>
+        </div>
+        ${reasonSelectHtml(it)}`;
+    }
+    return '';
+  }
+
+  function reasonSelectHtml(it) {
+    const st = recvState[it.orderItemId];
+    const needsChoice = !st.reasonCode;
+    return `
+      <select class="reason-select ${needsChoice ? 'needs-choice' : ''}" data-reason>
+        <option value="" ${!st.reasonCode ? 'selected' : ''} disabled>${t('reasonPlaceholder')}</option>
+        ${reasonOptions.map(r => `<option value="${r.itemCode}" ${st.reasonCode === r.itemCode ? 'selected' : ''}>${optionLabel(r)}</option>`).join('')}
+      </select>`;
+  }
+
+  function wireItem(it) {
+    const row = root.querySelector(`.recv-item[data-item="${it.orderItemId}"]`);
+    const qtyInput = row.querySelector('.recv-qty-input');
+    const condSelect = row.querySelector('.condition-chip');
+    const panel = row.querySelector('[data-diff-panel]');
+
+    function refreshPanel() {
+      const st = recvState[it.orderItemId];
+      const diff = round1(st.receivedQty - it.deliveredQty);
+      panel.className = 'diff-panel' + (diff > 0 ? ' positive show' : diff < 0 ? ' negative show' : '');
+      panel.innerHTML = diffPanelInnerHtml(it, diff);
+      wirePanel();
+      updateConfirmState();
+    }
+
+    function wirePanel() {
+      panel.querySelectorAll('[data-decision]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          recvState[it.orderItemId].decision = btn.getAttribute('data-decision');
+          refreshPanel();
+        });
+      });
+      const reasonSel = panel.querySelector('[data-reason]');
+      if (reasonSel) {
+        reasonSel.addEventListener('change', () => {
+          recvState[it.orderItemId].reasonCode = reasonSel.value;
+          updateConfirmState();
+        });
+      }
+    }
+
+    qtyInput.addEventListener('change', () => {
+      // SPEC v1.4 (إصلاح نفس النمط الخطير المُكتشَف في اعتماد الإنتاج، طلب
+      // مباشر): حدث change بلا رقم صالح فعليًا كان يُسجِّل "استُلم صفر"
+      // صامتًا -- الآن يعود للكمية المُسلَّمة فعليًا بدل صفر عند أي قيمة غير صالحة.
+      const parsed = parseFloat(qtyInput.value);
+      const val = Math.max(0, !isNaN(parsed) ? parsed : it.deliveredQty);
+      qtyInput.value = val;
+      const prevDiffSign = Math.sign(round1(recvState[it.orderItemId].receivedQty - it.deliveredQty));
+      recvState[it.orderItemId].receivedQty = val;
+      const newDiffSign = Math.sign(round1(val - it.deliveredQty));
+      if (prevDiffSign !== newDiffSign) {
+        recvState[it.orderItemId].decision = null;
+        recvState[it.orderItemId].reasonCode = '';
+      }
+      refreshPanel();
+    });
+    condSelect.addEventListener('change', () => { recvState[it.orderItemId].condition = condSelect.value; });
+
+    refreshPanel();
+  }
+
+  function updateConfirmState() {
+    let allResolved = true;
+    items.forEach(it => {
+      const st = recvState[it.orderItemId];
+      const diff = round1(st.receivedQty - it.deliveredQty);
+      if (diff !== 0 && (!st.decision || !st.reasonCode)) allResolved = false;
+    });
+    const btn = root.querySelector('#rc-confirmBtn');
+    if (btn) btn.disabled = !allResolved;
+  }
+
+  /**
+   * render(params) -- SPEC v1.4: with no id -> real listOrders() filtered
+   * to DELIVERED, for the picker. With an id -> getReceivingDetails() (real
+   * requestedQty + deliveredQty) plus getAllLists() for reason/condition
+   * options (both in parallel).
+   */
+  function render(params) {
+    orderId = (params && params.id) || null;
+
+    if (!orderId) {
+      root.querySelector('#rc-orderIdBadge').textContent = '';
+      root.querySelector('#rc-content').innerHTML = `<div class="card" style="padding:20px; text-align:center; color:var(--ink-soft);">${t('loadingText')}</div>`;
+      setStickyBarVisible(false);
+      google.script.run
+        .withSuccessHandler(result => {
+          if (!result || !result.success) { pickerOrders = []; renderPicker(); return; }
+          pickerOrders = result.data.orders.sort((a, b) => new Date(b.CreatedAt) - new Date(a.CreatedAt));
+          renderPicker();
+        })
+        .withFailureHandler(() => { pickerOrders = []; renderPicker(); })
+        .listOrders(Core.currentUserId, { storeId: Core.currentStoreId, status: 'DELIVERED' });
+      return;
+    }
+
+    root.querySelector('#rc-content').innerHTML = `<div class="card" style="padding:20px; text-align:center; color:var(--ink-soft);">${t('loadingText')}</div>`;
+    let orderDone = false, listsDone = false, hadError = false;
+    function checkBothDone() {
+      if (!orderDone || !listsDone) return;
+      if (hadError) {
+        root.querySelector('#rc-content').innerHTML = `<div class="card"><div class="empty-state" style="color:var(--warn);">${t('loadErrorText')}</div></div>`;
+        setStickyBarVisible(false);
+        return;
+      }
+      renderDeptCards();
+    }
+
+    google.script.run
+      .withSuccessHandler(result => {
+        orderDone = true;
+        if (!result || !result.success) { hadError = true; checkBothDone(); return; }
+        items = result.data.items;
+        orderStatus = (result.data.order && result.data.order.Status) || 'DELIVERED';
+        items.forEach(it => {
+          recvState[it.orderItemId] = { receivedQty: it.deliveredQty, decision: null, reasonCode: '', condition: conditionOptions[0] ? conditionOptions[0].itemCode : 'GOOD' };
+        });
+        checkBothDone();
+      })
+      .withFailureHandler(() => { orderDone = true; hadError = true; checkBothDone(); })
+      .getReceivingDetails(Core.currentUserId, orderId);
+
+    google.script.run
+      .withSuccessHandler(result => {
+        listsDone = true;
+        if (!result || !result.success) { hadError = true; checkBothDone(); return; }
+        reasonOptions = result.data.items.filter(i => i.listCode === 'DIFFERENCE_REASON' && i.active);
+        conditionOptions = result.data.items.filter(i => i.listCode === 'PRODUCT_CONDITION' && i.active);
+        checkBothDone();
+      })
+      .withFailureHandler(() => { listsDone = true; hadError = true; checkBothDone(); })
+      .getReferenceLists(Core.currentUserId);
+  }
+
+  root.querySelector('#rc-backBtn').addEventListener('click', () => {
+    if (orderId) Core.showView('dashboard'); else Core.showView('dashboard');
+  });
+
+  Core.wireConfirmableClick(root.querySelector('#rc-confirmBtn'), () => {
+    const itemsReceived = items.map(it => {
+      const st = recvState[it.orderItemId];
+      return {
+        orderItemId: it.orderItemId, receivedQty: st.receivedQty,
+        receivingDecision: st.decision || '', differenceReasonCode: st.reasonCode || '', conditionCode: st.condition
+      };
+    });
+    const btn = root.querySelector('#rc-confirmBtn');
+    btn.disabled = true;
+    google.script.run
+      .withSuccessHandler(result => {
+        btn.disabled = false;
+        if (!result || !result.success) { Core.showToast(t('loadErrorText')); return; }
+        let hasCompletion = false, hasReturn = false;
+        items.forEach(it => {
+          const st = recvState[it.orderItemId];
+          if (st.decision === 'ACCEPT_SHORT_REQUEST_COMPLETION') hasCompletion = true;
+          if (st.decision === 'RETURN_EXCESS' || st.decision === 'ACCEPT_SHORT' || st.decision === 'ACCEPT_SHORT_REQUEST_COMPLETION') hasReturn = true;
+        });
+        if (hasCompletion) Core.showToast(t('toastConfirmedWithCompletion'));
+        else if (hasReturn) Core.showToast(t('toastConfirmedWithReturn'));
+        else Core.showToast(t('toastConfirmed'));
+        orderStatus = 'RECEIVED';
+        try { setStickyBarVisible(false); const b = root.querySelector('.live-banner span:last-child'); if (b) b.textContent = t('receivedBanner'); } catch (e) { /* عرض فقط */ }
+        Core.showView('dashboard');
+      })
+      .withFailureHandler(() => { btn.disabled = false; Core.showToast(t('loadErrorText')); })
+      .receiveOrder(Core.currentUserId, orderId, itemsReceived);
+  });
+
+  return { dict, render };
+})();
+Core.register('receive', ReceiveView);
+
+</script>
+<script>
+  Core.start();
+</script>
+
+</body>
+</html>

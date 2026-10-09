@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>تثبيت تطبيق MASAR</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#3D2B1E">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="مسار">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<script>
+  /* beforeinstallprompt قد يُطلَق مبكرًا جدًا: نلتقطه هنا قبل أي شيء */
+  window.__masarInstall = { prompt: null, installed: false };
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); window.__masarInstall.prompt = e; if (window.__masarInstallUpdate) window.__masarInstallUpdate(); });
+  window.addEventListener('appinstalled', function () { window.__masarInstall.installed = true; window.__masarInstall.prompt = null; if (window.__masarInstallUpdate) window.__masarInstallUpdate('installed-event'); });
+</script>
+<script src="masar-config.js?v=67ea158b"></script>
+<script src="masar-runtime.js?v=67ea158b"></script>
+<style>
+  :root {
+    --bg: #FAF6F1; --card: #ffffff; --ink: #3D2B1E; --ink-soft: #7a6757; --line: #eadfd3;
+    --primary: #EE7126; --primary-dark: #c95a14; --brand: #3D2B1E; --ok: #1f7a4d; --ok-bg: #e5f4ec; --warn: #a15c07; --warn-bg: #fdf1dc; --bad: #b23b2e; --bad-bg: #fbe9e6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #1b1410; --card: #261c16; --ink: #f3e9de; --ink-soft: #b9a898; --line: #3a2d24; --ok-bg: #123324; --warn-bg: #3b2c10; --bad-bg: #3d1a15; }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body { background: var(--bg); color: var(--ink); font: 16px/1.7 system-ui, -apple-system, "Segoe UI", Tahoma, "Noto Sans Arabic", sans-serif; }
+  header.top { background: var(--brand); color: #fff; padding: 28px 20px 70px; text-align: center; }
+  header.top img { width: 84px; height: 84px; border-radius: 20px; background: #FAF6F1; padding: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.28); }
+  header.top h1 { font-size: 24px; margin: 14px 0 4px; letter-spacing: .2px; }
+  header.top p { margin: 0; opacity: .85; font-size: 14.5px; }
+  main { max-width: 560px; margin: -48px auto 40px; padding: 0 16px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 20px 18px; box-shadow: 0 10px 28px rgba(61,43,30,.10); margin-bottom: 16px; }
+  .status { display: none; border-radius: 12px; padding: 12px 14px; margin: 0 0 14px; font-size: 14.5px; font-weight: 600; }
+  .status.show { display: block; }
+  .status.ok { background: var(--ok-bg); color: var(--ok); }
+  .status.warn { background: var(--warn-bg); color: var(--warn); }
+  .status.bad { background: var(--bad-bg); color: var(--bad); }
+  .status.info { background: rgba(238,113,38,.12); color: var(--primary-dark); }
+  .btn { display: block; width: 100%; border: none; border-radius: 14px; padding: 15px 18px; font-family: inherit; font-weight: 700; font-size: 18px; line-height: 1.3; cursor: pointer; text-align: center; text-decoration: none; }
+  .btn.primary { background: var(--primary); color: #fff; box-shadow: 0 6px 16px rgba(238,113,38,.35); }
+  .btn.primary:hover { background: var(--primary-dark); }
+  .btn.primary:disabled { opacity: .6; cursor: default; box-shadow: none; }
+  .btn.ghost { background: transparent; border: 1.5px solid var(--line); color: var(--ink); font-size: 15px; padding: 11px 14px; font-weight: 600; }
+  .btn + .btn { margin-top: 10px; }
+  h2 { font-size: 17px; margin: 0 0 8px; }
+  .why { margin: 0; padding: 0; list-style: none; color: var(--ink-soft); font-size: 14.5px; }
+  .why li { padding: 3px 0 3px 0; }
+  .why li::before { content: "✓"; color: var(--primary); font-weight: 800; margin-inline-end: 8px; }
+  .how { display: none; }
+  .how.show { display: block; }
+  .how ol { margin: 8px 0 0; padding-inline-start: 22px; }
+  .how li { margin: 6px 0; }
+  .kbd { display: inline-block; border: 1px solid var(--line); background: rgba(127,127,127,.12); border-radius: 8px; padding: 0 8px; font-weight: 700; font-size: 14px; }
+  .note { color: var(--ink-soft); font-size: 13.5px; margin: 10px 0 0; }
+  .share { display: flex; gap: 8px; align-items: stretch; }
+  .share input { flex: 1; min-width: 0; direction: ltr; text-align: left; border: 1.5px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 12px; padding: 10px 12px; font: 14px/1.4 ui-monospace, Consolas, monospace; }
+  .share button { border: none; background: var(--brand); color: #fff; border-radius: 12px; padding: 0 16px; font-family: inherit; font-weight: 700; font-size: 14px; cursor: pointer; white-space: nowrap; }
+  footer { text-align: center; color: var(--ink-soft); font-size: 12.5px; padding: 0 16px 30px; }
+  a { color: var(--primary-dark); }
+  .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+</head>
+<body>
+<header class="top">
+  <img src="icon-192.png" alt="شعار MASAR" width="84" height="84">
+  <h1>تثبيت تطبيق MASAR</h1>
+  <p>نظام إدارة الطلبيات — ALAKER SWEETS</p>
+</header>
+
+<main>
+  <section class="card" aria-labelledby="installTitle">
+    <h2 id="installTitle" class="visually-hidden">التثبيت</h2>
+    <div id="status" class="status" role="status" aria-live="polite"></div>
+    <button id="installBtn" type="button" class="btn primary">تثبيت MASAR</button>
+    <a id="openBtn" class="btn primary" href="./" style="display:none">فتح التطبيق</a>
+    <a id="loginBtn" class="btn ghost" href="./">متابعة في المتصفح بدون تثبيت</a>
+    <p class="note" id="envNote"></p>
+  </section>
+
+  <section class="card how" id="how" aria-live="polite">
+    <h2 id="howTitle">طريقة التثبيت على جهازك</h2>
+    <ol id="howSteps"></ol>
+    <p class="note" id="howNote"></p>
+  </section>
+
+  <section class="card">
+    <h2>لماذا التثبيت؟</h2>
+    <ul class="why">
+      <li>أيقونة على الشاشة الرئيسية وفتح بملء الشاشة كأي تطبيق</li>
+      <li>فتح أسرع للشاشات</li>
+      <li>إمكانية البقاء مسجّل الدخول على جهازك الخاص (خيار «تذكّرني»)</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2>رابط التثبيت لإرساله للمستخدمين</h2>
+    <div class="share">
+      <input id="shareUrl" type="text" readonly aria-label="رابط صفحة التثبيت">
+      <button id="copyBtn" type="button">نسخ</button>
+      <button id="shareBtn" type="button" style="display:none">مشاركة</button>
+    </div>
+    <p class="note" id="copyNote" aria-live="polite"></p>
+  </section>
+</main>
+<footer>لا تُدخل كلمة مرور أي جهاز مشترك مع خيار «تذكّرني».</footer>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var ua = navigator.userAgent || '';
+  var isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var isAndroid = /Android/.test(ua);
+  var isWindows = /Windows/.test(ua);
+  var isMac = /Macintosh/.test(ua) && !isIOS;
+  var isEdge = /Edg\//.test(ua);
+  var isFirefox = /Firefox|FxiOS/.test(ua);
+  var isSamsung = /SamsungBrowser/.test(ua);
+  var isChrome = /Chrome|CriOS/.test(ua) && !isEdge && !isSamsung && !/OPR\//.test(ua);
+  var isSafari = /Safari/.test(ua) && !/Chrome|CriOS|FxiOS|Edg\/|OPR\//.test(ua);
+  var inApp = /FBAN|FBAV|Instagram|Line\/|MicroMessenger|; wv\)|Snapchat|TikTok/.test(ua);
+  var standalone = !!(window.navigator.standalone) || (window.matchMedia && (window.matchMedia('(display-mode: standalone)').matches || window.matchMedia('(display-mode: window-controls-overlay)').matches));
+  var CFG = window.MASAR_CONFIG || {};
+  var state = window.__masarInstall;
+  var locked = false; // رسالة ناتجة عن فعل المستخدم لا تُستبدَل برسائل الحالة الافتراضية
+
+  $('envNote').textContent = CFG.env && CFG.env !== 'PROD' ? 'نسخة تجريبية (' + CFG.env + ')' : '';
+  $('shareUrl').value = location.href.split('#')[0].split('?')[0];
+
+  function setStatus(kind, text) {
+    var s = $('status'); s.className = 'status show ' + kind; s.textContent = text;
+  }
+  function steps(title, items, note) {
+    $('howTitle').textContent = title;
+    var ol = $('howSteps'); ol.innerHTML = '';
+    items.forEach(function (html) { var li = document.createElement('li'); li.innerHTML = html; ol.appendChild(li); });
+    $('howNote').textContent = note || '';
+    $('how').className = 'card how show';
+  }
+
+  function showInstructions() {
+    if (inApp) {
+      steps('افتح الرابط في المتصفح أولًا', [
+        'أنت تفتح الصفحة داخل تطبيق آخر (واتساب أو فيسبوك...)، ولا يدعم التثبيت.',
+        'اضغط على <span class="kbd">⋮</span> أو <span class="kbd">…</span> ثم اختر «فتح في المتصفح» (Chrome على أندرويد، Safari على iPhone).',
+        'ثم ارجع لهذه الصفحة واضغط «تثبيت MASAR».'
+      ]);
+    } else if (isIOS) {
+      if (isSafari) {
+        steps('التثبيت على iPhone / iPad (Safari)', [
+          'اضغط زر <span class="kbd">مشاركة ⬆️</span> أسفل الشاشة (أو أعلاها على iPad).',
+          'مرّر للأسفل واختر <span class="kbd">إضافة إلى الشاشة الرئيسية</span>.',
+          'اضغط <span class="kbd">إضافة</span>. ستجد أيقونة «مسار» على الشاشة الرئيسية.'
+        ], 'على iOS لا توجد نافذة تثبيت تلقائية: التثبيت يدوي من Safari فقط.');
+      } else {
+        steps('التثبيت على iPhone / iPad', [
+          'افتح هذا الرابط في <b>Safari</b> (التثبيت من المتصفحات الأخرى غير متاح على iOS في أغلب الإصدارات).',
+          'ثم اتبع الخطوات: <span class="kbd">مشاركة ⬆️</span> ← <span class="kbd">إضافة إلى الشاشة الرئيسية</span>.'
+        ]);
+      }
+    } else if (isAndroid) {
+      if (isFirefox) {
+        steps('التثبيت على أندرويد (Firefox)', ['اضغط <span class="kbd">⋮</span> ثم <span class="kbd">تثبيت</span> أو <span class="kbd">إضافة إلى الشاشة الرئيسية</span>.'], 'للحصول على التجربة الأفضل استعمل Chrome.');
+      } else if (isSamsung) {
+        steps('التثبيت على أندرويد (Samsung Internet)', ['اضغط قائمة <span class="kbd">☰</span> ثم <span class="kbd">إضافة الصفحة إلى</span> ← <span class="kbd">الشاشة الرئيسية</span>.']);
+      } else {
+        steps('التثبيت على أندرويد (Chrome)', [
+          'اضغط <span class="kbd">⋮</span> أعلى المتصفح.',
+          'اختر <span class="kbd">تثبيت التطبيق</span> (أو <span class="kbd">إضافة إلى الشاشة الرئيسية</span>).',
+          'أكّد بالضغط على <span class="kbd">تثبيت</span>.'
+        ], isChrome ? 'إن لم يظهر الخيار، حدّث Chrome وأعد فتح هذه الصفحة.' : 'يُفضَّل استعمال Chrome.');
+      }
+    } else if (isFirefox) {
+      steps('Firefox على الحاسوب', ['لا يدعم Firefox تثبيت التطبيقات على الحاسوب.', 'افتح هذا الرابط في <b>Chrome</b> أو <b>Edge</b> ثم اضغط «تثبيت MASAR».']);
+    } else if (isMac && isSafari) {
+      steps('التثبيت على Mac (Safari)', ['من قائمة <span class="kbd">ملف</span> اختر <span class="kbd">إضافة إلى Dock</span> (Safari 17 أو أحدث).']);
+    } else if (isEdge) {
+      steps('التثبيت على Windows (Edge)', [
+        'اضغط <span class="kbd">⋯</span> أعلى المتصفح ← <span class="kbd">التطبيقات</span> ← <span class="kbd">تثبيت هذا الموقع كتطبيق</span>.',
+        'أو اضغط أيقونة التثبيت في يمين شريط العنوان.',
+        'أكّد بالضغط على <span class="kbd">تثبيت</span>.'
+      ]);
+    } else {
+      steps('التثبيت على Windows (Chrome)', [
+        'ابحث عن أيقونة التثبيت <span class="kbd">⊕</span> في يمين شريط العنوان واضغطها.',
+        'أو من <span class="kbd">⋮</span> ← <span class="kbd">إرسال وحفظ ومشاركة</span> ← <span class="kbd">تثبيت MASAR</span>.',
+        'أكّد بالضغط على <span class="kbd">تثبيت</span>.'
+      ], 'إن لم تجد الخيار، حدّث Chrome وأعد فتح الصفحة.');
+    }
+  }
+
+  function render(reason) {
+    if (state.installed || standalone) {
+      $('installBtn').style.display = 'none'; $('loginBtn').style.display = 'none'; $('openBtn').style.display = 'block';
+      $('how').className = 'card how';
+      setStatus('ok', reason === 'installed-event' ? 'اكتمل التثبيت. يمكنك الآن فتح MASAR من أيقونته على جهازك.' : (standalone ? 'التطبيق مثبَّت ويعمل الآن كتطبيق مستقل.' : 'تم تثبيت التطبيق.'));
+      return;
+    }
+    $('installBtn').style.display = 'block'; $('openBtn').style.display = 'none'; $('loginBtn').style.display = 'block';
+    if (locked) return;
+    if (state.prompt) {
+      setStatus('info', 'جاهز للتثبيت. اضغط «تثبيت MASAR» ثم أكّد في النافذة التي تظهر.');
+    } else if (isIOS || inApp) {
+      showInstructions();
+      setStatus('info', isIOS ? 'التثبيت على iPhone/iPad يدوي، اتبع الخطوات أدناه.' : 'افتح الرابط في المتصفح لإكمال التثبيت.');
+    } else {
+      setStatus('warn', 'إن كان MASAR مثبَّتًا على هذا الجهاز فافتحه من أيقونته. وإن لم تظهر نافذة التثبيت عند الضغط فاتبع الخطوات أدناه.');
+    }
+  }
+  window.__masarInstallUpdate = render;
+
+  $('installBtn').addEventListener('click', function () {
+    var p = state.prompt;
+    locked = true;
+    if (!p) { showInstructions(); setStatus('warn', 'لا يوفّر هذا المتصفح نافذة تثبيت مباشرة الآن، اتبع الخطوات أدناه.'); return; }
+    $('installBtn').disabled = true;
+    p.prompt();
+    p.userChoice.then(function (choice) {
+      state.prompt = null;
+      if (choice && choice.outcome === 'accepted') {
+        setStatus('info', 'جارٍ إكمال التثبيت… سيظهر تأكيد عند اكتماله.');
+        setTimeout(function () { if (!state.installed && !standalone) { setStatus('warn', 'لم يصلنا تأكيد اكتمال التثبيت بعد. إن لم تجد أيقونة MASAR على جهازك خلال لحظات فاتبع الخطوات أدناه.'); showInstructions(); $('installBtn').disabled = false; } }, 8000);
+      } else {
+        setStatus('warn', 'لم يكتمل التثبيت (أُغلقت النافذة). يمكنك المحاولة مرة أخرى.');
+        $('installBtn').disabled = false;
+      }
+    }, function () { setStatus('bad', 'تعذّر إكمال التثبيت. اتبع الخطوات أدناه.'); showInstructions(); $('installBtn').disabled = false; });
+  });
+
+  if (window.matchMedia) {
+    try { window.matchMedia('(display-mode: standalone)').addEventListener('change', function (e) { if (e.matches) { standalone = true; render('installed-event'); } }); } catch (e) { /* تجاهل */ }
+  }
+
+  $('copyBtn').addEventListener('click', function () {
+    var v = $('shareUrl').value;
+    function done(ok) { $('copyNote').textContent = ok ? 'تم نسخ الرابط.' : 'تعذّر النسخ تلقائيًا؛ حدّد الرابط وانسخه يدويًا.'; if (!ok) { $('shareUrl').focus(); $('shareUrl').select(); } }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v).then(function () { done(true); }, function () { done(false); });
+    else { $('shareUrl').focus(); $('shareUrl').select(); var ok = false; try { ok = document.execCommand('copy'); } catch (e) { ok = false; } done(ok); }
+  });
+  if (navigator.share) {
+    $('shareBtn').style.display = 'inline-block';
+    $('shareBtn').addEventListener('click', function () { navigator.share({ title: 'تثبيت تطبيق MASAR', text: 'ثبّت تطبيق MASAR من هذا الرابط:', url: $('shareUrl').value }).catch(function () { /* ألغى المستخدم */ }); });
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>

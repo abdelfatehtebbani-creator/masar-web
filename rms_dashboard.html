@@ -1,0 +1,1982 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#3D2B1E">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="مسار">
+<link rel="apple-touch-icon" href="icon-180.png">
+<script src="masar-config.js?v=67ea158b"></script>
+<script src="masar-runtime.js?v=67ea158b"></script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MASAR — مخزن المواد الأولية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Markazi+Text:wght@600;700&family=Fraunces:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #EE7126; --primary-dark: #C85A18; --primary-tint: #FCE8D8;
+    --secondary: #3D2B1E; --ink: #2B211B; --ink-soft: #6B5D52;
+    --bg: #FAF7F1; --surface: #FFFFFF; --line: #E7DFD2;
+    --success: #4B7A4F; --success-tint: #E7EFE6;
+    --warn: #B23B2E; --warn-tint: #F7E6E2;
+    --pending: #B4802A; --pending-tint: #F5EAD9;
+    --radius-lg: 16px; --radius-md: 12px; --radius-sm: 8px;
+    --shadow-card: 0 1px 2px rgba(43,33,27,0.06), 0 4px 16px rgba(43,33,27,0.05);
+    --font-ar: 'IBM Plex Sans Arabic', sans-serif; --font-en: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { overflow-x: hidden; max-width: 100vw; }
+  html[lang="ar"] body { font-family: var(--font-ar); }
+  html[lang="en"] body { font-family: var(--font-en); }
+  body {
+    background-color: var(--bg);
+    background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 38px, rgba(61,43,30,0.035) 38px, rgba(61,43,30,0.035) 39px);
+    color: var(--ink); min-height: 100vh; -webkit-font-smoothing: antialiased; padding-bottom: 30px;
+  }
+  header.topbar {
+    display: flex; align-items: center; gap: 16px; background: var(--secondary); color: #fff;
+    padding: 10px 20px; position: sticky; top: 0; z-index: 30; box-shadow: 0 2px 10px rgba(0,0,0,0.15); max-width: 100%;
+  }
+  .brand-logo { height: 40px; width: auto; display: block; flex-shrink: 0; }
+  .brand-meta { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; overflow: hidden; }
+  .brand-meta .system-name { font-size: 11px; letter-spacing: 0.14em; color: rgba(255,255,255,0.55); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .brand-meta .role-name { font-size: 15px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .topbar-spacer { flex: 1; min-width: 8px; }
+  .icon-btn {
+    display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #fff; cursor: pointer;
+    font-size: 14px; font-weight: 600; transition: background 0.15s ease; position: relative; flex-shrink: 0;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,0.16); }
+  .user-menu { position: relative; flex-shrink: 0; }
+  .user-dropdown {
+    position: absolute; top: calc(100% + 8px); inset-inline-end: 0; background: var(--surface); color: var(--ink);
+    border: 1px solid var(--line); border-radius: var(--radius-md); box-shadow: var(--shadow-card);
+    min-width: 200px; padding: 6px; display: none; z-index: 40;
+  }
+  .user-dropdown.open { display: block; }
+  .user-dropdown button {
+    display: flex; align-items: center; gap: 10px; width: 100%; text-align: start; background: none; border: none;
+    padding: 10px 12px; border-radius: var(--radius-sm); font-size: 14px; font-family: inherit; color: var(--ink); cursor: pointer;
+  }
+  .user-dropdown button:hover { background: var(--bg); }
+  @media (max-width: 420px) {
+    header.topbar { flex-wrap: wrap; row-gap: 8px; padding: 10px 12px; gap: 8px; }
+    .topbar-spacer { flex: 0 0 100%; height: 0; }
+    .brand-meta .system-name { display: none; }
+  }
+  .subheader { display: flex; align-items: center; gap: 12px; max-width: 880px; margin: 0 auto; padding: 16px 20px 4px; }
+  .back-btn {
+    display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 10px;
+    background: var(--surface); border: 1px solid var(--line); color: var(--secondary); cursor: pointer; font-size: 16px;
+    flex-shrink: 0; box-shadow: var(--shadow-card);
+  }
+  html[dir="rtl"] .back-btn .arrow { transform: scaleX(-1); display: inline-block; }
+  .subheader h1 { font-size: 19px; font-weight: 600; color: var(--secondary); flex: 1; }
+  .meta-badge {
+    font-size: 12.5px; font-weight: 600; color: var(--primary-dark); background: var(--primary-tint);
+    border: 1px solid rgba(238,113,38,0.35); padding: 5px 11px; border-radius: 999px; white-space: nowrap;
+  }
+  main { max-width: 880px; margin: 0 auto; padding: 12px 20px 20px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); overflow: hidden; }
+  .form-card { padding: 6px 0 16px; }
+  .search-input { width: 100%; padding: 9px 12px; border: 1px solid var(--line); border-radius: var(--radius-md); font-family: inherit; font-size: 13.5px; background: var(--surface); color: var(--ink); box-sizing: border-box; margin-bottom: 6px; }
+  .search-input:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
+  .product-info-box { margin-top: 8px; padding: 10px 12px; background: var(--bg); border-radius: var(--radius-sm); font-size: 13px; color: var(--ink); display: flex; flex-direction: column; gap: 4px; }
+  .threshold-row { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+  .threshold-row label { font-size: 12px; color: var(--ink-soft); white-space: nowrap; }
+  .threshold-row input { width: 70px; padding: 5px 8px; border: 1px solid var(--line); border-radius: var(--radius-sm); font-family: inherit; }
+  .mini-btn { padding: 5px 12px; border: none; border-radius: var(--radius-sm); background: var(--primary); color: #fff; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+  .recv-product-img { max-width: 100%; max-height: 140px; border-radius: var(--radius-sm); display: block; margin-bottom: 6px; }
+  .banner {
+    display: flex; align-items: flex-start; gap: 10px; padding: 14px 16px; border-radius: var(--radius-md);
+    margin-bottom: 16px; font-size: 13px; line-height: 1.6; background: var(--pending-tint); color: #7A5A1C; border: 1px solid rgba(180,128,42,0.3);
+  }
+
+  .shift-row { padding: 15px 18px; border-bottom: 1px dashed var(--line); }
+  .shift-row:last-child { border-bottom: none; }
+  .shift-top { display: flex; align-items: center; gap: 12px; }
+  .shift-icon {
+    width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0; background: var(--success-tint); color: var(--success);
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+  }
+  .shift-main { flex: 1; min-width: 0; }
+  .shift-store { font-size: 14.5px; font-weight: 700; color: var(--ink); }
+  .shift-cashier { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+  .shift-duration { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-soft); white-space: nowrap; }
+  .close-btn {
+    font-size: 12px; font-weight: 600; padding: 8px 14px; border-radius: 999px; cursor: pointer; font-family: inherit;
+    background: var(--surface); color: var(--warn); border: 1.5px solid var(--warn); white-space: nowrap;
+  }
+  .close-btn:hover { background: var(--warn-tint); }
+  .confirm-armed { background: var(--warn) !important; color: #fff !important; animation: pulse-confirm 1s ease-in-out infinite; }
+  @keyframes pulse-confirm { 0%, 100% { opacity: 1; } 50% { opacity: 0.75; } }
+
+  .blocking-notice {
+    display: none; margin-top: 10px; font-size: 12px; color: var(--pending); background: var(--pending-tint);
+    border-radius: var(--radius-sm); padding: 10px 12px; line-height: 1.6;
+  }
+  .blocking-notice.show { display: block; }
+  .blocking-notice .send-empty-btn {
+    display: block; margin-top: 8px; width: 100%; background: var(--secondary); color: #fff; border: none;
+    font-family: inherit; font-size: 12px; font-weight: 600; padding: 8px; border-radius: var(--radius-sm); cursor: pointer;
+  }
+
+  .tabs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 16px 16px 8px; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex-shrink: 0; font-size: 13px; font-weight: 600; color: var(--ink-soft); background: var(--surface); border: 1px solid var(--line);
+    padding: 9px 15px; border-radius: 999px; cursor: pointer; white-space: nowrap; font-family: inherit;
+  }
+  .tab.active { background: var(--secondary); color: #fff; border-color: var(--secondary); }
+  .tab .count { margin-inline-start: 5px; font-size: 11px; opacity: 0.8; }
+
+  .stock-item-card { padding: 14px 16px; border-bottom: 1px solid var(--line); }
+  .expiry-row.row-near { background: var(--pending-tint); }
+  .expiry-row.row-expired { background: var(--warn-tint); }
+  .expiry-date-row { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; font-size: 13px; color: var(--ink-soft); }
+  .stock-item-name .expiry-badge { margin-inline-start: 6px; vertical-align: middle; }
+  .expiry-badge { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 10px; }
+  .expiry-badge.near { background: var(--pending); color: #fff; }
+  .expiry-badge.expired { background: var(--warn); color: #fff; }
+  .expiry-filter-row { display: flex; gap: 8px; margin-top: 10px; }
+  .expiry-filter-chip {
+    flex: 1; padding: 8px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface);
+    color: var(--ink-soft); font-family: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; text-align: center;
+  }
+  .expiry-filter-chip.active { background: var(--secondary); color: #fff; border-color: var(--secondary); }
+  .suppliers-subtabs { display: flex; gap: 8px; padding: 12px 16px 0; }
+  .suppliers-subtab {
+    flex: 1; padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--line); background: var(--surface);
+    color: var(--ink-soft); font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; text-align: center;
+  }
+  .suppliers-subtab.active { background: var(--secondary); color: #fff; border-color: var(--secondary); }
+  .stock-item-card:last-child { border-bottom: none; }
+  .stock-item-name { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+  .attachment-badge {
+    display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600;
+    padding: 3px 9px; border-radius: 999px; background: var(--primary-tint); color: var(--primary-dark);
+    border: 1px solid rgba(238,113,38,0.35); cursor: pointer; white-space: nowrap; margin-bottom: 8px;
+  }
+  .attachment-modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 200;
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .attachment-modal-overlay.open { display: flex; }
+  .attachment-modal {
+    background: var(--surface); border-radius: var(--radius-lg); padding: 18px; max-width: 420px; width: 100%;
+    max-height: 85vh; overflow-y: auto; box-shadow: var(--shadow-card);
+  }
+  .attachment-modal img { width: 100%; border-radius: var(--radius-md); display: block; margin-bottom: 12px; }
+  .attachment-modal audio, .attachment-modal iframe { width: 100%; margin-bottom: 12px; }
+  .attachment-modal-close {
+    width: 100%; border: none; background: var(--secondary); color: #fff; font-family: inherit; font-size: 14px;
+    font-weight: 600; padding: 10px; border-radius: var(--radius-md); cursor: pointer;
+  }
+  .stock-numbers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .stock-num-box { background: var(--bg); border-radius: var(--radius-sm); padding: 8px; text-align: center; }
+  .stock-num-box .lbl { font-size: 10.5px; color: var(--ink-soft); margin-bottom: 3px; }
+  .stock-num-box .val { font-family: var(--font-mono); font-size: 15px; font-weight: 700; color: var(--ink); }
+  .stock-num-box.available .val { color: var(--success); }
+  .stock-num-box.quarantine .val { color: var(--pending); }
+  .stock-num-box.damaged .val, .stock-num-box.expired .val { color: var(--warn); }
+
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 12.5px; font-weight: 600; color: var(--ink-soft); margin-bottom: 6px; }
+  .field select, .field input[type="number"] {
+    width: 100%; padding: 11px 12px; border: 1.5px solid var(--line); border-radius: var(--radius-sm);
+    font-family: inherit; font-size: 14px; color: var(--ink); background: var(--surface);
+  }
+  .submit-btn {
+    width: 100%; background: var(--secondary); color: #fff; border: none; font-family: inherit;
+    font-size: 14.5px; font-weight: 700; padding: 13px; border-radius: var(--radius-md); cursor: pointer;
+  }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .quarantine-row { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .quarantine-row:last-child { border-bottom: none; }
+  .quarantine-icon { font-size: 18px; }
+  .quarantine-main { flex: 1; min-width: 0; }
+  .quarantine-name { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+  .quarantine-meta { font-size: 11.5px; color: var(--ink-soft); margin-top: 2px; }
+  .quarantine-decision { font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+  .quarantine-decision.AVAILABLE { background: var(--success-tint); color: var(--success); }
+  .quarantine-decision.DAMAGED, .quarantine-decision.EXPIRED { background: var(--warn-tint); color: var(--warn); }
+
+
+
+  .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(10px);
+    background: var(--secondary); color: #fff; font-size: 13.5px; padding: 11px 18px; border-radius: 999px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2); opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 60; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  #globalBusyOverlay { position: fixed; inset: 0; z-index: 999; cursor: wait; display: none; background: rgba(0,0,0,0.02); }
+  #globalBusyOverlay.show { display: block; }
+  .continue-armed { color: var(--success) !important; }
+  .refresh-btn { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; border-radius: 999px; background: rgba(255,255,255,0.18); border: 1.5px solid rgba(255,255,255,0.9); color: #fff; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; flex-shrink: 0; white-space: nowrap; transition: background 0.15s ease; }
+  .refresh-btn:hover { background: rgba(255,255,255,0.32); }
+  .refresh-btn:active { transform: scale(0.97); }
+  .refresh-btn.armed { background: #fff; color: var(--secondary); }
+  .refresh-btn.spin .ico { animation: masar-spin 0.8s linear infinite; }
+  @keyframes masar-spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <img src="asset-82d7b1e2.png" alt="ALAKER SWEETS" class="brand-logo">
+  <div class="brand-meta">
+    <span class="system-name">MASAR</span>
+    <span class="role-name" data-i18n="roleName"></span>
+  </div>
+  <div class="topbar-spacer"></div>
+  <button class="refresh-btn" id="refreshBtn" type="button" title="تحديث / Refresh"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span class="rf-label">تحديث</span></button>
+  <button class="icon-btn" id="langToggle" title="AR / EN">AR</button>
+  <div class="user-menu">
+    <button class="icon-btn" id="userMenuBtn">⋮</button>
+    <div class="user-dropdown" id="userDropdown">
+      <button data-i18n="changePassword" data-toast="notReady"></button>
+      <button id="logoutBtn" data-i18n="logout"></button>
+    </div>
+  </div>
+</header>
+
+<div class="subheader">
+  <button class="back-btn" id="backBtn"><span class="arrow">←</span></button>
+  <h1 data-i18n="screenTitle"></h1>
+</div>
+<div class="tabs" id="tabsRow"></div>
+
+<main>
+  <div id="mainArea"></div>
+</main>
+
+<div class="toast" id="toast"></div>
+<div id="globalBusyOverlay"></div>
+<div class="attachment-modal-overlay" id="attModalOverlay">
+  <div class="attachment-modal">
+    <div id="attModalBody"></div>
+    <button class="attachment-modal-close" id="attModalCloseBtn" type="button" data-i18n="attachmentModalClose"></button>
+  </div>
+</div>
+
+<script>
+  const APP_BASE_URL = MASAR_TPL.appBaseUrl;
+  var TIMEOUT_SCALE = MASAR_TPL.timeoutScale; // مضاعِف مُهَل الانتظار: ١ في الإنتاج، أكبر في DIV (مشروع بارد/شبكة اختبار)
+  // ===== شبكة الاتصال (١٠ أكتوبر ٢٠٢٦) =====
+  // مولَّد من tools/net_snippet.js بواسطة tools/build_client_snippets.js -- لا تعدّله يدويًا داخل الصفحات.
+  // (١) يتتبّع نداءات الحفظ (أي نداء لا يبدأ بـ get/list) ليعرف التحديث التلقائي أن الصفحة حفظت بنفسها.
+  // (٢) بلاغ "تعذّر تنفيذ العملية" المتكرر: بطء بدء Google (أو انقطاع لحظي) كان يُسقط النداء. للقراءات الصرفة فقط (قائمة مولَّدة آليًا من الخادم: دوال لا تكتب هي
+  // ولا ما تستدعيه) تُعاد المحاولة مرة واحدة عند الفشل/الردّ الفارغ، ويُرسَل نداء ثانٍ موازٍ إن تأخّر الأول ٦ ثوانٍ؛ يُسلَّم أول ردّ صالح. الحفظ والإنشاء لا يُكرَّران أبدًا.
+  const MASAR_RAW_RUN_ = (typeof google !== 'undefined' && google.script) ? google.script.run : null;
+  const MASAR_AR_INSTANCES_ = [];
+  const MASAR_PURE_READS_ = { getActiveDriversList:1,getActiveShipments:1,getActiveStoresWithOccupancy:1,getAllDepartments:1,getAllLists:1,getAllProducts:1,getAllRoles:1,getAllSettings:1,getAllStores:1,getAllUsers:1,getChangeTokens:1,getDepartmentStoreOrders:1,getDisposalFormData:1,getDistributionComparisonDetail:1,getDistributionManagerCancelEditRequests:1,getDistributionsReadyToPrepare:1,getFinishedGoodsQuarantineHistory:1,getFinishedGoodsStockBoard:1,getIssueToDepartmentFormData:1,getManagementReports:1,getMyNotifications:1,getMyShipments:1,getMySupplyRequests:1,getOffCatalogPurchaseRequests:1,getOrderDetails:1,getOrderEditStage:1,getOrderProductionApprovalDetail:1,getOrdersAwaitingInvoice:1,getOrdersAwaitingProductionApproval:1,getOrdersReadyForShipment:1,getOrdersReadyToReceive:1,getPendingLoadDiscrepancies:1,getPendingReturnItems:1,getPendingSupplyRequestsForRMS:1,getProductionManagerApprovals:1,getProductionManagerOrderFullDetail:1,getProductionManagerOrdersOverview:1,getPurchasingRawMaterialReports:1,getRawMaterialCatalog:1,getRawMaterialCatalogForRequest:1,getRawMaterialExpiryReport:1,getRawMaterialMovementSummary:1,getRawMaterialProductHistory:1,getRawMaterialQuarantineHistory:1,getRawMaterialShortageNotices:1,getRawMaterialStockBoard:1,getReceiveSurplusFormData:1,getReceivingDetails:1,getReferenceLists:1,getReturnReasons:1,getRolePermissionsMatrix:1,getShipmentPrepareDetail:1,getShortageReasons:1,getStoreDirectRawMaterialOrders:1,getStoreOrderDetail:1,getSuppliers:1,getSuppliersList:1,getTasksCatalog:1,getUnitsAndFamiliesList:1,getVehicleCoordinatorDriverStatus:1,getVehicleCoordinatorSpecialOrders:1,listOrders:1 };
+  (function masarTrackOwnCalls() {
+    try {
+      if (!MASAR_RAW_RUN_) return;
+      Object.defineProperty(google.script, 'run', {
+        configurable: true,
+        get() {
+          const handlers = { onSuccess: null, onFailure: null };
+          let proxy;
+          const chain = {
+            withSuccessHandler(fn) { handlers.onSuccess = fn; return proxy; },
+            withFailureHandler(fn) { handlers.onFailure = fn; return proxy; }
+          };
+          proxy = new Proxy(chain, {
+            get(target, prop) {
+              if (prop === 'withSuccessHandler' || prop === 'withFailureHandler') return target[prop];
+              return (...args) => {
+                // لقطة المعالجات لحظة النداء: غلاف حاجز الانشغال في الصفحات يمسك مرجعًا واحدًا من run فتتشارك النداءات المتزامنة كائن handlers، فلو قُرئ
+                // وقت الرد لاستلم كل رد معالج آخر نداء (بلاغ: "تعذّر فتح إنشاء رحلة" -- نداءا السائقين والجاهزة كانا يتبادلان معالجيهما)
+                const onS = handlers.onSuccess, onF = handlers.onFailure;
+                const name = String(prop);
+                if (Object.prototype.hasOwnProperty.call(MASAR_PURE_READS_, name)) {
+                  let settled = false, attempts = 0, pending = 0, hedge = null;
+                  const finish = (ok, v) => { if (settled) return; settled = true; clearTimeout(hedge); if (ok) { if (onS) onS(v); } else if (onF) onF(v); else { try { console.error(v); } catch (e) { /* تجاهل */ } } };
+                  const launch = () => {
+                    attempts++; pending++;
+                    const bad = v => {
+                      pending--;
+                      if (settled) return;
+                      if (attempts < 2) { setTimeout(launch, 700); return; }   // محاولة ثانية واحدة فقط
+                      if (pending === 0) finish(false, v);                       // الأخيرة فشلت ولا نداء آخر في الطريق
+                    };
+                    MASAR_RAW_RUN_
+                      .withSuccessHandler(r => { if (r === null || r === undefined) { bad(r); } else { pending--; finish(true, r); } })
+                      .withFailureHandler(e => bad(e))
+                      [name](...args);
+                  };
+                  hedge = setTimeout(() => { if (!settled && attempts < 2) launch(); }, 6000);
+                  launch();
+                  return;
+                }
+                const done = () => { if (!/^(get|list)/.test(name)) MASAR_AR_INSTANCES_.forEach(i => { try { i.ownDone(); } catch (e) { /* لا يعطّل النداء */ } }); };
+                return MASAR_RAW_RUN_
+                  .withSuccessHandler((...r) => { done(); if (onS) onS(...r); })
+                  .withFailureHandler((...r) => { done(); if (onF) onF(...r); else { try { console.error(r[0]); } catch (e) { /* تجاهل */ } } })
+                  [prop](...args);
+              };
+            }
+          });
+          return proxy;
+        }
+      });
+    } catch (e) { /* لا تتبّع: يبقى السلوك القديم كما هو */ }
+  })();
+  // يستعمله التحديث التلقائي الصامت: نفس طبقة الاتصال (إعادة المحاولة) لكن بلا غلاف حاجز الانشغال الذي تُركّبه الصفحة لاحقًا فوقها
+  let MASAR_NET_GETTER_ = null;
+  try { MASAR_NET_GETTER_ = Object.getOwnPropertyDescriptor(google.script, 'run').get || null; } catch (e) { MASAR_NET_GETTER_ = null; }
+  // ===== نهاية شبكة الاتصال =====
+  // ===== تحديث تلقائي بالتغيّر (٩ أكتوبر ٢٠٢٦، نُقّح ١٠ أكتوبر) =====
+  // كل ٣٠ ثانية تسأل الصفحة (نداء خفيف بلا قراءة جداول) هل تغيّر شيء في مجالاتها؛ إن تغيّر تُعيد جلب بياناتها مرة واحدة. تتوقف والتبويب مخفيّ، وتستأنف عند
+  // العودة. إن كان المستخدم يكتب أو توجد نافذة مفتوحة أو حقل معدَّل لا تُبدَّل الشاشة تحت يده: يظهر شريط "توجد تحديثات" ينقر عليه حين يشاء.
+  // النداء الخفيف يمرّ عبر مرجع google.script.run الأصلي (قبل غلاف حاجز الانشغال) فلا يحجب الشاشة، ولا يمدّ الجلسة.
+  // تنقيح (بلاغ ميداني: "ساعة رملية كل برهة" و"الشاشة تُعاد بعد كل حفظ"): (١) التحديث التلقائي صامت: لا حاجز انشغال ولا ومضة "جارٍ التحميل"،
+  // ويحفظ موضع التمرير؛ (٢) ما تحفظه هذه الصفحة نفسها (أي نداء لا يبدأ بـ get) لا يُحدِّثها هي: تُعاد قراءة الرمز بعده فيصير خط الأساس الجديد؛ (٣) شارة
+  // صغيرة أسفل الشاشة تُظهر وقت آخر فحص وتومض عند التحديث، ولون أحمر إن تعذّر الفحص.
+  // ينفّذ إعادة جلب بيانات الصفحة بصمت: بلا حاجز انشغال (النداءات داخلها تمرّ بالمرجع الأصلي)، بلا ومضة "جارٍ التحميل"، وبحفظ موضع التمرير
+  function masarRunSilently(fn) {
+    let desc = null, area = null, proto = null;
+    try { desc = Object.getOwnPropertyDescriptor(google.script, 'run'); Object.defineProperty(google.script, 'run', { configurable: true, get() { return MASAR_NET_GETTER_ ? MASAR_NET_GETTER_() : MASAR_RAW_RUN_; } }); } catch (e) { desc = null; }
+    try {
+      area = document.getElementById('mainArea');
+      if (area && typeof Element !== 'undefined') {
+        proto = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
+        Object.defineProperty(area, 'innerHTML', {
+          configurable: true,
+          get() { return proto.get.call(area); },
+          set(v) { const s = String(v); if (/empty-state/.test(s) && !/order-card|<table|<button/.test(s)) return; proto.set.call(area, v); }
+        });
+      }
+    } catch (e) { proto = null; }
+    let keep = null;
+    try {
+      if (area && typeof window !== 'undefined' && typeof MutationObserver !== 'undefined') {
+        const scrollers = [document.scrollingElement, area.parentElement].filter(Boolean).map(el => ({ el: el, top: el.scrollTop }));
+        let moved = false;
+        const mark = () => { moved = true; };
+        ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(ev => window.addEventListener(ev, mark, true));
+        const mo = new MutationObserver(() => { if (!moved) requestAnimationFrame(() => scrollers.forEach(s => { if (s.top > 0 && Math.abs(s.el.scrollTop - s.top) > 4) s.el.scrollTop = s.top; })); });
+        mo.observe(area, { childList: true });
+        keep = () => { try { mo.disconnect(); ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(ev => window.removeEventListener(ev, mark, true)); } catch (e) { /* تجاهل */ } };
+        setTimeout(keep, 9000);
+      }
+    } catch (e) { keep = null; }
+    try { fn(); }
+    finally {
+      if (desc) { try { Object.defineProperty(google.script, 'run', desc); } catch (e) { /* تجاهل */ } }
+      if (proto && area) { try { delete area.innerHTML; } catch (e) { /* تجاهل */ } }
+    }
+  }
+  function masarAutoRefresh(opts) {
+    if (!MASAR_RAW_RUN_ || !opts || typeof opts.refresh !== 'function') return null;
+    const domains = opts.domains || [];
+    const interval = (opts.intervalMs || 30000) + Math.floor(Math.random() * 4000); // تشتيت بسيط كي لا تتزامن شاشات كثيرة
+    let baseline = null, inflight = false, inflightSince = 0, stopped = false, banner = null, pill = null, ownDoneAt = 0, rebaseWanted = false, changes = 0;
+    const uid = () => (typeof CURRENT_USER_ID !== 'undefined' ? CURRENT_USER_ID : (typeof Core !== 'undefined' ? Core.currentUserId : ''));
+    const isAr = () => (document.documentElement.lang || 'ar') !== 'en';
+    function setPill(text, bad) {
+      try {
+        if (!pill) {
+          pill = document.createElement('div');
+          pill.style.cssText = 'position:fixed;right:8px;bottom:6px;z-index:2147482000;font:600 10px sans-serif;color:#fff;padding:2px 8px;border-radius:999px;pointer-events:none;opacity:0.85;';
+          document.body.appendChild(pill);
+        }
+        pill.style.background = bad ? 'rgba(176,42,42,0.9)' : 'rgba(61,43,30,0.55)';
+        pill.textContent = text;
+      } catch (e) { /* الشارة تكميلية */ }
+    }
+    function clock() { try { return new Date().toTimeString().slice(0, 8); } catch (e) { return ''; } }
+    function busy() {
+      try {
+        if (opts.isBusy && opts.isBusy()) return true;
+        const a = document.activeElement;
+        if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && !/^(button|checkbox|radio|submit)$/.test(a.type || '')) return true;
+        if (document.querySelector('.header-modal-overlay.open, [class*="overlay"].open, [class*="modal"].open')) return true;
+        const fields = document.querySelectorAll('main input, main textarea, main select, #mainArea input, #mainArea textarea, #mainArea select');
+        for (let i = 0; i < fields.length; i++) {
+          const f = fields[i];
+          if (f.type === 'checkbox' || f.type === 'radio') { if (f.checked !== f.defaultChecked) return true; }
+          else if (f.type !== 'hidden' && f.type !== 'button' && f.tagName !== 'SELECT' && f.value !== f.defaultValue) return true;
+        }
+      } catch (e) { /* عند الشك نعتبر الشاشة غير مشغولة */ }
+      return false;
+    }
+    function hideBanner() { if (banner) { banner.style.display = 'none'; } }
+    function showBanner() {
+      if (!banner) {
+        banner = document.createElement('button');
+        banner.type = 'button';
+        banner.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:76px;z-index:2147483000;border:none;border-radius:999px;padding:10px 18px;background:#3D2B1E;color:#fff;font:700 13px sans-serif;box-shadow:0 6px 20px rgba(0,0,0,0.3);cursor:pointer;';
+        banner.addEventListener('click', () => doRefresh());
+        document.body.appendChild(banner);
+      }
+      banner.textContent = isAr() ? '🔄 توجد تحديثات جديدة — اضغط للتحديث' : '🔄 New updates — tap to refresh';
+      banner.style.display = 'block';
+    }
+    function doRefresh() {
+      hideBanner();
+      setPill((isAr() ? '✅ تحديث ' : '✅ Updated ') + clock(), false);
+      try { masarRunSilently(opts.refresh); } catch (e) { /* لا يعطّل الصفحة */ }
+    }
+    function handle(r, startedAt) {
+      if (!r || !r.success) {
+        if (r && r.error && r.error.code === 'SESSION_EXPIRED') stopped = true;
+        setPill('⚠ ' + ((r && r.error && r.error.code) || (isAr() ? 'تعذّر الفحص' : 'check failed')), true);
+        return;
+      }
+      setPill((isAr() ? '🔄 آخر فحص ' : '🔄 Checked ') + clock() + (changes ? (isAr() ? ' · تغيّرات ' : ' · changes ') + changes : ''), false);
+      const sig = JSON.stringify(domains.map(d => r.data.tokens[d] || ''));
+      if (rebaseWanted) {
+        // هذه الصفحة حفظت شيئًا بنفسها: الرمز بعد حفظها هو خط الأساس الجديد (لا تُحدَّث هي بما كتبته). ردٌّ بدأ قبل انتهاء حفظها قديم: نعيد السؤال
+        if (startedAt >= ownDoneAt) { rebaseWanted = false; baseline = sig; } else { setTimeout(tick, 300); }
+        return;
+      }
+      if (baseline === null) { baseline = sig; return; }
+      if (sig === baseline) return;
+      baseline = sig; changes++;
+      if (busy()) { showBanner(); return; }
+      doRefresh();
+      // الكتابة قد لا تكون ظهرت للقراءة بعد لحظة الرمز: إن كان التغيّر حديثًا (<٨ ثوانٍ) نُعيد الجلب مرة ثانية بعد استقراره
+      const newest = Math.max.apply(null, domains.map(d => parseFloat(r.data.tokens[d]) || 0));
+      const age = (r.data.serverTime || Date.now()) - newest;
+      if (age < 8000) setTimeout(() => { if (!document.hidden && !busy()) doRefresh(); }, 8500 - Math.max(0, age));
+    }
+    function tick() {
+      if (stopped || document.hidden) return;
+      // نداء ضاع بلا ردّ (شبكة بطيئة/تبويب مجمَّد) كان يُبقي inflight=true فيتوقف التحديث للأبد: بعد ٢٥ ثانية نعدّه مفقودًا ونسأل من جديد
+      if (inflight && Date.now() - inflightSince < 25000) return;
+      inflight = true;
+      const startedAt = Date.now();
+      inflightSince = startedAt;
+      MASAR_RAW_RUN_.withSuccessHandler(r => { inflight = false; handle(r, startedAt); }).withFailureHandler(() => { inflight = false; setPill(isAr() ? '⚠ تعذّر الفحص' : '⚠ check failed', true); }).getChangeTokens(uid(), domains);
+    }
+    function ownDone() { ownDoneAt = Date.now(); rebaseWanted = true; hideBanner(); setTimeout(tick, 500); }
+    MASAR_AR_INSTANCES_.push({ ownDone: ownDone });
+    setInterval(tick, interval);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) { rebaseWanted = false; setTimeout(tick, 400); } });
+    setTimeout(tick, 1500); // يلتقط خط الأساس مبكرًا
+    return { tick: tick };
+  }
+  // تسجيل الخروج (٨ أكتوبر ٢٠٢٦، بلاغ مستخدم: "لا يأخذني دائمًا لشاشة الدخول حتى أضغط زرًا في الصفحة التي بقيت مفتوحة"): المتصفحات (خصوصًا
+  // الهاتف) تحجب التنقّل غير المرتبط بلمسة مباشرة، فكانت الصفحة تبقى ظاهرة بزر "اضغط للمتابعة" مخبّأ داخل قائمة مغلقة. الآن أول ما يُستدعى
+  // logout يُغطّى المحتوى بحاجز كامل الشاشة "تم تسجيل الخروج" بزر كبير ظاهر، مع محاولة تلقائية للانتقال حيث يسمح المتصفح.
+  function masarLogoutMarker() {
+    try {
+      if (document.getElementById('masarLoggedOutOverlay')) return null;
+      var ar = (document.documentElement.lang || 'ar') !== 'en';
+      var o = document.createElement('div');
+      o.id = 'masarLoggedOutOverlay';
+      o.dir = ar ? 'rtl' : 'ltr';
+      o.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:2147483646;background:#3D2B1E;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font:600 19px/1.6 sans-serif;text-align:center;padding:24px;';
+      o.innerHTML = '<div style="font-size:48px">\uD83D\uDD12</div><div>' + (ar ? 'تم تسجيل الخروج' : 'You have been logged out') + '</div>' +
+        '<button type="button" style="border:none;background:#EE7126;color:#fff;font:700 17px sans-serif;padding:15px 34px;border-radius:999px;cursor:pointer;">' + (ar ? 'العودة إلى شاشة الدخول' : 'Back to login') + '</button>';
+      document.body.appendChild(o);
+      var go = function () { try { window.top.location.href = APP_BASE_URL; } catch (e) { window.location.href = APP_BASE_URL; } };
+      o.getElementsByTagName('button')[0].addEventListener('click', go);
+      setTimeout(go, 700);
+    } catch (e) { /* عرض فقط */ }
+    return null;
+  }
+  const CURRENT_USER_ID = MASAR_TPL.currentUserId;
+
+
+
+  const state = { lang: (MASAR_TPL.userLang === 'en' ? 'en' : 'ar'), activeTab: 'OFFCATALOG' };
+  // لغة المستخدم المحفوظة على الخادم (Users.Language) -- طلب مباشر ٢٥ سبتمبر ٢٠٢٦: تُفتح بها كل الشاشات وتبقى عند التنقّل
+  (function () {
+    if (state.lang === 'en') { document.documentElement.lang = 'en'; document.documentElement.dir = 'ltr'; }
+    const langBtn = document.getElementById('langToggle');
+    if (!langBtn) return;
+    langBtn.textContent = state.lang === 'ar' ? 'EN' : 'AR';
+    langBtn.addEventListener('click', () => setTimeout(() => {
+      try { if (MASAR_TPL.currentUserId) google.script.run.withFailureHandler(() => {}).setUserLanguage(MASAR_TPL.currentUserId, state.lang); } catch (e) { /* لا يعطّل الشاشة */ }
+    }, 0));
+  })();
+  // ---- زر التحيين (طلب مباشر ٢٦ سبتمبر ٢٠٢٦): تحديث ناعم إن وُجد مُحمِّل للصفحة، وإلا إعادة تحميل الصفحة بنفس رابطها ----
+  (function () {
+    const btn = document.getElementById('refreshBtn');
+    if (!btn) return;
+    const CONFIRM = false;
+    const label = btn.querySelector('.rf-label');
+    const idleText = () => (state.lang === 'ar' ? 'تحديث' : 'Refresh');
+    const sureText = () => (state.lang === 'ar' ? 'اضغط للتأكيد' : 'Tap to confirm');
+    const setIdle = () => { btn.classList.remove('armed'); if (label) label.textContent = idleText(); };
+    setIdle();
+    const lt = document.getElementById('langToggle');
+    if (lt) lt.addEventListener('click', () => setTimeout(setIdle, 0));
+    let armed = false, timer = null;
+    const hardReload = () => {
+      try { window.top.location.href = APP_BASE_URL + '?' + MASAR_TPL.reloadQuery; } catch (e) { window.location.reload(); }
+    };
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      if (CONFIRM && !armed) {
+        armed = true; btn.classList.add('armed'); if (label) label.textContent = sureText();
+        clearTimeout(timer); timer = setTimeout(() => { armed = false; setIdle(); }, 2800);
+        return;
+      }
+      clearTimeout(timer); armed = false; setIdle();
+      const soft = () => { loadActiveTab(); loadBadge('getOffCatalogPurchaseRequests', 'offCatalog', d => d.items.length); loadBadge('getRawMaterialShortageNotices', 'shortage', d => d.items.length); loadBadge('getPendingSupplyRequestsForRMS', 'issue', d => d.requests.length); loadBadge('getDepartmentStoreOrders', 'orders', d => d.orders.filter(o => o.overallStatus === 'PROGRESS').length); };
+      if (soft) {
+        btn.classList.add('spin');
+        try { soft(); setTimeout(() => btn.classList.remove('spin'), 1200); return; } catch (e) { btn.classList.remove('spin'); }
+      }
+      hardReload();
+    });
+  })();
+
+  // ---- عدّاد الطابور على التبويب (طلب مباشر ٢٥ سبتمبر ٢٠٢٦، تعميم لمسة pm_approvals): "(N)" = ما ينتظر المراجعة ----
+  const BADGES = {};
+  // النداءات الصامتة تتجاوز غلاف "مؤشر الانشغال" العام (يحجب النقر) -- تُلتقَط قبل تغليف google.script.run
+  let BADGE_RUN = null;
+  function badgeHtml(key) { return `<span class="count" data-count="${key}">${BADGES[key] === undefined ? '' : '(' + BADGES[key] + ')'}</span>`; }
+  function setBadge(key, n) { BADGES[key] = n; document.querySelectorAll('[data-count="' + key + '"]').forEach(el => { el.textContent = '(' + n + ')'; }); }
+  // نداء صامت موازٍ (يفشل بصمت -- العدّاد ميزة مساعدة لا يجوز أن تعطّل الشاشة)
+  function loadBadge(fnName, key, countFn) {
+    try {
+      (BADGE_RUN || google.script.run)
+        .withSuccessHandler(r => { try { if (r && r.success) setBadge(key, countFn(r.data)); } catch (e) { /* تجاهل */ } })
+        .withFailureHandler(() => { /* تجاهل */ })[fnName](CURRENT_USER_ID);
+    } catch (e) { /* تجاهل */ }
+  }
+  let OFFCATALOG_ITEMS = [];
+  let SHORTAGE_ITEMS = [];
+  let SUPPLIERS_LIST = [];
+  let RAW_CATALOG = [];
+  let receiveFormContext = null; // {linkedOrderItemId, presetProductId} عند القدوم من "اعتماد"/"بدء التوفير"
+  let SUPPLY_REQUESTS = []; // SPEC v1.4 -- طلبات تزويد واردة من الأقسام (بديل تدفّق الصرف المباشر القديم)
+  let EXPIRY_ITEMS = []; // مرجع دفاعي -- تُستخدَم في دالة قديمة أصبحت غير قابلة للوصول (تبويبها دُمج في BOARD) لكنها لا تزال معرَّفة في الملف
+  let SUPPLIERS_MGMT_LIST = [];
+  let BOARD_ITEMS = [];
+  let receiveSearchQuery = '';
+  let QUARANTINE_ITEMS = [];
+  let DISPOSAL_FORM_DATA = null;
+  let MOVEMENT_ITEMS = [];
+  let movementPeriod = 'TODAY';
+  let STORE_DIRECT_ORDERS = [];
+
+  const dict = {
+    ar: {
+      roleName: 'مخزن المواد الأولية',
+      changePassword: '🔑 تغيير كلمة المرور', logout: '↩ تسجيل الخروج',
+      screenTitle: 'مخزن المواد الأولية',
+      tabOffCatalog: 'طلبات خارج الكتالوج', tabShortage: 'إشعارات النقص', tabReceive: 'استلام من مورد',
+      tabIssue: 'صرف للأقسام', tabSuppliers: 'الموردون', tabBoard: 'المخزون', tabQuarantine: 'متابعة Quarantine',
+      tabDisposal: 'الإتلاف/الإرجاع', tabMovement: 'حركة الأصناف', tabStoreOrders: 'طلبيات المحلات المباشرة',
+      tabApprovedStoreOrders: 'طلبيات معتمَدة للتنفيذ',
+      emptyStoreOrders: 'لا توجد طلبيات محلات مباشرة لمواد أولية حاليًا',
+      storeOrdersNote: 'ℹ️ للعلم فقط — هذه الأصناف تُنفَّذ تلقائيًا عبر خط أنابيب التوزيع الكامل (استلام ← تجهيز ← شحن)، لا إجراء مطلوب هنا.',
+      statusConfirmed: '✅ مؤكَّد من المخزون', statusPlanned: '⏳ بانتظار توفير (نقص)',
+      actionTypeLabel: 'نوع الإجراء', disposalOption: 'إتلاف', returnOption: 'إرجاع للمورد',
+      reasonLabel: 'السبب (إلزامي)', currentStockNote: (onHand, damaged, expired) => `الموجود: ${onHand} · تالف: ${damaged} · منتهي: ${expired}`,
+      submitDisposal: '⚠️ تنفيذ (لا رجعة بعده)', irreversibleWarning: '⚠️ هذا الإجراء ينقص الرصيد نهائيًا ولا يمكن التراجع عنه لاحقًا',
+      toastDisposed: 'سُجِّل الإتلاف بنجاح', toastReturnedToSupplier: 'سُجِّل الإرجاع للمورد بنجاح',
+      toastMissingDisposalFields: 'الرجاء اختيار الصنف وإدخال سبب وكمية صحيحة',
+      periodLabel: 'الفترة', periodToday: 'اليوم', periodWeek: 'الأسبوع', periodMonth: 'الشهر',
+      inLbl: 'وارد', outLbl: 'صادر', txnCountLbl: (n) => `${n} حركة`,
+      emptyMovement: 'لا توجد حركة مسجَّلة لهذه الفترة',
+      availableNowLbl: (n, unit) => `المتاح حاليًا: ${n} ${unit}`,
+      departmentLabel: 'القسم', chooseDepartment: 'اختر القسم',
+      searchProductPlaceholder: '🔍 ابحث عن الصنف...', noResultsFound: 'لا نتائج مطابقة',
+      unitLabel: 'الوحدة', minThresholdLabel: 'الحد الأدنى', saveThresholdBtn: 'حفظ', toastInvalidMin: 'الحد الأدنى يجب أن يكون رقمًا صفرًا أو أكثر',
+      subtabSuppliers: 'الموردون', subtabAddProduct: '+ إضافة صنف', productNameLbl: 'اسم الصنف',
+      selectPlaceholder: 'اختر', materialFamilyLbl: 'عائلة المادة', saveNewProductBtn: '💾 حفظ الصنف',
+      toastProductSaved: '✅ أُضيف الصنف بنجاح',
+      toastThresholdSaved: '✅ حُفظ الحد الأدنى',
+      submitIssue: '📤 تسجيل الصرف', toastIssueSaved: (dept) => `سُجِّل الصرف لقسم ${dept} بنجاح`,
+      toastMissingIssueFields: 'الرجاء اختيار القسم والصنف وإدخال كمية صحيحة',
+      toastInsufficientStock: (available, unit) => `الكمية المطلوبة تتجاوز المتاح — المتاح فعليًا: ${available} ${unit}`,
+      addSupplierBtn: '+ إضافة مورد جديد', supplierNameLbl: 'اسم المورد', phoneLbl: 'الهاتف (اختياري)',
+      saveSupplierBtn: '💾 حفظ', cancelBtn: 'إلغاء', editBtn: 'تعديل', inactiveTag: 'معطَّل',
+      toastSupplierSaved: 'حُفظ المورد بنجاح', emptySuppliers: 'لا يوجد موردون مسجَّلون بعد',
+      onHandLbl: 'الموجود', reservedLbl: 'محجوز', quarantineLbl: 'Quarantine',
+      lastPriceLbl: 'آخر سعر شراء', lastExpiryLbl: 'صلاحية آخر توريد', noDataYet: '—',
+      damagedLbl: 'تالف', expiredLbl: 'منتهي', availableLbl: 'المتاح فعليًا',
+      emptyBoard: 'لا توجد أصناف مواد أولية مسجَّلة بعد',
+      boardSearchPlaceholder: '🔍 ابحث بالاسم أو العائلة...', emptyBoardSearch: 'لا يوجد صنف مطابق للبحث',
+      expFilterAll: 'الكل', expFilterNear: 'قريب الانتهاء', expFilterExpired: 'منتهٍ',
+      emptyExpiry: 'لا توجد أصناف بتاريخ صلاحية مُسجَّل حاليًا',
+      expiryScopeNote: 'ℹ️ التاريخ المعروض هو أقرب تاريخ صلاحية من بين كل دفعات التوريد المُستلَمة لهذا الصنف — لا دفعة بعينها',
+      expiredBadge: 'منتهي', nearExpiryBadge: 'أقل من شهر', expiryDateLbl: 'تاريخ الصلاحية',
+      emptyQuarantine: 'لا توجد قرارات Quarantine مُنفَّذة بعد لهذا النوع من المنتجات',
+      quarantineNote: 'ℹ️ هذه الشاشة للمتابعة فقط — القرار نفسه يُتَّخذ من مدير الإنتاج، ويُطبَّق هنا تلقائيًا فور اعتماده.',
+      decisionAvailable: '✅ أُعيد للمتاح', decisionDamaged: '🚫 تالف', decisionExpired: '⏰ منتهي الصلاحية',
+      emptyOffCatalog: 'لا توجد طلبات شراء خارج الكتالوج بانتظار القرار',
+      cashierLbl: (name) => `طلب الكاشير: ${name}`,
+      approveBtn: '✅ موافقة', rejectBtn: '❌ رفض',
+      hasAttachmentNote: '📎 مرفق صورة/تسجيل مع هذا الصنف', attachmentModalClose: 'إغلاق',
+      emptySupplyRequests: 'لا توجد طلبات تزويد واردة حاليًا',
+      statusPending: 'بانتظار القرار', statusApprovedAwaitingDelivery: 'معتمَد — بانتظار التسليم',
+      itemsCountLbl: (n) => `${n} صنف`, requestedRefLbl: 'المطلوب', availableRefLbl: 'المتوفر',
+      recordDeliveryBtn: 'تسجيل التسليم', toastApproved: '✅ اعتُمد الطلب', toastRejected: 'رُفض الطلب',
+      toastDelivered: '✅ سُجِّل التسليم وخُصم الرصيد',
+      toastApproved: 'اعتُمد الطلب — الصنف أصبح مادة أولية جاهزة للشراء',
+      toastRejected: 'رُفض الطلب',
+      emptyShortage: 'لا توجد إشعارات نقص بانتظار المتابعة حاليًا',
+      shortageNote: 'ℹ️ هذا إشعار مبكر وليس قرارًا نهائيًا — يمكن العودة لهذه القائمة لاحقًا',
+      startSourcingBtn: '🛒 بدء التوفير', deferBtn: '⏸️ تأجيل',
+      toastSourcingStarted: 'بدأ التوفير — أكمل بيانات الاستلام أدناه',
+      toastDeferred: 'أُجِّل الإشعار — سيبقى مسجَّلًا للتقارير',
+      supplierLabel: 'المورد', productLabel: 'الصنف', quantityLabel: 'الكمية',
+      priceLabel: 'سعر الشراء للوحدة', expiryLabel: 'تاريخ الصلاحية (اختياري)', referenceLabel: 'رقم فاتورة الاستلام (اختياري)',
+      referencePlaceholder: 'كما هو مكتوب على فاتورة المورد',
+      chooseSupplier: 'اختر المورد', chooseProduct: 'اختر الصنف',
+      submitReceive: '📦 تسجيل الاستلام',
+      toastReceiveSaved: (product) => `سُجِّل استلام ${product} بنجاح — أُضيف للرصيد فورًا`,
+      toastMissingFields: 'الرجاء اختيار المورد والصنف وإدخال كمية وسعر صحيحين',
+      contextBanner: (product) => `📌 هذا الاستلام مرتبط بطلبية عميل مباشرة (${product}) — سيُغلق تلقائيًا فور تسجيله`,
+      loadingText: 'جارٍ التحميل...', loadErrorText: 'تعذّر تنفيذ العملية — أعد المحاولة',
+      toastNotReady: 'هذه الميزة ستُبنى في خطوة قادمة', savingText: 'جارٍ الحفظ...', continueBtn: 'اضغط هنا للمتابعة'
+    },
+    en: {
+      roleName: 'Raw material store',
+      changePassword: '🔑 Change password', logout: '↩ Log out',
+      screenTitle: 'Raw material store',
+      tabOffCatalog: 'Off-catalog requests', tabShortage: 'Shortage notices', tabReceive: 'Receive from supplier',
+      tabIssue: 'Issue to departments', tabSuppliers: 'Suppliers', tabBoard: 'Inventory', tabQuarantine: 'Quarantine tracking',
+      tabDisposal: 'Disposal/Return', tabMovement: 'Item movement', tabStoreOrders: 'Direct store orders',
+      tabApprovedStoreOrders: 'Approved orders for execution',
+      emptyStoreOrders: 'No direct store orders for raw materials right now',
+      storeOrdersNote: 'ℹ️ For awareness only — these items are fulfilled automatically through the full distribution pipeline (receive → prepare → ship), no action needed here.',
+      statusConfirmed: '✅ Confirmed from stock', statusPlanned: '⏳ Awaiting sourcing (shortage)',
+      actionTypeLabel: 'Action type', disposalOption: 'Disposal', returnOption: 'Return to supplier',
+      reasonLabel: 'Reason (required)', currentStockNote: (onHand, damaged, expired) => `On hand: ${onHand} · Damaged: ${damaged} · Expired: ${expired}`,
+      submitDisposal: '⚠️ Execute (irreversible)', irreversibleWarning: '⚠️ This action permanently reduces stock and cannot be undone later',
+      toastDisposed: 'Disposal recorded successfully', toastReturnedToSupplier: 'Return to supplier recorded successfully',
+      toastMissingDisposalFields: 'Please choose the product, enter a reason, and a valid quantity',
+      periodLabel: 'Period', periodToday: 'Today', periodWeek: 'This week', periodMonth: 'This month',
+      inLbl: 'In', outLbl: 'Out', txnCountLbl: (n) => `${n} transactions`,
+      emptyMovement: 'No movement recorded for this period',
+      availableNowLbl: (n, unit) => `Available now: ${n} ${unit}`,
+      departmentLabel: 'Department', chooseDepartment: 'Choose department',
+      searchProductPlaceholder: '🔍 Search for item...', noResultsFound: 'No matching results',
+      unitLabel: 'Unit', minThresholdLabel: 'Minimum threshold', saveThresholdBtn: 'Save', toastInvalidMin: 'Minimum threshold must be a number, zero or more',
+      subtabSuppliers: 'Suppliers', subtabAddProduct: '+ Add item', productNameLbl: 'Item name',
+      selectPlaceholder: 'Select', materialFamilyLbl: 'Material family', saveNewProductBtn: '💾 Save item',
+      toastProductSaved: '✅ Item added successfully',
+      toastThresholdSaved: '✅ Minimum threshold saved',
+      submitIssue: '📤 Record issue', toastIssueSaved: (dept) => `Issue recorded for ${dept} successfully`,
+      toastMissingIssueFields: 'Please choose the department, product, and enter a valid quantity',
+      toastInsufficientStock: (available, unit) => `Requested quantity exceeds availability — actually available: ${available} ${unit}`,
+      addSupplierBtn: '+ Add new supplier', supplierNameLbl: 'Supplier name', phoneLbl: 'Phone (optional)',
+      saveSupplierBtn: '💾 Save', cancelBtn: 'Cancel', editBtn: 'Edit', inactiveTag: 'Inactive',
+      toastSupplierSaved: 'Supplier saved successfully', emptySuppliers: 'No suppliers registered yet',
+      onHandLbl: 'On hand', reservedLbl: 'Reserved', quarantineLbl: 'Quarantine',
+      lastPriceLbl: 'Last purchase price', lastExpiryLbl: 'Last supply expiry', noDataYet: '—',
+      damagedLbl: 'Damaged', expiredLbl: 'Expired', availableLbl: 'Actually available',
+      emptyBoard: 'No raw material items registered yet',
+      boardSearchPlaceholder: '🔍 Search by name or family...', emptyBoardSearch: 'No matching item found',
+      expFilterAll: 'All', expFilterNear: 'Near expiry', expFilterExpired: 'Expired',
+      emptyExpiry: 'No items with a registered expiry date currently',
+      expiryScopeNote: 'ℹ️ The date shown is the nearest expiry among all supply batches received for this item — not one specific batch',
+      expiredBadge: 'Expired', nearExpiryBadge: 'Under a month', expiryDateLbl: 'Expiry date',
+      emptyQuarantine: 'No quarantine decisions applied yet for this product type',
+      quarantineNote: 'ℹ️ This screen is for tracking only — the decision itself is made by the production manager, and applied here automatically once approved.',
+      decisionAvailable: '✅ Returned to available', decisionDamaged: '🚫 Damaged', decisionExpired: '⏰ Expired',
+      emptyOffCatalog: 'No off-catalog purchase requests awaiting decision',
+      cashierLbl: (name) => `Requested by: ${name}`,
+      approveBtn: '✅ Approve', rejectBtn: '❌ Reject',
+      hasAttachmentNote: '📎 A photo/recording is attached to this item', attachmentModalClose: 'Close',
+      emptySupplyRequests: 'No incoming supply requests right now',
+      statusPending: 'Awaiting decision', statusApprovedAwaitingDelivery: 'Approved — awaiting delivery',
+      itemsCountLbl: (n) => `${n} item${n === 1 ? '' : 's'}`, requestedRefLbl: 'Requested', availableRefLbl: 'Available',
+      recordDeliveryBtn: 'Record delivery', toastApproved: '✅ Request approved', toastRejected: 'Request rejected',
+      toastDelivered: '✅ Delivery recorded and stock deducted',
+      toastApproved: 'Request approved — item is now a raw material ready to purchase',
+      toastRejected: 'Request rejected',
+      emptyShortage: 'No shortage notices awaiting follow-up right now',
+      shortageNote: 'ℹ️ This is an early notice, not a final decision — you can return to this list later',
+      startSourcingBtn: '🛒 Start sourcing', deferBtn: '⏸️ Defer',
+      toastSourcingStarted: 'Sourcing started — complete the receiving details below',
+      toastDeferred: 'Notice deferred — it stays recorded for reports',
+      supplierLabel: 'Supplier', productLabel: 'Product', quantityLabel: 'Quantity',
+      priceLabel: 'Unit purchase price', expiryLabel: 'Expiry date (optional)', referenceLabel: 'Receipt invoice number (optional)',
+      referencePlaceholder: 'As written on the supplier invoice',
+      chooseSupplier: 'Choose supplier', chooseProduct: 'Choose product',
+      submitReceive: '📦 Record receipt',
+      toastReceiveSaved: (product) => `Receipt recorded for ${product} — added to stock immediately`,
+      toastMissingFields: 'Please choose the supplier and product, and enter a valid quantity and price',
+      contextBanner: (product) => `📌 This receipt is linked directly to a customer order (${product}) — it will close automatically once recorded`,
+      loadingText: 'Loading...', loadErrorText: 'Could not complete the operation — please try again',
+      toastNotReady: 'This feature is coming up next', savingText: 'Saving...', continueBtn: 'Tap here to continue'
+    }
+  };
+
+  function t(key) { return (dict[state.lang] && dict[state.lang][key]) || key; }
+
+  function applyI18n(container) {
+    (container || document).querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (dict[state.lang][key] !== undefined) el.textContent = dict[state.lang][key];
+    });
+  }
+
+  // يُلحِق رمز الخطأ الفعلي القادم من الخادم بالرسالة العامة، فلا يبقى سبب الفشل مخفيًا خلف "تعذّر تنفيذ العملية"
+  function failText(result) {
+    const code = result && result.error && result.error.code ? result.error.code : '';
+    return t('loadErrorText') + (code ? ' (' + code + ')' : '');
+  }
+
+  // تاريخ ووقت الطلبية بصيغة مقروءة (يصل من الخادم كنص ISO)
+  function fmtOrderDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return new Intl.DateTimeFormat(state.lang === 'ar' ? 'ar-QA-u-nu-latn' : 'en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(d);
+  }
+
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => el.classList.remove('show'), 2600);
+  }
+
+  // بناء الرابط بلا "//" حرفية في الكود المصدري -- انظر نفس الإصلاح في admin_products_v2.html
+  // (updateImageBtn): شرطتان مائلتان متتاليتان في المصدر تُعامَلان كبداية تعليق جافاسكريبت من
+  // طرف آلية غوغل الداخلية حتى داخل نص بين علامتَي اقتباس، فيُقتَطع الملف صامتًا من تلك النقطة.
+  function driveUrl_(path) {
+    const s = String.fromCharCode(47);
+    return 'https:' + s + s + 'drive.google.com' + s + path;
+  }
+  function attachmentBadgeHtml(it) {
+    if (!it.attachmentImageFileId && !it.attachmentAudioFileId) return '';
+    return `<span class="attachment-badge" data-att-img="${it.attachmentImageFileId || ''}" data-att-audio="${it.attachmentAudioFileId || ''}">${t('hasAttachmentNote')}</span>`;
+  }
+  function openAttachmentModal(imgId, audioId) {
+    let html = '';
+    if (imgId) html += '<img src="' + driveUrl_('thumbnail?id=' + encodeURIComponent(imgId) + '&sz=w800') + '" alt="">';
+    if (audioId) html += '<iframe src="' + driveUrl_('file/d/' + encodeURIComponent(audioId) + '/preview') + '" style="width:100%; height:80px; border:none;" allow="autoplay"></iframe>';
+    document.getElementById('attModalBody').innerHTML = html;
+    document.getElementById('attModalOverlay').classList.add('open');
+  }
+  document.addEventListener('click', (e) => {
+    const badge = e.target.closest('.attachment-badge');
+    if (badge) { e.stopPropagation(); openAttachmentModal(badge.getAttribute('data-att-img'), badge.getAttribute('data-att-audio')); }
+  }, true);
+
+  /**
+   * showApiError(result) -- SPEC v1.4 (إصلاح خطأ حقيقي، بلاغ مستخدم مباشر:
+   * حفظ الحد الأدنى كان يفشل ويظهر "تعذّر تنفيذ العملية" العامة دومًا، لا
+   * السبب الفعلي -- نفس فئة الخطأ التي أُصلحت سابقًا في admin_products.html
+   * لكنها لم تُنقَل لهذا الملف. تعرض الآن رسالة الخادم المحدَّدة إن وُجدت.
+   */
+  function showApiError(result) {
+    const specific = result && result.error && (state.lang === 'ar' ? result.error.messageAR : result.error.messageEN);
+    showToast(specific || t('loadErrorText'));
+  }
+
+  function onceWithTimeout(fn, timeoutMs) {
+    let fired = false;
+    const timer = setTimeout(() => { if (!fired) { fired = true; forceHideBusyOverlay(); fn(); } }, timeoutMs * (typeof TIMEOUT_SCALE === 'number' ? TIMEOUT_SCALE : 1));
+    return (...args) => { if (fired) return; fired = true; clearTimeout(timer); fn(...args); };
+  }
+
+  function renderTabs() {
+    document.getElementById('tabsRow').innerHTML = `
+      <button class="tab ${state.activeTab === 'OFFCATALOG' ? 'active' : ''}" data-tab="OFFCATALOG">${t('tabOffCatalog')}${badgeHtml('offCatalog')}</button>
+      <button class="tab ${state.activeTab === 'SHORTAGE' ? 'active' : ''}" data-tab="SHORTAGE">${t('tabShortage')}${badgeHtml('shortage')}</button>
+      <button class="tab ${state.activeTab === 'RECEIVE' ? 'active' : ''}" data-tab="RECEIVE">${t('tabReceive')}</button>
+      <button class="tab ${state.activeTab === 'ISSUE' ? 'active' : ''}" data-tab="ISSUE">${t('tabIssue')}${badgeHtml('issue')}</button>
+      <button class="tab ${state.activeTab === 'SUPPLIERS' ? 'active' : ''}" data-tab="SUPPLIERS">${t('tabSuppliers')}</button>
+      <!-- SPEC v1.4 (طلب مباشر: دمج "تاريخ الصلاحية" و"الرصيد" في تبويب
+           واحد مع فلترة -- أبسط للمستخدم، نفس البيانات من زاويتين). زر هذا
+           التبويب أُزيل، محتواه اندمج في تبويب BOARD أدناه. -->
+      <button class="tab ${state.activeTab === 'BOARD' ? 'active' : ''}" data-tab="BOARD">${t('tabBoard')}</button>
+      <button class="tab ${state.activeTab === 'QUARANTINE' ? 'active' : ''}" data-tab="QUARANTINE">${t('tabQuarantine')}</button>
+      <button class="tab ${state.activeTab === 'DISPOSAL' ? 'active' : ''}" data-tab="DISPOSAL">${t('tabDisposal')}</button>
+      <button class="tab ${state.activeTab === 'MOVEMENT' ? 'active' : ''}" data-tab="MOVEMENT">${t('tabMovement')}</button>
+      <!-- SPEC v1.4 (طلب مباشر: "يبدو أن لا حاجة لنا بها الآن") -- الزر
+           أُزيل من الواجهة، الدالة الخادمية والمنطق بقيا كما هما دون حذف،
+           تحسّبًا لإعادة النظر لاحقًا. -->
+      <!-- SPEC v1.4 (جديدة، طلب مباشر: توحيد دورة الطلبية بين الأقسام
+           ومخزن المواد الأولية) -- تبويب منفصل تمامًا عن "طلبيات المحلات
+           المباشرة" أعلاه (مفهوم مختلف كليًا: طلبات مباشرة من المحل للمخزن
+           تتجاوز مسار الكاشير/الاعتماد بالكامل). هذا التبويب ينقل لصفحة
+           منفصلة (rms_store_orders.html) لا محتوى داخل نفس اللوحة، لأنه
+           يُعيد استخدام شاشة التنفيذ الكاملة المبنية والمُختبَرة أصلًا
+           لصالح الأقسام الإنتاجية بنفس الآلية بالضبط. -->
+      <button class="tab" id="tabGoToApprovedOrders" type="button">${t('tabApprovedStoreOrders')}${badgeHtml('orders')}</button>
+    `;
+    document.querySelectorAll('[data-tab]').forEach(el => {
+      el.addEventListener('click', () => {
+        state.activeTab = el.getAttribute('data-tab');
+        if (state.activeTab !== 'RECEIVE') receiveFormContext = null; // مسح السياق إلا لو أتينا عبر إجراء مباشر
+        renderTabs();
+        loadActiveTab();
+      });
+    });
+    // SPEC v1.4 -- تنقّل فوري متزامن لصفحة منفصلة، لا تبديل محتوى داخل نفس
+    // اللوحة كبقية التبويبات -- نقرة واحدة تكفي (بلا بيانات تُعدَّل هنا).
+    document.getElementById('tabGoToApprovedOrders').addEventListener('click', () => {
+      window.top.location.href = APP_BASE_URL + '?page=rms_store_orders&uid=' + encodeURIComponent(CURRENT_USER_ID);
+    });
+  }
+
+  function loadActiveTab() {
+    if (state.activeTab === 'OFFCATALOG') loadOffCatalog();
+    else if (state.activeTab === 'SHORTAGE') loadShortage();
+    else if (state.activeTab === 'RECEIVE') loadReceiveForm();
+    else if (state.activeTab === 'ISSUE') loadSupplyRequestsForRMS();
+    else if (state.activeTab === 'SUPPLIERS') loadSuppliers();
+    else if (state.activeTab === 'EXPIRY') loadExpiryReport();
+    else if (state.activeTab === 'BOARD') loadBoard();
+    else if (state.activeTab === 'QUARANTINE') loadQuarantineHistory();
+    else if (state.activeTab === 'DISPOSAL') loadDisposalForm();
+    else if (state.activeTab === 'MOVEMENT') loadMovement();
+    else loadStoreOrders();
+  }
+
+  // ===================== 6.4 طلبات خارج الكتالوج =====================
+  function loadOffCatalog() {
+    document.getElementById('mainArea').innerHTML = `<div class="card empty-state">${t('loadingText')}</div>`;
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(result => {
+        if (!result || !result.success) {
+          const detail = result ? JSON.stringify(result) : '';
+          document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} — ${detail}</div>`;
+          return;
+        }
+        OFFCATALOG_ITEMS = result.data.items;
+        setBadge('offCatalog', OFFCATALOG_ITEMS.length);
+        renderOffCatalog();
+      }, 8000))
+      .withFailureHandler(error => {
+        let detail = ''; try { detail = (error && error.message) ? error.message : JSON.stringify(error); } catch (e) { detail = String(error); }
+        document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} (FAIL) — ${detail}</div>`;
+      })
+      .getOffCatalogPurchaseRequests(CURRENT_USER_ID);
+  }
+
+  function renderOffCatalog() {
+    if (!OFFCATALOG_ITEMS.length) {
+      document.getElementById('mainArea').innerHTML = `<div class="card empty-state"><div class="big">📥</div>${t('emptyOffCatalog')}</div>`;
+      return;
+    }
+    document.getElementById('mainArea').innerHTML = `
+      <div class="card">
+        ${OFFCATALOG_ITEMS.map(it => `
+          <div class="stock-item-card" data-item="${it.approvalId}">
+            <div class="stock-item-name">${it.descriptionAR}</div>
+            ${attachmentBadgeHtml(it)}
+            <div style="font-size:12px; color:var(--ink-soft); margin-bottom:10px;">
+              <span style="font-family:var(--font-mono);">${it.orderId}</span> · ${fmtOrderDate(it.orderCreatedAt)}<br>
+              ${it.storeNameAR} · ${it.qty} ${it.unitId} · ${t('cashierLbl')(it.cashierNameAR)}
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="submit-btn" style="background:var(--warn); flex:1;" data-reject="${it.approvalId}">${t('rejectBtn')}</button>
+              <button class="submit-btn" style="background:var(--success); flex:1;" data-approve="${it.approvalId}">${t('approveBtn')}</button>
+            </div>
+          </div>`).join('')}
+      </div>
+    `;
+    wireConfirmableSimple('[data-approve]', 'data-approve', (id) => {
+      const it = OFFCATALOG_ITEMS.find(x => x.approvalId === id);
+      google.script.run
+        .withSuccessHandler(onceWithTimeout(result => {
+          if (result && !result.success) { showToast(failText(result)); return; }
+          showToast(t('toastApproved'));
+          loadOffCatalog();
+        }, 8000))
+        .withFailureHandler(() => showToast(t('loadErrorText')))
+        .decideOffCatalogRequest(CURRENT_USER_ID, id, 'APPROVED', '');
+    });
+    wireConfirmableSimple('[data-reject]', 'data-reject', (id) => {
+      google.script.run
+        .withSuccessHandler(onceWithTimeout(result => {
+          if (result && !result.success) { showToast(failText(result)); return; }
+          showToast(t('toastRejected'));
+          loadOffCatalog();
+        }, 8000))
+        .withFailureHandler(() => showToast(t('loadErrorText')))
+        .decideOffCatalogRequest(CURRENT_USER_ID, id, 'REJECTED', '');
+    });
+  }
+
+  // ===================== 6.6 إشعارات النقص =====================
+  function loadShortage() {
+    document.getElementById('mainArea').innerHTML = `<div class="card empty-state">${t('loadingText')}</div>`;
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(result => {
+        if (!result || !result.success) {
+          const detail = result ? JSON.stringify(result) : '';
+          document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} — ${detail}</div>`;
+          return;
+        }
+        SHORTAGE_ITEMS = result.data.items;
+        setBadge('shortage', SHORTAGE_ITEMS.length);
+        renderShortage();
+      }, 8000))
+      .withFailureHandler(error => {
+        let detail = ''; try { detail = (error && error.message) ? error.message : JSON.stringify(error); } catch (e) { detail = String(error); }
+        document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} (FAIL) — ${detail}</div>`;
+      })
+      .getRawMaterialShortageNotices(CURRENT_USER_ID);
+  }
+
+  function renderShortage() {
+    const rowsHtml = !SHORTAGE_ITEMS.length
+      ? `<div class="empty-state"><div class="big">✅</div>${t('emptyShortage')}</div>`
+      : `<div class="banner">${t('shortageNote')}</div>` + SHORTAGE_ITEMS.map(it => `
+          <div class="stock-item-card" data-item="${it.approvalId}">
+            <div class="stock-item-name">${state.lang === 'ar' ? it.nameAR : it.nameEN} — ${it.shortageQty} ${it.unitId}</div>
+            <div style="font-size:12px; color:var(--ink-soft); margin-bottom:10px;">${state.lang === 'ar' ? it.storeNameAR : it.storeNameEN} · ${it.orderId}</div>
+            <div style="display:flex; gap:8px;">
+              <button class="submit-btn" style="background:var(--ink-soft); flex:1;" data-defer="${it.approvalId}">${t('deferBtn')}</button>
+              <button class="submit-btn" style="background:var(--secondary); flex:1;" data-start="${it.approvalId}" data-product="${it.productId}">${t('startSourcingBtn')}</button>
+            </div>
+          </div>`).join('');
+    document.getElementById('mainArea').innerHTML = `<div class="card">${rowsHtml}</div>`;
+
+    wireConfirmableSimple('[data-defer]', 'data-defer', (id) => {
+      google.script.run
+        .withSuccessHandler(onceWithTimeout(result => {
+          if (result && !result.success) { showToast(failText(result)); return; }
+          showToast(t('toastDeferred'));
+          loadShortage();
+        }, 8000))
+        .withFailureHandler(() => showToast(t('loadErrorText')))
+        .decideApproval(CURRENT_USER_ID, id, 'REJECTED', '');
+    });
+    document.querySelectorAll('[data-start]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-start');
+        const productId = btn.getAttribute('data-product');
+        btn.disabled = true;
+        google.script.run
+          .withSuccessHandler(onceWithTimeout(result => {
+            btn.disabled = false;
+            if (result && !result.success) { showToast(failText(result)); return; }
+            showToast(t('toastSourcingStarted'));
+            receiveFormContext = { presetProductId: productId };
+            state.activeTab = 'RECEIVE';
+            renderTabs();
+            loadReceiveForm();
+          }, 8000))
+          .withFailureHandler(() => { btn.disabled = false; showToast(t('loadErrorText')); })
+          .decideApproval(CURRENT_USER_ID, id, 'APPROVED', '');
+      });
+    });
+  }
+
+  // ===================== 6.2 استلام من مورد =====================
+  function loadReceiveForm() {
+    document.getElementById('mainArea').innerHTML = `<div class="card empty-state">${t('loadingText')}</div>`;
+    let suppliersResult = null, catalogResult = null, finished = false;
+    function checkDone() {
+      if (finished || suppliersResult === null || catalogResult === null) return;
+      finished = true;
+      if (!suppliersResult.success || !catalogResult.success) {
+        const failed = !suppliersResult.success ? suppliersResult : catalogResult;
+        document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} — ${JSON.stringify(failed)}</div>`;
+        return;
+      }
+      SUPPLIERS_LIST = suppliersResult.data.suppliers;
+      RAW_CATALOG = catalogResult.data.products;
+      renderReceiveForm();
+    }
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(r => { suppliersResult = r || { success: true, data: { suppliers: [] } }; checkDone(); }, 8000))
+      .withFailureHandler(() => { suppliersResult = { success: false }; checkDone(); })
+      .getSuppliersList(CURRENT_USER_ID);
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(r => { catalogResult = r || { success: true, data: { products: [] } }; checkDone(); }, 8000))
+      .withFailureHandler(() => { catalogResult = { success: false }; checkDone(); })
+      .getRawMaterialCatalog(CURRENT_USER_ID);
+  }
+
+  function renderReceiveForm() {
+    const ctx = receiveFormContext;
+    const ctxProduct = ctx && ctx.presetProductId ? RAW_CATALOG.find(p => p.productId === ctx.presetProductId) : null;
+    const bannerHtml = ctxProduct ? `<div class="banner">${t('contextBanner')(state.lang === 'ar' ? ctxProduct.nameAR : ctxProduct.nameEN)}</div>` : '';
+    receiveSearchQuery = ctxProduct ? '' : (receiveSearchQuery || '');
+    document.getElementById('mainArea').innerHTML = `
+      ${bannerHtml}
+      <div class="card form-card" style="padding:16px;">
+        <div class="field">
+          <label>${t('referenceLabel')}</label>
+          <input type="text" id="recvReference" placeholder="${t('referencePlaceholder')}">
+        </div>
+        <div class="field">
+          <label>${t('supplierLabel')}</label>
+          <select id="recvSupplier">
+            <option value="" selected disabled>${t('chooseSupplier')}</option>
+            ${SUPPLIERS_LIST.map(s => `<option value="${s.supplierId}">${state.lang === 'ar' ? s.nameAR : s.nameEN}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field">
+          <label>${t('productLabel')}</label>
+          ${ctxProduct ? '' : `<input type="text" id="recvProductSearch" class="search-input" placeholder="${t('searchProductPlaceholder')}" value="${receiveSearchQuery}">`}
+          <select id="recvProduct" size="${ctxProduct ? 1 : 6}" ${ctxProduct ? 'disabled' : ''}>
+            ${ctxProduct ? `<option value="${ctxProduct.productId}" selected>${state.lang === 'ar' ? ctxProduct.nameAR : ctxProduct.nameEN}</option>` : ''}
+          </select>
+          <div id="recvProductInfo" class="product-info-box" style="display:none;"></div>
+        </div>
+        <div class="field">
+          <label>${t('quantityLabel')}</label>
+          <input type="number" id="recvQty" min="0.5" step="0.5">
+        </div>
+        <div class="field">
+          <label>${t('priceLabel')}</label>
+          <input type="number" id="recvPrice" min="0.01" step="0.01">
+        </div>
+        <div class="field">
+          <label>${t('expiryLabel')}</label>
+          <input type="date" id="recvExpiry">
+        </div>
+        <button class="submit-btn" id="submitReceiveBtn">${t('submitReceive')}</button>
+      </div>
+    `;
+
+    function populateProductSelect() {
+      const sel = document.getElementById('recvProduct');
+      const q = receiveSearchQuery.trim().toLowerCase();
+      const filtered = RAW_CATALOG.filter(p => !q || p.nameAR.toLowerCase().includes(q) || p.nameEN.toLowerCase().includes(q));
+      sel.innerHTML = filtered.length
+        ? filtered.map(p => `<option value="${p.productId}">${state.lang === 'ar' ? p.nameAR : p.nameEN}</option>`).join('')
+        : `<option value="" disabled>${t('noResultsFound')}</option>`;
+    }
+
+    function showProductInfo(productId) {
+      const box = document.getElementById('recvProductInfo');
+      const p = RAW_CATALOG.find(x => x.productId === productId);
+      if (!p) { box.style.display = 'none'; return; }
+      const imgHtml = p.imageFileId
+        ? '<img src="' + driveUrl_('thumbnail?id=' + encodeURIComponent(p.imageFileId) + '&sz=w200') + '" class="recv-product-img" alt="">'
+        : '';
+      box.innerHTML = `
+        ${imgHtml}
+        <div><b>${t('unitLabel')}:</b> ${p.unitId}</div>
+        <div class="threshold-row">
+          <label>${t('minThresholdLabel')}</label>
+          <input type="number" id="recvMinThreshold" min="0" step="0.5" value="${p.minimumThreshold || 0}">
+          <button type="button" id="recvSaveThresholdBtn" class="mini-btn">${t('saveThresholdBtn')}</button>
+        </div>`;
+      box.style.display = 'block';
+      document.getElementById('recvSaveThresholdBtn').addEventListener('click', () => {
+        const val = parseFloat(document.getElementById('recvMinThreshold').value) || 0;
+        google.script.run
+          .withSuccessHandler(onceWithTimeout(result => {
+            if (result && result.success) { p.minimumThreshold = val; showToast(t('toastThresholdSaved')); }
+            else showApiError(result);
+          }, 8000))
+          .withFailureHandler(() => showToast(t('loadErrorText')))
+          .setMinimumThreshold(CURRENT_USER_ID, productId, val);
+      });
+    }
+
+    if (ctxProduct) {
+      showProductInfo(ctxProduct.productId);
+    } else {
+      populateProductSelect();
+      document.getElementById('recvProductSearch').addEventListener('input', (e) => {
+        receiveSearchQuery = e.target.value;
+        populateProductSelect();
+        document.getElementById('recvProductInfo').style.display = 'none';
+      });
+    }
+    document.getElementById('recvProduct').addEventListener('change', (e) => showProductInfo(e.target.value));
+
+    const btn = document.getElementById('submitReceiveBtn');
+    let armed = false;
+    let timer = null;
+    const original = btn.innerHTML;
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      const supplierId = document.getElementById('recvSupplier').value;
+      const productId = ctxProduct ? ctxProduct.productId : document.getElementById('recvProduct').value;
+      const qty = parseFloat(document.getElementById('recvQty').value);
+      const price = parseFloat(document.getElementById('recvPrice').value);
+      if (!supplierId || !productId || !qty || qty <= 0 || !price || price <= 0) { showToast(t('toastMissingFields')); return; }
+      if (!armed) {
+        armed = true;
+        btn.classList.add('confirm-armed');
+        btn.innerHTML = state.lang === 'ar' ? '\u{1F446} \u0627\u0636\u063a\u0637 \u0645\u0631\u0629 \u0623\u062e\u0631\u0649 \u0644\u0644\u062a\u0623\u0643\u064a\u062f' : '\u{1F446} Tap again to confirm';
+        timer = setTimeout(() => { armed = false; btn.classList.remove('confirm-armed'); btn.innerHTML = original; }, 2800);
+      } else {
+        clearTimeout(timer);
+        btn.disabled = true;
+        btn.innerHTML = t('savingText');
+        const expiry = document.getElementById('recvExpiry').value;
+        const reference = document.getElementById('recvReference').value;
+        const productObj = RAW_CATALOG.find(p => p.productId === productId);
+        const productLabel = productObj ? (state.lang === 'ar' ? productObj.nameAR : productObj.nameEN) : productId;
+        const items = [{ productId: productId, quantity: qty, unitPurchasePrice: price, expiryDate: expiry || '' }];
+        google.script.run
+          .withSuccessHandler(onceWithTimeout(result => {
+            btn.disabled = false;
+            if (result && !result.success) { btn.innerHTML = original; showToast(t('loadErrorText')); return; }
+            showToast(t('toastReceiveSaved')(productLabel));
+            armed = false; btn.classList.remove('confirm-armed');
+            receiveFormContext = null;
+            receiveSearchQuery = '';
+            loadReceiveForm();
+          }, 8000))
+          .withFailureHandler(() => { btn.disabled = false; btn.innerHTML = original; showToast(t('loadErrorText')); })
+          .receiveFromSupplier(CURRENT_USER_ID, supplierId, items, reference || '', ctx ? null : null);
+      }
+    });
+  }
+
+  // ===================== 6.3 صرف للأقسام =====================
+  /**
+   * loadSupplyRequestsForRMS() -- SPEC v1.4 (طلب مباشر، بند 22): استبدال
+   * كامل لتدفّق "الصرف المباشر" القديم بمراجعة طلبات تزويد واردة فعليًّا
+   * من الأقسام -- المخزن يعتمد/يرفض/يعدِّل، ثم يسجِّل التسليم كخطوة منفصلة
+   * (هنا فقط يُخصَم الرصيد، عبر recordSupplyDelivery المُختبَرة أصلًا).
+   */
+  function loadSupplyRequestsForRMS() {
+    document.getElementById('mainArea').innerHTML = `<div class="card empty-state">${t('loadingText')}</div>`;
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(result => {
+        if (!result || !result.success) {
+          const detail = result ? JSON.stringify(result) : '';
+          document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} — ${detail}</div>`;
+          return;
+        }
+        SUPPLY_REQUESTS = result.data.requests;
+        setBadge('issue', SUPPLY_REQUESTS.length);
+        renderSupplyRequestsList();
+      }, 8000))
+      .withFailureHandler(error => {
+        let detail = ''; try { detail = (error && error.message) ? error.message : JSON.stringify(error); } catch (e) { detail = String(error); }
+        document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} (FAIL) — ${detail}</div>`;
+      })
+      .getPendingSupplyRequestsForRMS(CURRENT_USER_ID);
+  }
+
+  function renderSupplyRequestsList() {
+    if (!SUPPLY_REQUESTS.length) {
+      document.getElementById('mainArea').innerHTML = `<div class="card empty-state"><div class="big">📥</div>${t('emptySupplyRequests')}</div>`;
+      return;
+    }
+    document.getElementById('mainArea').innerHTML = `
+      <div class="card" id="supplyRequestsListCard">
+        ${SUPPLY_REQUESTS.map((r, idx) => `
+          <button class="stock-item-card" type="button" style="width:100%; text-align:${state.lang === 'ar' ? 'right' : 'left'}; border:none; border-bottom:1px dashed var(--line); cursor:pointer;" data-req-idx="${idx}">
+            <div class="stock-item-name">${state.lang === 'ar' ? r.departmentNameAR : r.departmentNameEN}
+              <span class="expiry-badge ${r.status === 'APPROVED' ? 'near' : ''}" style="${r.status === 'PENDING' ? 'background:var(--pending-tint); color:var(--pending);' : ''}">${r.status === 'PENDING' ? t('statusPending') : t('statusApprovedAwaitingDelivery')}</span>
+            </div>
+            <div style="font-size:12px; color:var(--ink-soft);">${t('itemsCountLbl')(r.items.length)} — ${formatRequestTime(r.requestedAt)}</div>
+          </button>`).join('')}
+      </div>
+    `;
+    document.querySelectorAll('[data-req-idx]').forEach(btn => {
+      btn.addEventListener('click', () => renderSupplyRequestDetail(parseInt(btn.getAttribute('data-req-idx'))));
+    });
+  }
+
+  function formatRequestTime(iso) {
+    if (!iso) return '';
+    const diffMin = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
+    if (diffMin < 60) return state.lang === 'ar' ? `قبل ${diffMin} دقيقة` : `${diffMin}m ago`;
+    const diffH = Math.round(diffMin / 60);
+    if (diffH < 24) return state.lang === 'ar' ? `قبل ${diffH} ساعة` : `${diffH}h ago`;
+    return new Date(iso).toLocaleDateString(state.lang === 'ar' ? 'ar-QA-u-nu-latn' : 'en-US');
+  }
+
+  /**
+   * renderSupplyRequestDetail(idx) -- طلب PENDING: اعتماد (بكميات قابلة
+   * للتعديل) أو رفض. طلب APPROVED: تسجيل تسليم فعلي فقط (بكميات قابلة
+   * للتعديل أيضًا -- قد يقل المتوفر عمّا اعتُمد سابقًا).
+   */
+  function renderSupplyRequestDetail(idx) {
+    const r = SUPPLY_REQUESTS[idx];
+    const isPending = r.status === 'PENDING';
+    document.getElementById('mainArea').innerHTML = `
+      <div class="subheader" style="padding:0 0 12px;">
+        <button class="back-btn" id="srDetailBackBtn"><span class="arrow">←</span></button>
+        <h1 style="font-size:16px;">${state.lang === 'ar' ? r.departmentNameAR : r.departmentNameEN}</h1>
+      </div>
+      <div class="card form-card">
+        ${r.items.map((it, itemIdx) => `
+          <div class="final-row" data-item-idx="${itemIdx}">
+            <div class="item-thumb">📦</div>
+            <div class="item-main">
+              <div class="item-name">${state.lang === 'ar' ? it.nameAR : it.nameEN}</div>
+              <div class="item-ref">${t('requestedRefLbl')}: ${it.requestedQty} ${it.unitId}</div>
+              ${isPending ? `<div class="item-ref" style="color:var(--success);">${t('availableRefLbl')}: ${it.availableQty} ${it.unitId}</div>` : ''}
+            </div>
+            <div class="qty-stepper">
+              <button class="sr-dec" aria-label="-">−</button>
+              <input type="number" class="sr-qty-input" value="${isPending ? (it.approvedQty !== null ? it.approvedQty : it.requestedQty) : it.requestedQty}" min="0" step="0.5">
+              <button class="sr-inc" aria-label="+">+</button>
+            </div>
+            <span class="item-unit">${it.unitId}</span>
+          </div>`).join('')}
+      </div>
+      <div style="display:flex; gap:10px; padding:0 4px;">
+        ${isPending ? `
+          <button class="submit-btn" id="srRejectBtn" style="flex:1; background:var(--warn);">✕ ${t('rejectBtn')}</button>
+          <button class="submit-btn" id="srApproveBtn" style="flex:1;">✅ ${t('approveBtn')}</button>
+        ` : `
+          <button class="submit-btn" id="srDeliverBtn" style="flex:1;">🚚 ${t('recordDeliveryBtn')}</button>
+        `}
+      </div>
+    `;
+    document.getElementById('srDetailBackBtn').addEventListener('click', renderSupplyRequestsList);
+
+    document.querySelectorAll('[data-item-idx]').forEach(row => {
+      const itemIdx = parseInt(row.getAttribute('data-item-idx'));
+      const input = row.querySelector('.sr-qty-input');
+      const setQty = (val) => { input.value = Math.max(0, round1(val)); };
+      row.querySelector('.sr-inc').addEventListener('click', () => setQty(parseFloat(input.value) + 0.5));
+      row.querySelector('.sr-dec').addEventListener('click', () => setQty(Math.max(0, parseFloat(input.value) - 0.5)));
+      input.addEventListener('change', () => {
+        const parsed = parseFloat(input.value);
+        setQty(!isNaN(parsed) ? parsed : (isPending ? r.items[itemIdx].requestedQty : r.items[itemIdx].requestedQty));
+      });
+    });
+
+    if (isPending) {
+      wireConfirmable(document.getElementById('srApproveBtn'), () => {
+        const overrides = r.items.map((it, itemIdx) => ({
+          supplyRequestItemId: it.supplyRequestItemId,
+          approvedQty: parseFloat(document.querySelector(`[data-item-idx="${itemIdx}"] .sr-qty-input`).value) || 0
+        }));
+        google.script.run
+          .withSuccessHandler(onceWithTimeout(result => {
+            if (!result || !result.success) { showToast(t('loadErrorText')); return; }
+            showToast(t('toastApproved'));
+            loadSupplyRequestsForRMS();
+          }, 8000))
+          .withFailureHandler(() => showToast(t('loadErrorText')))
+          .decideSupplyRequest(CURRENT_USER_ID, r.requestId, 'APPROVED', overrides, '');
+      });
+      wireConfirmable(document.getElementById('srRejectBtn'), () => {
+        google.script.run
+          .withSuccessHandler(onceWithTimeout(result => {
+            if (!result || !result.success) { showToast(t('loadErrorText')); return; }
+            showToast(t('toastRejected'));
+            loadSupplyRequestsForRMS();
+          }, 8000))
+          .withFailureHandler(() => showToast(t('loadErrorText')))
+          .decideSupplyRequest(CURRENT_USER_ID, r.requestId, 'REJECTED', [], '');
+      });
+    } else {
+      wireConfirmable(document.getElementById('srDeliverBtn'), () => {
+        const delivered = r.items.map((it, itemIdx) => ({
+          supplyRequestItemId: it.supplyRequestItemId,
+          deliveredQty: parseFloat(document.querySelector(`[data-item-idx="${itemIdx}"] .sr-qty-input`).value) || 0
+        }));
+        google.script.run
+          .withSuccessHandler(onceWithTimeout(result => {
+            if (!result || !result.success) { showToast(t('loadErrorText')); return; }
+            showToast(t('toastDelivered'));
+            loadSupplyRequestsForRMS();
+          }, 8000))
+          .withFailureHandler(() => showToast(t('loadErrorText')))
+          .recordSupplyDelivery(CURRENT_USER_ID, r.requestId, delivered);
+      });
+    }
+  }
+
+  /** wireConfirmable(btn, onConfirm) -- نفس نمط النقرتين المُثبَت عبر المشروع، مختصَرة هنا محليًّا. */
+  function round1(n) { return Math.round(n * 100) / 100; }
+  function wireConfirmable(btn, onConfirm) {
+    let armed = false;
+    let timer = null;
+    const original = btn.innerHTML;
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      if (!armed) {
+        armed = true;
+        btn.classList.add('confirm-armed');
+        btn.innerHTML = state.lang === 'ar' ? '👆 اضغط مرة أخرى للتأكيد' : '👆 Tap again to confirm';
+        timer = setTimeout(() => { armed = false; btn.classList.remove('confirm-armed'); btn.innerHTML = original; }, 2800);
+      } else {
+        clearTimeout(timer);
+        btn.disabled = true;
+        onConfirm();
+      }
+    });
+  }
+
+  // ===================== 6.1 الموردون =====================
+  function loadSuppliers() {
+    document.getElementById('mainArea').innerHTML = `<div class="card empty-state">${t('loadingText')}</div>`;
+    let suppliersResult = null, listsResult = null, finished = false;
+    function checkDone() {
+      if (finished || suppliersResult === null || listsResult === null) return;
+      finished = true;
+      if (!suppliersResult.success) {
+        document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} — ${JSON.stringify(suppliersResult)}</div>`;
+        return;
+      }
+      SUPPLIERS_MGMT_LIST = suppliersResult.data.suppliers;
+      if (listsResult.success) { RMS_UNITS_LIST = listsResult.data.units; RMS_FAMILIES_LIST = listsResult.data.materialFamilies; }
+      renderSuppliers();
+    }
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(r => { suppliersResult = r || { success: false }; checkDone(); }, 8000))
+      .withFailureHandler(() => { suppliersResult = { success: false }; checkDone(); })
+      .getSuppliers(CURRENT_USER_ID);
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(r => { listsResult = r || { success: false }; checkDone(); }, 8000))
+      .withFailureHandler(() => { listsResult = { success: false }; checkDone(); })
+      .getUnitsAndFamiliesList(CURRENT_USER_ID);
+  }
+
+  let suppliersSubTab = 'SUPPLIERS'; // SUPPLIERS | ADDPRODUCT -- SPEC v1.4 (طلب مباشر: دمج الموردين وإضافة أصناف جديدة)
+  let RMS_UNITS_LIST = [];
+  let RMS_FAMILIES_LIST = [];
+
+  function renderSuppliers() {
+    if (suppliersSubTab === 'ADDPRODUCT') { renderAddProductSubTab(); return; }
+    const listHtml = !SUPPLIERS_MGMT_LIST.length
+      ? `<div class="empty-state">${t('emptySuppliers')}</div>`
+      : SUPPLIERS_MGMT_LIST.map(s => `
+          <div class="stock-item-card" data-supplier="${s.supplierId}">
+            <div class="stock-item-name">${state.lang === 'ar' ? s.nameAR : s.nameEN} ${!s.active ? `<span style="color:var(--warn); font-size:11px;">(${t('inactiveTag')})</span>` : ''}</div>
+            <div style="font-size:12px; color:var(--ink-soft); margin-bottom:8px;">${s.phone || ''}</div>
+            <button class="submit-btn" style="padding:8px;" data-edit-supplier="${s.supplierId}">${t('editBtn')}</button>
+          </div>`).join('');
+    document.getElementById('mainArea').innerHTML = `
+      <div class="suppliers-subtabs">
+        <button class="suppliers-subtab active" data-subtab="SUPPLIERS">${t('subtabSuppliers')}</button>
+        <button class="suppliers-subtab" data-subtab="ADDPRODUCT">${t('subtabAddProduct')}</button>
+      </div>
+      <div style="padding:12px 16px 12px;">
+        <button class="submit-btn" id="addSupplierToggle">${t('addSupplierBtn')}</button>
+      </div>
+      <div id="supplierFormWrap"></div>
+      <div class="card">${listHtml}</div>
+    `;
+    wireSuppliersSubtabs();
+    document.getElementById('addSupplierToggle').addEventListener('click', () => renderSupplierForm(null));
+    document.querySelectorAll('[data-edit-supplier]').forEach(btn => {
+      btn.addEventListener('click', () => renderSupplierForm(SUPPLIERS_MGMT_LIST.find(s => s.supplierId === btn.getAttribute('data-edit-supplier'))));
+    });
+  }
+
+  function wireSuppliersSubtabs() {
+    document.querySelectorAll('[data-subtab]').forEach(btn => {
+      btn.addEventListener('click', () => { suppliersSubTab = btn.getAttribute('data-subtab'); renderSuppliers(); });
+    });
+  }
+
+  /**
+   * renderAddProductSubTab() -- SPEC v1.4 (جديدة، طلب مباشر): مخزن المواد
+   * الأولية يستطيع الآن إضافة أصناف مواد أولية مباشرة، بنفس منطق
+   * createProduct() الموجود (مقيَّد لنوع RAW_MATERIAL فقط خادميًّا).
+   */
+  function renderAddProductSubTab() {
+    document.getElementById('mainArea').innerHTML = `
+      <div class="suppliers-subtabs">
+        <button class="suppliers-subtab" data-subtab="SUPPLIERS">${t('subtabSuppliers')}</button>
+        <button class="suppliers-subtab active" data-subtab="ADDPRODUCT">${t('subtabAddProduct')}</button>
+      </div>
+      <div class="card form-card" style="padding:16px; margin:12px 16px;">
+        <div class="field"><label>${t('productNameLbl')} (AR)</label><input type="text" id="newProdNameAR"></div>
+        <div class="field"><label>${t('productNameLbl')} (EN)</label><input type="text" id="newProdNameEN"></div>
+        <div class="field"><label>${t('unitLabel')}</label>
+          <select id="newProdUnit"><option value="">-- ${t('selectPlaceholder')} --</option>
+            ${RMS_UNITS_LIST.map(u => `<option value="${u.itemCode}">${state.lang === 'ar' ? u.valueAR : u.valueEN}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field"><label>${t('materialFamilyLbl')}</label>
+          <select id="newProdFamily"><option value="">-- ${t('selectPlaceholder')} --</option>
+            ${RMS_FAMILIES_LIST.map(f => `<option value="${f.itemCode}">${state.lang === 'ar' ? f.valueAR : f.valueEN}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field"><label>${t('minThresholdLabel')}</label>
+          <input type="number" id="newProdMin" min="0" step="0.5" value="0" inputmode="decimal">
+        </div>
+        <button class="submit-btn" id="saveNewProductBtn" style="width:100%;">${t('saveNewProductBtn')}</button>
+      </div>
+    `;
+    wireSuppliersSubtabs();
+    document.getElementById('saveNewProductBtn').addEventListener('click', () => {
+      const nameAR = document.getElementById('newProdNameAR').value.trim();
+      const nameEN = document.getElementById('newProdNameEN').value.trim();
+      const unitId = document.getElementById('newProdUnit').value;
+      const materialFamily = document.getElementById('newProdFamily').value;
+      if (!nameAR || !unitId || !materialFamily) { showToast(t('toastMissingFields')); return; }
+      const minRaw = document.getElementById('newProdMin').value;
+      const minimumThreshold = minRaw === '' ? 0 : Number(minRaw);
+      if (isNaN(minimumThreshold) || minimumThreshold < 0) { showToast(t('toastInvalidMin')); return; }
+      const btn = document.getElementById('saveNewProductBtn');
+      btn.disabled = true;
+      google.script.run
+        .withSuccessHandler(onceWithTimeout(result => {
+          btn.disabled = false;
+          if (!result || !result.success) { showToast(failText(result)); return; }
+          showToast(t('toastProductSaved'));
+          document.getElementById('newProdMin').value = '0';
+          document.getElementById('newProdNameAR').value = '';
+          document.getElementById('newProdNameEN').value = '';
+          document.getElementById('newProdUnit').value = '';
+          document.getElementById('newProdFamily').value = '';
+        }, 8000))
+        .withFailureHandler(() => { btn.disabled = false; showToast(t('loadErrorText')); })
+        .createProduct(CURRENT_USER_ID, { productNameAR: nameAR, productNameEN: nameEN, productType: 'RAW_MATERIAL', unitId: unitId, materialFamily: materialFamily, minimumThreshold: minimumThreshold });
+    });
+  }
+
+  function renderSupplierForm(existing) {
+    const wrap = document.getElementById('supplierFormWrap');
+    wrap.innerHTML = `
+      <div class="card form-card" style="padding:16px; margin:0 16px 12px;">
+        <div class="field"><label>${t('supplierNameLbl')} (AR)</label><input type="text" id="supNameAR" value="${existing ? existing.nameAR : ''}"></div>
+        <div class="field"><label>${t('supplierNameLbl')} (EN)</label><input type="text" id="supNameEN" value="${existing ? existing.nameEN : ''}"></div>
+        <div class="field"><label>${t('phoneLbl')}</label><input type="text" id="supPhone" value="${existing ? existing.phone : ''}"></div>
+        <div style="display:flex; gap:8px;">
+          <button class="submit-btn" style="background:var(--ink-soft); flex:1;" id="cancelSupplierBtn">${t('cancelBtn')}</button>
+          <button class="submit-btn" style="flex:1;" id="saveSupplierBtn">${t('saveSupplierBtn')}</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('cancelSupplierBtn').addEventListener('click', () => { wrap.innerHTML = ''; });
+    document.getElementById('saveSupplierBtn').addEventListener('click', () => {
+      const nameAR = document.getElementById('supNameAR').value.trim();
+      const nameEN = document.getElementById('supNameEN').value.trim();
+      const phone = document.getElementById('supPhone').value.trim();
+      if (!nameAR) { showToast(t('toastMissingFields')); return; }
+      const btn = document.getElementById('saveSupplierBtn');
+      btn.disabled = true;
+      if (existing) {
+        google.script.run
+          .withSuccessHandler(onceWithTimeout(result => {
+            btn.disabled = false;
+            if (result && !result.success) { showToast(failText(result)); return; }
+            showToast(t('toastSupplierSaved'));
+            loadSuppliers();
+          }, 8000))
+          .withFailureHandler(() => { btn.disabled = false; showToast(t('loadErrorText')); })
+          .updateSupplier(CURRENT_USER_ID, existing.supplierId, { nameAR: nameAR, nameEN: nameEN, phone: phone });
+      } else {
+        google.script.run
+          .withSuccessHandler(onceWithTimeout(result => {
+            btn.disabled = false;
+            if (result && !result.success) { showToast(failText(result)); return; }
+            showToast(t('toastSupplierSaved'));
+            loadSuppliers();
+          }, 8000))
+          .withFailureHandler(() => { btn.disabled = false; showToast(t('loadErrorText')); })
+          .createSupplier(CURRENT_USER_ID, { nameAR: nameAR, nameEN: nameEN, phone: phone });
+      }
+    });
+  }
+
+  // ===================== 6.5 لوحة الرصيد =====================
+  function loadBoard() {
+    document.getElementById('mainArea').innerHTML = `<div class="card empty-state">${t('loadingText')}</div>`;
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(result => {
+        if (!result || !result.success) {
+          const detail = result ? JSON.stringify(result) : '';
+          document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} — ${detail}</div>`;
+          return;
+        }
+        BOARD_ITEMS = result.data.items;
+        renderBoard();
+      }, 8000))
+      .withFailureHandler(error => {
+        let detail = ''; try { detail = (error && error.message) ? error.message : JSON.stringify(error); } catch (e) { detail = String(error); }
+        document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} (FAIL) — ${detail}</div>`;
+      })
+      .getRawMaterialStockBoard(CURRENT_USER_ID);
+  }
+
+  let boardSearchQuery = ''; // SPEC v1.4 -- فلترة تبويب "المخزون" (المُدمَج) بالاسم والعائلة
+  let boardExpiryFilter = 'ALL'; // ALL | NEAR_EXPIRY | EXPIRED
+
+  /**
+   * computeUrgency(it) -- SPEC v1.4 (طلب مباشر: دمج تبويبَي "تاريخ الصلاحية"
+   * و"الرصيد" في تبويب واحد بفلترة) -- نفس عتبة الثلاثين يومًا المُستخدَمة
+   * في getRawMaterialExpiryReport الخادمية بالضبط، محسوبة هنا محليًّا من
+   * lastPurchaseExpiryDate الموجود أصلًا في بيانات لوحة المخزون (لا حاجة
+   * لنداء خادمي منفصل بعد الآن -- كل البيانات اللازمة موجودة في مصدر واحد).
+   */
+  function computeUrgency(it) {
+    if (!it.lastPurchaseExpiryDate) return 'NONE';
+    const expiry = new Date(it.lastPurchaseExpiryDate);
+    const now = new Date();
+    const oneMonthFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    if (expiry < now) return 'EXPIRED';
+    if (expiry <= oneMonthFromNow) return 'NEAR_EXPIRY';
+    return 'NORMAL';
+  }
+
+  function renderBoard() {
+    if (!BOARD_ITEMS.length) {
+      document.getElementById('mainArea').innerHTML = `<div class="card empty-state"><div class="big">📦</div>${t('emptyBoard')}</div>`;
+      return;
+    }
+    const q = boardSearchQuery.trim().toLowerCase();
+    let filtered = BOARD_ITEMS;
+    if (q) {
+      filtered = filtered.filter(it =>
+        it.nameAR.toLowerCase().includes(q) || it.nameEN.toLowerCase().includes(q) || (it.materialFamily || '').toLowerCase().includes(q)
+      );
+    }
+    if (boardExpiryFilter === 'NEAR_EXPIRY') filtered = filtered.filter(it => computeUrgency(it) === 'NEAR_EXPIRY');
+    else if (boardExpiryFilter === 'EXPIRED') filtered = filtered.filter(it => computeUrgency(it) === 'EXPIRED');
+
+    document.getElementById('mainArea').innerHTML = `
+      <input type="text" class="search-input" id="boardSearchInput" placeholder="${t('boardSearchPlaceholder')}" value="${boardSearchQuery}">
+      <div class="expiry-filter-row">
+        <button class="expiry-filter-chip ${boardExpiryFilter === 'ALL' ? 'active' : ''}" data-expfilter="ALL">${t('expFilterAll')}</button>
+        <button class="expiry-filter-chip ${boardExpiryFilter === 'NEAR_EXPIRY' ? 'active' : ''}" data-expfilter="NEAR_EXPIRY">⚠️ ${t('expFilterNear')}</button>
+        <button class="expiry-filter-chip ${boardExpiryFilter === 'EXPIRED' ? 'active' : ''}" data-expfilter="EXPIRED">⛔ ${t('expFilterExpired')}</button>
+      </div>
+      ${!filtered.length ? `<div class="card empty-state" style="margin-top:12px;">${t('emptyBoardSearch')}</div>` : `
+      <div class="card" style="margin-top:12px;">
+        ${filtered.map(it => {
+          const priceStr = it.lastPurchasePrice != null ? it.lastPurchasePrice : t('noDataYet');
+          const expiryStr = it.lastPurchaseExpiryDate
+            ? new Date(it.lastPurchaseExpiryDate).toLocaleDateString(state.lang === 'ar' ? 'ar-QA-u-nu-latn' : 'en-US')
+            : t('noDataYet');
+          const urgency = computeUrgency(it);
+          const badge = urgency === 'EXPIRED' ? `<span class="expiry-badge expired">⛔ ${t('expiredBadge')}</span>`
+            : urgency === 'NEAR_EXPIRY' ? `<span class="expiry-badge near">⚠️ ${t('nearExpiryBadge')}</span>` : '';
+          const rowCls = urgency === 'EXPIRED' ? 'row-expired' : urgency === 'NEAR_EXPIRY' ? 'row-near' : '';
+          return `
+          <div class="stock-item-card ${rowCls}">
+            <div class="stock-item-name">${state.lang === 'ar' ? it.nameAR : it.nameEN} <span style="font-weight:400; color:var(--ink-soft); font-size:12px;">(${it.unitId})</span>${badge ? ` ${badge}` : ''}</div>
+            <div class="stock-numbers">
+              <div class="stock-num-box"><div class="lbl">${t('onHandLbl')}</div><div class="val">${it.onHand}</div></div>
+              <div class="stock-num-box"><div class="lbl">${t('lastPriceLbl')}</div><div class="val">${priceStr}</div></div>
+              <div class="stock-num-box"><div class="lbl">${t('lastExpiryLbl')}</div><div class="val">${expiryStr}</div></div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`}
+    `;
+    const input = document.getElementById('boardSearchInput');
+    input.addEventListener('input', () => { boardSearchQuery = input.value; renderBoard(); input.focus(); input.setSelectionRange(input.value.length, input.value.length); });
+    document.querySelectorAll('[data-expfilter]').forEach(btn => {
+      btn.addEventListener('click', () => { boardExpiryFilter = btn.getAttribute('data-expfilter'); renderBoard(); });
+    });
+  }
+
+  // ===================== تاريخ الصلاحية (جديد SPEC v1.4) =====================
+  function loadExpiryReport() {
+    document.getElementById('mainArea').innerHTML = `<div class="card empty-state">${t('loadingText')}</div>`;
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(result => {
+        if (!result || !result.success) {
+          const detail = result ? JSON.stringify(result) : '';
+          document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} — ${detail}</div>`;
+          return;
+        }
+        EXPIRY_ITEMS = result.data.items;
+        renderExpiryReport();
+      }, 8000))
+      .withFailureHandler(error => {
+        let detail = ''; try { detail = (error && error.message) ? error.message : JSON.stringify(error); } catch (e) { detail = String(error); }
+        document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} (FAIL) — ${detail}</div>`;
+      })
+      .getRawMaterialExpiryReport(CURRENT_USER_ID);
+  }
+
+  /**
+   * renderExpiryReport() -- SPEC v1.4 (جديدة، طلب مباشر): الأصناف ذات تاريخ
+   * صلاحية مُسجَّل، مرتَّبة أقربَ انتهاءً أولًا (الترتيب يصل جاهزًا من
+   * الخادم)، مع تبيان بصري صريح لحالتي "أقل من شهر" و"منتهٍ".
+   */
+  function renderExpiryReport() {
+    if (!EXPIRY_ITEMS.length) {
+      document.getElementById('mainArea').innerHTML = `<div class="card empty-state"><div class="big">📅</div>${t('emptyExpiry')}</div>`;
+      return;
+    }
+    document.getElementById('mainArea').innerHTML = `
+      <div class="banner" style="margin-bottom:12px;">${t('expiryScopeNote')}</div>
+      <div class="card">
+        ${EXPIRY_ITEMS.map(it => {
+          const d = new Date(it.expiryDate);
+          const dateStr = d.toLocaleDateString(state.lang === 'ar' ? 'ar-QA-u-nu-latn' : 'en-US');
+          const badge = it.urgency === 'EXPIRED' ? `<span class="expiry-badge expired">⛔ ${t('expiredBadge')}</span>`
+            : it.urgency === 'NEAR_EXPIRY' ? `<span class="expiry-badge near">⚠️ ${t('nearExpiryBadge')}</span>`
+            : '';
+          return `
+          <div class="stock-item-card expiry-row ${it.urgency === 'EXPIRED' ? 'row-expired' : it.urgency === 'NEAR_EXPIRY' ? 'row-near' : ''}">
+            <div class="stock-item-name">${state.lang === 'ar' ? it.nameAR : it.nameEN} <span style="font-weight:400; color:var(--ink-soft); font-size:12px;">(${it.onHand} ${it.unitId})</span></div>
+            <div class="expiry-date-row"><span>${t('expiryDateLbl')}: ${dateStr}</span> ${badge}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    `;
+  }
+
+
+  function loadQuarantineHistory() {
+    document.getElementById('mainArea').innerHTML = `<div class="card empty-state">${t('loadingText')}</div>`;
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(result => {
+        if (!result || !result.success) {
+          const detail = result ? JSON.stringify(result) : '';
+          document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} — ${detail}</div>`;
+          return;
+        }
+        QUARANTINE_ITEMS = result.data.items;
+        renderQuarantineHistory();
+      }, 8000))
+      .withFailureHandler(error => {
+        let detail = ''; try { detail = (error && error.message) ? error.message : JSON.stringify(error); } catch (e) { detail = String(error); }
+        document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} (FAIL) — ${detail}</div>`;
+      })
+      .getRawMaterialQuarantineHistory(CURRENT_USER_ID);
+  }
+
+  function renderQuarantineHistory() {
+    const decisionMeta = {
+      AVAILABLE: { icon: '✅', key: 'decisionAvailable' },
+      DAMAGED: { icon: '🚫', key: 'decisionDamaged' },
+      EXPIRED: { icon: '⏰', key: 'decisionExpired' }
+    };
+    const rowsHtml = !QUARANTINE_ITEMS.length
+      ? `<div class="empty-state"><div class="big">📋</div>${t('emptyQuarantine')}</div>`
+      : QUARANTINE_ITEMS.map(it => {
+          const meta = decisionMeta[it.finalDecision] || { icon: 'ℹ️', key: '' };
+          const dateStr = it.decidedAt ? new Date(it.decidedAt).toLocaleDateString(state.lang === 'ar' ? 'ar-QA-u-nu-latn' : 'en-US') : '';
+          return `
+            <div class="quarantine-row">
+              <div class="quarantine-icon">${meta.icon}</div>
+              <div class="quarantine-main">
+                <div class="quarantine-name">${state.lang === 'ar' ? it.nameAR : it.nameEN}</div>
+                <div class="quarantine-meta">${it.quantity} ${it.unitId} · ${dateStr}</div>
+              </div>
+              <div class="quarantine-decision ${it.finalDecision}">${t(meta.key)}</div>
+            </div>`;
+        }).join('');
+    document.getElementById('mainArea').innerHTML = `
+      <div class="banner" style="margin:0 16px 12px;">${t('quarantineNote')}</div>
+      <div class="card">${rowsHtml}</div>
+    `;
+  }
+
+  // ===================== 6.7 الإتلاف والإرجاع للمورد =====================
+  function loadDisposalForm() {
+    document.getElementById('mainArea').innerHTML = `<div class="card empty-state">${t('loadingText')}</div>`;
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(result => {
+        if (!result || !result.success) {
+          const detail = result ? JSON.stringify(result) : '';
+          document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} — ${detail}</div>`;
+          return;
+        }
+        DISPOSAL_FORM_DATA = result.data;
+        renderDisposalForm();
+      }, 8000))
+      .withFailureHandler(error => {
+        let detail = ''; try { detail = (error && error.message) ? error.message : JSON.stringify(error); } catch (e) { detail = String(error); }
+        document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} (FAIL) — ${detail}</div>`;
+      })
+      .getDisposalFormData(CURRENT_USER_ID);
+  }
+
+  function renderDisposalForm() {
+    const d = DISPOSAL_FORM_DATA;
+    document.getElementById('mainArea').innerHTML = `
+      <div class="card form-card" style="padding:16px;">
+        <div class="field">
+          <label>${t('actionTypeLabel')}</label>
+          <select id="dispAction">
+            <option value="DISPOSAL">${t('disposalOption')}</option>
+            <option value="RETURN">${t('returnOption')}</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>${t('productLabel')}</label>
+          <select id="dispProduct">
+            <option value="" selected disabled>${t('chooseProduct')}</option>
+            ${d.products.map(p => `<option value="${p.productId}" data-onhand="${p.onHand}" data-damaged="${p.damaged}" data-expired="${p.expired}">${state.lang === 'ar' ? p.nameAR : p.nameEN}</option>`).join('')}
+          </select>
+          <div id="dispStockNote" style="font-size:12px; color:var(--ink-soft); margin-top:6px;"></div>
+        </div>
+        <div class="field" id="dispSupplierField" style="display:none;">
+          <label>${t('supplierLabel')}</label>
+          <select id="dispSupplier">
+            <option value="" selected disabled>${t('chooseSupplier')}</option>
+            ${d.suppliers.map(s => `<option value="${s.supplierId}">${state.lang === 'ar' ? s.nameAR : s.nameEN}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field">
+          <label>${t('quantityLabel')}</label>
+          <input type="number" id="dispQty" min="0.5" step="0.5">
+        </div>
+        <div class="field">
+          <label>${t('reasonLabel')}</label>
+          <input type="text" id="dispReason">
+        </div>
+        <div class="banner">${t('irreversibleWarning')}</div>
+        <button class="submit-btn" style="background:var(--warn);" id="submitDisposalBtn">${t('submitDisposal')}</button>
+      </div>
+    `;
+    document.getElementById('dispAction').addEventListener('change', (e) => {
+      document.getElementById('dispSupplierField').style.display = e.target.value === 'RETURN' ? 'block' : 'none';
+    });
+    document.getElementById('dispProduct').addEventListener('change', (e) => {
+      const opt = e.target.selectedOptions[0];
+      if (opt) document.getElementById('dispStockNote').textContent = t('currentStockNote')(opt.getAttribute('data-onhand'), opt.getAttribute('data-damaged'), opt.getAttribute('data-expired'));
+    });
+    const btn = document.getElementById('submitDisposalBtn');
+    let armed = false;
+    let timer = null;
+    const original = btn.innerHTML;
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      const action = document.getElementById('dispAction').value;
+      const productId = document.getElementById('dispProduct').value;
+      const qty = parseFloat(document.getElementById('dispQty').value);
+      const reason = document.getElementById('dispReason').value.trim();
+      const supplierId = document.getElementById('dispSupplier').value;
+      if (!productId || !qty || qty <= 0 || !reason || (action === 'RETURN' && !supplierId)) { showToast(t('toastMissingDisposalFields')); return; }
+      if (!armed) {
+        armed = true;
+        btn.classList.add('confirm-armed');
+        btn.innerHTML = state.lang === 'ar' ? '👆 اضغط مرة أخرى للتأكيد' : '👆 Tap again to confirm';
+        timer = setTimeout(() => { armed = false; btn.classList.remove('confirm-armed'); btn.innerHTML = original; }, 2800);
+      } else {
+        clearTimeout(timer);
+        btn.disabled = true;
+        btn.innerHTML = t('savingText');
+        const finish = (success, msg) => {
+          btn.disabled = false;
+          if (!success) { btn.innerHTML = original; showToast(t('loadErrorText')); return; }
+          showToast(msg);
+          armed = false; btn.classList.remove('confirm-armed');
+          loadDisposalForm();
+        };
+        if (action === 'DISPOSAL') {
+          google.script.run
+            .withSuccessHandler(onceWithTimeout(result => finish(!(result && !result.success), t('toastDisposed')), 8000))
+            .withFailureHandler(() => finish(false))
+            .disposeRawMaterial(CURRENT_USER_ID, productId, qty, reason);
+        } else {
+          google.script.run
+            .withSuccessHandler(onceWithTimeout(result => finish(!(result && !result.success), t('toastReturnedToSupplier')), 8000))
+            .withFailureHandler(() => finish(false))
+            .returnRawMaterialToSupplier(CURRENT_USER_ID, productId, qty, supplierId, reason);
+        }
+      }
+    });
+  }
+
+  // ===================== 6.8 حركة الأصناف =====================
+  function loadMovement() {
+    document.getElementById('mainArea').innerHTML = `<div class="card empty-state">${t('loadingText')}</div>`;
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(result => {
+        if (!result || !result.success) {
+          const detail = result ? JSON.stringify(result) : '';
+          document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} — ${detail}</div>`;
+          return;
+        }
+        MOVEMENT_ITEMS = result.data.items;
+        renderMovement();
+      }, 8000))
+      .withFailureHandler(error => {
+        let detail = ''; try { detail = (error && error.message) ? error.message : JSON.stringify(error); } catch (e) { detail = String(error); }
+        document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} (FAIL) — ${detail}</div>`;
+      })
+      .getRawMaterialMovementSummary(CURRENT_USER_ID, movementPeriod);
+  }
+
+  function renderMovement() {
+    const rowsHtml = !MOVEMENT_ITEMS.length
+      ? `<div class="empty-state">${t('emptyMovement')}</div>`
+      : MOVEMENT_ITEMS.map(it => `
+          <div class="stock-item-card">
+            <div class="stock-item-name">${state.lang === 'ar' ? it.nameAR : it.nameEN}</div>
+            <div style="display:flex; gap:16px; font-size:12.5px; color:var(--ink-soft);">
+              <span style="color:var(--success);">${t('inLbl')}: ${it.inQty} ${it.unitId}</span>
+              <span style="color:var(--warn);">${t('outLbl')}: ${it.outQty} ${it.unitId}</span>
+              <span>${t('txnCountLbl')(it.txnCount)}</span>
+            </div>
+          </div>`).join('');
+    document.getElementById('mainArea').innerHTML = `
+      <div class="field" style="padding:0 16px;">
+        <label>${t('periodLabel')}</label>
+        <select id="movementPeriodSelect">
+          <option value="TODAY" ${movementPeriod === 'TODAY' ? 'selected' : ''}>${t('periodToday')}</option>
+          <option value="WEEK" ${movementPeriod === 'WEEK' ? 'selected' : ''}>${t('periodWeek')}</option>
+          <option value="MONTH" ${movementPeriod === 'MONTH' ? 'selected' : ''}>${t('periodMonth')}</option>
+        </select>
+      </div>
+      <div class="card" style="margin-top:12px;">${rowsHtml}</div>
+    `;
+    document.getElementById('movementPeriodSelect').addEventListener('change', (e) => {
+      movementPeriod = e.target.value;
+      loadMovement();
+    });
+  }
+
+  // ===================== 6.3b طلبيات المحلات المباشرة (للعلم فقط) =====================
+  function loadStoreOrders() {
+    document.getElementById('mainArea').innerHTML = `<div class="card empty-state">${t('loadingText')}</div>`;
+    google.script.run
+      .withSuccessHandler(onceWithTimeout(result => {
+        if (!result || !result.success) {
+          const detail = result ? JSON.stringify(result) : '';
+          document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} — ${detail}</div>`;
+          return;
+        }
+        STORE_DIRECT_ORDERS = result.data.orders;
+        renderStoreOrders();
+      }, 8000))
+      .withFailureHandler(error => {
+        let detail = ''; try { detail = (error && error.message) ? error.message : JSON.stringify(error); } catch (e) { detail = String(error); }
+        document.getElementById('mainArea').innerHTML = `<div class="card empty-state" style="color:var(--warn); word-break:break-all; font-size:12px;">${t('loadErrorText')} (FAIL) — ${detail}</div>`;
+      })
+      .getStoreDirectRawMaterialOrders(CURRENT_USER_ID);
+  }
+
+  function renderStoreOrders() {
+    if (!STORE_DIRECT_ORDERS.length) {
+      document.getElementById('mainArea').innerHTML = `<div class="card empty-state"><div class="big">🎀</div>${t('emptyStoreOrders')}</div>`;
+      return;
+    }
+    document.getElementById('mainArea').innerHTML = `
+      <div class="banner">${t('storeOrdersNote')}</div>
+      <div class="card">
+        ${STORE_DIRECT_ORDERS.map(o => `
+          <div class="stock-item-card">
+            <div class="stock-item-name">${state.lang === 'ar' ? o.storeNameAR : o.storeNameEN} <span style="font-weight:400; color:var(--ink-soft); font-size:12px;">· ${o.orderId}</span></div>
+            <div>${o.items.map(it => `
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-top:1px dashed var(--line); font-size:12.5px;">
+                <span>${state.lang === 'ar' ? it.nameAR : it.nameEN} · ${it.qty} ${it.unitId}</span>
+                <span>${it.status === 'CONFIRMED' ? t('statusConfirmed') : t('statusPlanned')}</span>
+              </div>`).join('')}
+            </div>
+          </div>`).join('')}
+      </div>
+    `;
+  }
+
+  // مساعد: نمط "اضغط مرتين للتأكيد" لأزرار بسيطة تحمل data-* بمعرِّف واحد فقط
+  function wireConfirmableSimple(selector, attrName, onConfirm) {
+    document.querySelectorAll(selector).forEach(btn => {
+      let armed = false;
+      let timer = null;
+      const original = btn.innerHTML;
+      btn.addEventListener('click', () => {
+        if (btn.disabled) return;
+        const id = btn.getAttribute(attrName);
+        if (!armed) {
+          armed = true;
+          btn.classList.add('confirm-armed');
+          btn.innerHTML = state.lang === 'ar' ? '👆 تأكيد' : '👆 Confirm';
+          timer = setTimeout(() => { armed = false; btn.classList.remove('confirm-armed'); btn.innerHTML = original; }, 2800);
+        } else {
+          clearTimeout(timer);
+          btn.disabled = true;
+          onConfirm(id);
+        }
+      });
+    });
+  }
+
+  /**
+   * زر الرجوع -- SPEC v1.4: يُوجَّه مؤقتًا لتسجيل الدخول (لا شاشة "تتبع
+   * الطلبات" 4.0 مبنية بعد لتكون الوجهة الطبيعية -- هذه الشاشة 4.0.2 هي
+   * أول شاشة مبنية فعليًا لهذا الدور حتى الآن). سيُحدَّث حين تُبنى 4.0.
+   */
+  document.getElementById('backBtn').addEventListener('click', () => { window.top.location.href = APP_BASE_URL; });
+  document.getElementById('langToggle').addEventListener('click', () => {
+    state.lang = state.lang === 'ar' ? 'en' : 'ar';
+    document.documentElement.lang = state.lang;
+    document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+    document.getElementById('langToggle').textContent = state.lang === 'ar' ? 'EN' : 'AR';
+    applyI18n(document.querySelector('header.topbar'));
+    applyI18n(document.querySelector('.subheader'));
+    renderTabs();
+    if (state.activeTab === 'OFFCATALOG') renderOffCatalog();
+    else if (state.activeTab === 'SHORTAGE') renderShortage();
+    else if (state.activeTab === 'RECEIVE') renderReceiveForm();
+    else if (state.activeTab === 'ISSUE') renderSupplyRequestsList();
+    else if (state.activeTab === 'SUPPLIERS') renderSuppliers();
+    else if (state.activeTab === 'BOARD') renderBoard();
+    else if (state.activeTab === 'QUARANTINE') renderQuarantineHistory();
+    else if (state.activeTab === 'DISPOSAL') renderDisposalForm();
+    else if (state.activeTab === 'MOVEMENT') renderMovement();
+    else renderStoreOrders();
+  });
+  document.getElementById('userMenuBtn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('userDropdown').classList.toggle('open'); });
+  document.addEventListener('click', () => document.getElementById('userDropdown').classList.remove('open'));
+  document.querySelectorAll('[data-toast="notReady"]').forEach(el => {
+    el.addEventListener('click', (e) => { e.stopPropagation(); showToast(t('toastNotReady')); });
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    const btn = document.getElementById('logoutBtn');
+    if (btn.classList.contains('continue-armed')) { window.top.location.href = APP_BASE_URL; return; }
+    document.getElementById('userDropdown').classList.remove('open');
+    btn.disabled = true;
+    const originalContent = btn.textContent;
+    btn.textContent = t('savingText');
+    const finishLogout = onceWithTimeout(() => {
+      btn.disabled = false;
+      btn.classList.add('continue-armed');
+      btn.textContent = '👆 ' + t('continueBtn');
+    }, 8000);
+    google.script.run.withSuccessHandler(finishLogout).withFailureHandler(finishLogout).logout(CURRENT_USER_ID, masarLogoutMarker());
+  });
+
+  let forceHideOverlayFn = () => {};
+  function forceHideBusyOverlay() { forceHideOverlayFn(); }
+  function wrapGoogleScriptRunWithBusyOverlay() {
+    if (typeof google === 'undefined' || !google.script || !google.script.run) return;
+    const realRun = google.script.run;
+    const overlay = document.getElementById('globalBusyOverlay');
+    let busyCount = 0;
+    function showBusy() { busyCount++; overlay.classList.add('show'); }
+    function hideBusy() { busyCount = Math.max(0, busyCount - 1); if (busyCount === 0) overlay.classList.remove('show'); }
+    forceHideOverlayFn = () => { busyCount = 0; overlay.classList.remove('show'); };
+    Object.defineProperty(google.script, 'run', {
+      configurable: true,
+      get() {
+        const handlers = { onSuccess: null, onFailure: null };
+        let proxy;
+        const chain = {
+          withSuccessHandler(fn) { handlers.onSuccess = fn; return proxy; },
+          withFailureHandler(fn) { handlers.onFailure = fn; return proxy; }
+        };
+        proxy = new Proxy(chain, {
+          get(target, prop) {
+            if (prop === 'withSuccessHandler' || prop === 'withFailureHandler') return target[prop];
+            return (...args) => {
+              showBusy();
+              return realRun
+                .withSuccessHandler((...r) => { hideBusy(); if (handlers.onSuccess) handlers.onSuccess(...r); })
+                .withFailureHandler((...r) => { hideBusy(); if (handlers.onFailure) handlers.onFailure(...r); })
+                [prop](...args);
+            };
+          }
+        });
+        return proxy;
+      }
+    });
+  }
+
+  BADGE_RUN = google.script.run;
+  wrapGoogleScriptRunWithBusyOverlay();
+  applyI18n(document.querySelector('header.topbar'));
+  applyI18n(document.querySelector('.subheader'));
+  applyI18n(document.getElementById('attModalOverlay'));
+  document.getElementById('attModalCloseBtn').addEventListener('click', () => document.getElementById('attModalOverlay').classList.remove('open'));
+  document.getElementById('attModalOverlay').addEventListener('click', (e) => { if (e.target.id === 'attModalOverlay') e.currentTarget.classList.remove('open'); });
+  renderTabs();
+  loadBadge('getOffCatalogPurchaseRequests', 'offCatalog', d => d.items.length);
+  loadBadge('getRawMaterialShortageNotices', 'shortage', d => d.items.length);
+  loadBadge('getPendingSupplyRequestsForRMS', 'issue', d => d.requests.length);
+  loadBadge('getDepartmentStoreOrders', 'orders', d => d.orders.filter(o => o.overallStatus === 'PROGRESS').length);
+  loadActiveTab();
+  masarAutoRefresh({ domains: ['PRODUCTION', 'ORDERS', 'STOCK', 'APPROVALS'], refresh: () => { loadActiveTab(); loadBadge('getOffCatalogPurchaseRequests', 'offCatalog', d => d.items.length); loadBadge('getRawMaterialShortageNotices', 'shortage', d => d.items.length); loadBadge('getPendingSupplyRequestsForRMS', 'issue', d => d.requests.length); loadBadge('getDepartmentStoreOrders', 'orders', d => d.orders.filter(o => o.overallStatus === 'PROGRESS').length); } });
+</script>
+
+</body>
+</html>

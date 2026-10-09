@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#3D2B1E">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="مسار">
+<link rel="apple-touch-icon" href="icon-180.png">
+<script src="masar-config.js?v=67ea158b"></script>
+<script src="masar-runtime.js?v=67ea158b"></script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALAKER SWEETS — تسجيل الدخول</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Markazi+Text:wght@600;700&family=Fraunces:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #EE7126; --primary-dark: #C85A18; --primary-tint: #FCE8D8;
+    --secondary: #3D2B1E; --ink: #2B211B; --ink-soft: #6B5D52;
+    --bg: #FAF7F1; --surface: #FFFFFF; --line: #E7DFD2;
+    --success: #4B7A4F; --success-tint: #E7EFE6;
+    --warn: #B23B2E; --warn-tint: #F7E6E2;
+    --radius-lg: 16px; --radius-md: 12px; --radius-sm: 8px;
+    --shadow-card: 0 1px 2px rgba(43,33,27,0.06), 0 4px 16px rgba(43,33,27,0.05);
+    --font-ar: 'IBM Plex Sans Arabic', sans-serif; --font-en: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { overflow-x: hidden; max-width: 100vw; }
+  html[lang="ar"] body { font-family: var(--font-ar); }
+  html[lang="en"] body { font-family: var(--font-en); }
+  body {
+    background-color: var(--bg);
+    background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 38px, rgba(61,43,30,0.035) 38px, rgba(61,43,30,0.035) 39px);
+    color: var(--ink); min-height: 100vh; -webkit-font-smoothing: antialiased;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .lang-toggle-fixed {
+    position: fixed; top: 16px; inset-inline-end: 16px;
+    display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px;
+    background: var(--secondary); color: #fff; border: none; cursor: pointer; font-size: 13px; font-weight: 700;
+  }
+
+  .login-wrap { width: 100%; max-width: 400px; }
+  .brand-block { text-align: center; margin-bottom: 24px; }
+  .brand-logo { height: 64px; width: auto; margin-bottom: 10px; }
+  .brand-title { font-size: 34px; font-weight: 700; letter-spacing: 0.22em; color: var(--primary-dark); line-height: 1.1; margin-bottom: 4px; }
+  .brand-name { font-size: 13px; letter-spacing: 0.16em; color: var(--ink-soft); text-transform: uppercase; }
+
+  .login-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 28px 26px; }
+  .login-card h1 { font-size: 19px; font-weight: 700; color: var(--secondary); margin-bottom: 20px; text-align: center; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+  .field label { font-size: 12.5px; font-weight: 600; color: var(--ink-soft); }
+  .field input {
+    border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 12px 14px;
+    font-family: inherit; font-size: 14px; color: var(--ink); background: var(--surface);
+  }
+  .field input:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
+  .field input.has-error { border-color: var(--warn); }
+
+  .error-banner {
+    display: none; align-items: center; gap: 8px; background: var(--warn-tint); color: var(--warn); border: 1px solid rgba(178,59,46,0.3);
+    border-radius: var(--radius-sm); padding: 10px 12px; font-size: 12.5px; margin-bottom: 14px;
+  }
+  .error-banner.show { display: flex; }
+
+  /* "تذكّرني على هذا الجهاز": يظهر في الواجهة الثابتة (PWA) فقط -- في Apps Script لا مكان للتخزين المحلي الموثوق فيبقى مخفيًا ويبقى التصميم الأصلي كما هو */
+  .remember-row { display: none; align-items: center; gap: 8px; margin: 2px 0 10px; font-size: 13px; color: var(--ink); }
+  .remember-row input { width: 18px; height: 18px; accent-color: var(--primary); margin: 0; }
+  .remember-note { display: none; font-size: 11.5px; color: var(--ink-soft); margin: -4px 0 10px; line-height: 1.6; }
+  html.masar-web .remember-row { display: flex; }
+  html.masar-web .remember-note { display: block; }
+  .login-btn {
+    width: 100%; background: var(--secondary); color: #fff; border: none; font-family: inherit; font-size: 15px; font-weight: 600;
+    padding: 13px; border-radius: var(--radius-md); cursor: pointer; margin-top: 4px;
+  }
+  .login-btn:hover { background: #2E2015; }
+  .login-btn:disabled { background: #B7ADA2; cursor: not-allowed; }
+
+  .demo-hint {
+    margin-top: 18px; padding-top: 16px; border-top: 1px dashed var(--line); font-size: 11.5px; color: var(--ink-soft); line-height: 1.7;
+  }
+  .demo-hint strong { color: var(--ink); }
+  .demo-users-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .demo-user-chip {
+    font-family: var(--font-mono); font-size: 11px; background: var(--bg); border: 1px solid var(--line); color: var(--primary-dark);
+    padding: 4px 8px; border-radius: 999px; cursor: pointer;
+  }
+  .demo-user-chip:hover { background: var(--primary-tint); }
+
+  /* Store picker (shown only for the rare multi-store cashier case) */
+  .store-picker-overlay { position: fixed; inset: 0; background: rgba(43,33,27,0.45); display: none; align-items: center; justify-content: center; z-index: 80; padding: 20px; }
+  .store-picker-overlay.open { display: flex; }
+  .store-picker-box { background: var(--surface); border-radius: var(--radius-lg); padding: 22px; max-width: 380px; width: 100%; box-shadow: var(--shadow-card); max-height: 85vh; overflow-y: auto; }
+  .store-picker-box h3 { font-size: 15px; font-weight: 700; color: var(--secondary); margin-bottom: 12px; }
+  .store-option {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; text-align: start;
+    background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-sm);
+    padding: 12px 14px; margin-bottom: 8px; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;
+  }
+  .store-option:hover { background: var(--primary-tint); border-color: var(--primary); }
+  .store-option.occupied:hover { background: var(--warn-tint); border-color: var(--warn); }
+  .store-option-tag { font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+  .store-option-tag.free { background: var(--success-tint); color: var(--success); }
+  .store-option-tag.occupied { background: var(--warn-tint); color: var(--warn); }
+
+  .conflict-msg { font-size: 13px; color: var(--ink); line-height: 1.6; margin-bottom: 14px; }
+  .notif-list { background: var(--bg); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 14px; }
+  .notif-title { font-size: 11.5px; font-weight: 700; color: var(--ink-soft); margin-bottom: 8px; }
+  .notif-item { font-size: 12px; color: var(--ink); padding: 4px 0; line-height: 1.5; }
+  .try-again-btn { background: var(--secondary) !important; color: #fff !important; text-align: center !important; justify-content: center !important; border: none !important; }
+
+  .login-toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(10px);
+    background: var(--secondary); color: #fff; font-size: 13.5px; padding: 11px 18px; border-radius: 999px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2); opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 90; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis;
+  }
+  .login-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* SPEC v1.4 (ملاحظة مستخدم مباشرة: لا مؤشر انتظار إطلاقًا بهذه الصفحة) --
+     نفس الحاجز الحقيقي على مستوى الصفحة كاملة المُطبَّق في الأدمن والكاشير. */
+  #globalBusyOverlay {
+    position: fixed; inset: 0; z-index: 999; cursor: wait; display: none;
+    background: rgba(0,0,0,0.02);
+  }
+  #globalBusyOverlay.show { display: block; }
+</style>
+</head>
+<body>
+
+<button class="lang-toggle-fixed" id="langToggle">AR</button>
+
+<div class="login-wrap">
+  <div class="brand-block">
+    <img src="asset-82d7b1e2.png" alt="ALAKER SWEETS" class="brand-logo">
+    <div class="brand-title">MASAR</div>
+    <div class="brand-name">ALAKER SWEETS</div>
+  </div>
+
+  <div class="login-card">
+    <div id="loginFormPanel">
+      <h1 data-i18n="loginTitle"></h1>
+      <div class="error-banner" id="errorBanner"></div>
+      <div class="field">
+        <label data-i18n="usernameLbl"></label>
+        <input type="text" id="fUsername" autocomplete="username">
+      </div>
+      <div class="field">
+        <label data-i18n="passwordLbl"></label>
+        <input type="password" id="fPassword" autocomplete="current-password">
+      </div>
+      <label class="remember-row"><input type="checkbox" id="fRemember"><span data-i18n="rememberLbl"></span></label>
+      <div class="remember-note" data-i18n="rememberNote"></div>
+      <button class="login-btn" id="loginBtn" data-i18n="loginBtn"></button>
+
+      <div class="demo-hint">
+        <div data-i18n="seedNote"></div>
+      </div>
+    </div>
+
+    <div id="successPanel" style="display:none; text-align:center;">
+      <div style="font-size:34px; margin-bottom:10px;">✅</div>
+      <h1 id="successTitle" style="margin-bottom:18px;"></h1>
+      <button class="login-btn" id="continueBtn"></button>
+    </div>
+  </div>
+</div>
+
+<div class="store-picker-overlay" id="storePickerOverlay">
+  <div class="store-picker-box" id="storePickerBox"></div>
+</div>
+
+<div id="globalBusyOverlay"></div>
+
+<script>
+  // ===== شبكة الاتصال (١٠ أكتوبر ٢٠٢٦) =====
+  // مولَّد من tools/net_snippet.js بواسطة tools/build_client_snippets.js -- لا تعدّله يدويًا داخل الصفحات.
+  // (١) يتتبّع نداءات الحفظ (أي نداء لا يبدأ بـ get/list) ليعرف التحديث التلقائي أن الصفحة حفظت بنفسها.
+  // (٢) بلاغ "تعذّر تنفيذ العملية" المتكرر: بطء بدء Google (أو انقطاع لحظي) كان يُسقط النداء. للقراءات الصرفة فقط (قائمة مولَّدة آليًا من الخادم: دوال لا تكتب هي
+  // ولا ما تستدعيه) تُعاد المحاولة مرة واحدة عند الفشل/الردّ الفارغ، ويُرسَل نداء ثانٍ موازٍ إن تأخّر الأول ٦ ثوانٍ؛ يُسلَّم أول ردّ صالح. الحفظ والإنشاء لا يُكرَّران أبدًا.
+  const MASAR_RAW_RUN_ = (typeof google !== 'undefined' && google.script) ? google.script.run : null;
+  const MASAR_AR_INSTANCES_ = [];
+  const MASAR_PURE_READS_ = { getActiveDriversList:1,getActiveShipments:1,getActiveStoresWithOccupancy:1,getAllDepartments:1,getAllLists:1,getAllProducts:1,getAllRoles:1,getAllSettings:1,getAllStores:1,getAllUsers:1,getChangeTokens:1,getDepartmentStoreOrders:1,getDisposalFormData:1,getDistributionComparisonDetail:1,getDistributionManagerCancelEditRequests:1,getDistributionsReadyToPrepare:1,getFinishedGoodsQuarantineHistory:1,getFinishedGoodsStockBoard:1,getIssueToDepartmentFormData:1,getManagementReports:1,getMyNotifications:1,getMyShipments:1,getMySupplyRequests:1,getOffCatalogPurchaseRequests:1,getOrderDetails:1,getOrderEditStage:1,getOrderProductionApprovalDetail:1,getOrdersAwaitingInvoice:1,getOrdersAwaitingProductionApproval:1,getOrdersReadyForShipment:1,getOrdersReadyToReceive:1,getPendingLoadDiscrepancies:1,getPendingReturnItems:1,getPendingSupplyRequestsForRMS:1,getProductionManagerApprovals:1,getProductionManagerOrderFullDetail:1,getProductionManagerOrdersOverview:1,getPurchasingRawMaterialReports:1,getRawMaterialCatalog:1,getRawMaterialCatalogForRequest:1,getRawMaterialExpiryReport:1,getRawMaterialMovementSummary:1,getRawMaterialProductHistory:1,getRawMaterialQuarantineHistory:1,getRawMaterialShortageNotices:1,getRawMaterialStockBoard:1,getReceiveSurplusFormData:1,getReceivingDetails:1,getReferenceLists:1,getReturnReasons:1,getRolePermissionsMatrix:1,getShipmentPrepareDetail:1,getShortageReasons:1,getStoreDirectRawMaterialOrders:1,getStoreOrderDetail:1,getSuppliers:1,getSuppliersList:1,getTasksCatalog:1,getUnitsAndFamiliesList:1,getVehicleCoordinatorDriverStatus:1,getVehicleCoordinatorSpecialOrders:1,listOrders:1 };
+  (function masarTrackOwnCalls() {
+    try {
+      if (!MASAR_RAW_RUN_) return;
+      Object.defineProperty(google.script, 'run', {
+        configurable: true,
+        get() {
+          const handlers = { onSuccess: null, onFailure: null };
+          let proxy;
+          const chain = {
+            withSuccessHandler(fn) { handlers.onSuccess = fn; return proxy; },
+            withFailureHandler(fn) { handlers.onFailure = fn; return proxy; }
+          };
+          proxy = new Proxy(chain, {
+            get(target, prop) {
+              if (prop === 'withSuccessHandler' || prop === 'withFailureHandler') return target[prop];
+              return (...args) => {
+                // لقطة المعالجات لحظة النداء: غلاف حاجز الانشغال في الصفحات يمسك مرجعًا واحدًا من run فتتشارك النداءات المتزامنة كائن handlers، فلو قُرئ
+                // وقت الرد لاستلم كل رد معالج آخر نداء (بلاغ: "تعذّر فتح إنشاء رحلة" -- نداءا السائقين والجاهزة كانا يتبادلان معالجيهما)
+                const onS = handlers.onSuccess, onF = handlers.onFailure;
+                const name = String(prop);
+                if (Object.prototype.hasOwnProperty.call(MASAR_PURE_READS_, name)) {
+                  let settled = false, attempts = 0, pending = 0, hedge = null;
+                  const finish = (ok, v) => { if (settled) return; settled = true; clearTimeout(hedge); if (ok) { if (onS) onS(v); } else if (onF) onF(v); else { try { console.error(v); } catch (e) { /* تجاهل */ } } };
+                  const launch = () => {
+                    attempts++; pending++;
+                    const bad = v => {
+                      pending--;
+                      if (settled) return;
+                      if (attempts < 2) { setTimeout(launch, 700); return; }   // محاولة ثانية واحدة فقط
+                      if (pending === 0) finish(false, v);                       // الأخيرة فشلت ولا نداء آخر في الطريق
+                    };
+                    MASAR_RAW_RUN_
+                      .withSuccessHandler(r => { if (r === null || r === undefined) { bad(r); } else { pending--; finish(true, r); } })
+                      .withFailureHandler(e => bad(e))
+                      [name](...args);
+                  };
+                  hedge = setTimeout(() => { if (!settled && attempts < 2) launch(); }, 6000);
+                  launch();
+                  return;
+                }
+                const done = () => { if (!/^(get|list)/.test(name)) MASAR_AR_INSTANCES_.forEach(i => { try { i.ownDone(); } catch (e) { /* لا يعطّل النداء */ } }); };
+                return MASAR_RAW_RUN_
+                  .withSuccessHandler((...r) => { done(); if (onS) onS(...r); })
+                  .withFailureHandler((...r) => { done(); if (onF) onF(...r); else { try { console.error(r[0]); } catch (e) { /* تجاهل */ } } })
+                  [prop](...args);
+              };
+            }
+          });
+          return proxy;
+        }
+      });
+    } catch (e) { /* لا تتبّع: يبقى السلوك القديم كما هو */ }
+  })();
+  // يستعمله التحديث التلقائي الصامت: نفس طبقة الاتصال (إعادة المحاولة) لكن بلا غلاف حاجز الانشغال الذي تُركّبه الصفحة لاحقًا فوقها
+  let MASAR_NET_GETTER_ = null;
+  try { MASAR_NET_GETTER_ = Object.getOwnPropertyDescriptor(google.script, 'run').get || null; } catch (e) { MASAR_NET_GETTER_ = null; }
+  // ===== نهاية شبكة الاتصال =====
+  // Real connected version — every login/store/openShift call below goes
+  // through google.script.run to the actual AuthService.gs/AdminService.gs
+  // functions (audited and fixed earlier in this project). This file only
+  // works when served as a deployed Apps Script web app; there is no local
+  // mock fallback, and it cannot be exercised with a plain file:// open or
+  // tested here the way the standalone demo screens were.
+
+  // SPEC v1.4 -- Apps Script redirects the whole tab to a separate
+  // googleusercontent.com sandbox domain when serving content, so a
+  // relative '?page=xxx' resolves against THAT domain, not the real
+  // deployment URL. APP_BASE_URL is injected server-side (WebApp.gs
+  // doGet(), HtmlTemplate) so every cross-page link here is absolute.
+  const APP_BASE_URL = MASAR_TPL.appBaseUrl;
+  var TIMEOUT_SCALE = MASAR_TPL.timeoutScale; // مضاعِف مُهَل الانتظار: ١ في الإنتاج، أكبر في DIV (مشروع بارد/شبكة اختبار)
+
+  /**
+   * wrapGoogleScriptRunWithBusyOverlay() -- SPEC v1.4 (ملاحظة مستخدم مباشرة:
+   * لا مؤشر انتظار إطلاقًا بهذه الصفحة تحديدًا) -- نفس الحل المُطبَّق في
+   * الأدمن والكاشير: حاجز حقيقي على مستوى الصفحة كاملة تلقائيًا حول كل
+   * نداء، بلا أي تعديل على نقاط الاستدعاء الفعلية أدناه.
+   */
+  (function wrapGoogleScriptRunWithBusyOverlay() {
+    if (typeof google === 'undefined' || !google.script || !google.script.run) return; // بيئة اختبار محلية بلا Apps Script حقيقي
+    const realRun = google.script.run;
+    const overlay = document.getElementById('globalBusyOverlay');
+    let busyCount = 0;
+    function showBusy() { busyCount++; overlay.classList.add('show'); }
+    function hideBusy() { busyCount = Math.max(0, busyCount - 1); if (busyCount === 0) overlay.classList.remove('show'); }
+    function makeChainable(chainObj) {
+      return new Proxy({}, {
+        get(_, prop) {
+          if (prop === 'withSuccessHandler') {
+            return (fn) => makeChainable(chainObj.withSuccessHandler((...args) => { hideBusy(); fn(...args); }));
+          }
+          if (prop === 'withFailureHandler') {
+            return (fn) => makeChainable(chainObj.withFailureHandler((...args) => { hideBusy(); fn(...args); }));
+          }
+          return (...args) => { showBusy(); return chainObj[prop](...args); };
+        }
+      });
+    }
+    google.script.run = makeChainable(realRun);
+  })();
+
+  // Client-side routing only — the backend returns roleCode (login()'s
+  // apiSuccess().data.roleCode), never a URL. Apps Script web apps serve
+  // every "page" through the SAME deployed URL with a ?page= parameter
+  // (see WebApp.gs doGet()) — there is no traditional file-path navigation.
+  // Only ADMIN is wired through end-to-end for now; the other eight roles
+  // will get their own 'page' entries as each screen is connected in turn.
+  const ROLE_DESTINATIONS = {
+    ADMIN: APP_BASE_URL + '?page=admin',
+    CASHIER: APP_BASE_URL + '?page=cashier',
+    DRIVER: APP_BASE_URL + '?page=driver',
+    PRODUCTION_SECTION: APP_BASE_URL + '?page=production_section',
+    // *** طلب مباشر (٢٢ سبتمبر ٢٠٢٦): الصفحة الرئيسية لمدير الإنتاج صارت "دورة الطلبيات" بدل "الموافقات"
+    // -- كلا الشاشتين (وكذلك نظرة عامة على المخزون ومتابعة Quarantine) تصل إليها الأخرى الآن عبر شريط
+    // تنقّل موحَّد (pm-nav-row) مُضاف في الأربع، فلا فرق عملي في الوصول، فقط أيّها تُفتَح أولًا بعد الدخول. ***
+    PRODUCTION_MANAGER: APP_BASE_URL + '?page=pm_orders_overview',
+    DISTRIBUTION_MANAGER: APP_BASE_URL + '?page=distribution_hub',
+    FINISHED_GOODS_STORE: APP_BASE_URL + '?page=finished_goods',
+    RAW_MATERIAL_STORE: APP_BASE_URL + '?page=raw_material',
+    MANAGEMENT: APP_BASE_URL + '?page=management',
+    VEHICLE_COORDINATOR: APP_BASE_URL + '?page=vehicle_coordinator',
+    PURCHASING_OFFICER: APP_BASE_URL + '?page=purchasing'
+  };
+
+  function homeUrl(session) { return session && session.homePage ? APP_BASE_URL + '?page=' + encodeURIComponent(session.homePage) : ''; }
+
+  const dict = {
+    ar: {
+      loginTitle: 'تسجيل الدخول',
+      usernameLbl: 'اسم المستخدم', passwordLbl: 'كلمة المرور',
+      loginBtn: 'دخول', loggingInBtn: 'جارٍ التحقق...',
+      rememberLbl: 'تذكّرني على هذا الجهاز', rememberNote: 'لا تفعّل هذا الخيار على جهاز مشترك. تُنهي كلمة المرور الجديدة أو تعطيل الحساب أو تسجيل الخروج هذا التذكّر.',
+      errorEmpty: 'الرجاء إدخال اسم المستخدم وكلمة المرور',
+      errorGeneric: 'تعذّر الاتصال بالخادم — تحقّق من اتصالك وحاول مجددًا',
+      roleNotConnected: 'تسجيل الدخول نجح، لكن شاشة هذا الدور لم تُربَط بعد — راجع لوحة الأدمن حاليًا',
+      loginSuccessTitle: 'تم تسجيل الدخول بنجاح', continueBtn: 'المتابعة ←',
+      seedNote: 'MASAR — نظام إدارة الطلبيات، صُمِّم لشركة ALAKER SWEETS. تصميم وتطوير عبد الفتاح تباني (2026).',
+      storePickerTitle: 'اختر المحل الذي تعمل فيه اليوم',
+      storeFreeTag: 'متاح', storeOccupiedTag: (name) => `محجوز — ${name}`,
+      loadingStores: 'جارٍ تحميل قائمة المحلات...',
+      conflictTitle: 'تعذّر فتح النوبة',
+      conflictMsg: (store, name) => `المحل "${store}" محجوز حاليًا من طرف ${name}. لا يمكن فتح نوبتين في نفس المحل معًا.`,
+      conflictNote: 'أُرسل إشعار لك وللكاشير صاحب النوبة ولمسؤول التوزيع — يمكنك مراجعة إشعاراتك لاحقًا.',
+      tryAnotherBtn: 'اختيار محل آخر',
+      ownShiftConflictTitle: 'لديك نوبة نشطة بالفعل', backToLoginBtn: 'العودة لتسجيل الدخول',
+      resumeShiftTitle: 'نوبتك لا تزال مفتوحة', resumeShiftMsg: (store) => `أنت لا تزال تعمل في ${store} من نوبة سابقة — تابع مباشرة`,
+      toastShiftOpened: (store) => `فُتحت نوبتك في ${store} بنجاح`
+    },
+    en: {
+      loginTitle: 'Log in',
+      usernameLbl: 'Username', passwordLbl: 'Password',
+      loginBtn: 'Log in', loggingInBtn: 'Checking...',
+      rememberLbl: 'Remember me on this device', rememberNote: 'Do not enable on a shared device. A new password, a disabled account, or logging out ends this.',
+      errorEmpty: 'Please enter both username and password',
+      errorGeneric: 'Could not reach the server — check your connection and try again',
+      roleNotConnected: "Login succeeded, but this role's screen isn't connected yet — check the admin panel for now",
+      loginSuccessTitle: 'Logged in successfully', continueBtn: 'Continue →',
+      seedNote: 'MASAR — order-management system, designed for ALAKER SWEETS. Designed and developed by Abdelfattah Tebbani (2026).',
+      storePickerTitle: "Choose the store you're working at today",
+      storeFreeTag: 'Available', storeOccupiedTag: (name) => `Occupied — ${name}`,
+      loadingStores: 'Loading store list...',
+      conflictTitle: "Couldn't open shift",
+      conflictMsg: (store, name) => `"${store}" is currently occupied by ${name}. Two shifts can't be open at the same store at once.`,
+      conflictNote: 'A notification was sent to you, to the cashier holding the shift, and to the distribution manager — you can check your notifications later.',
+      tryAnotherBtn: 'Choose another store',
+      ownShiftConflictTitle: 'You already have an active shift', backToLoginBtn: 'Back to login',
+      resumeShiftTitle: 'Your shift is still open', resumeShiftMsg: (store) => `You're still working at ${store} from an earlier shift — continue directly`,
+      toastShiftOpened: (store) => `Your shift at ${store} opened successfully`
+    }
+  };
+
+  const state = { lang: 'ar', session: null };
+  function t(key) { return (dict[state.lang] && dict[state.lang][key]) || key; }
+
+  function applyI18n() {
+    document.documentElement.lang = state.lang;
+    document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+    document.getElementById('langToggle').textContent = state.lang === 'ar' ? 'EN' : 'AR';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (dict[state.lang][key] !== undefined) el.textContent = dict[state.lang][key];
+    });
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('errorBanner');
+    el.textContent = '⚠️ ' + msg;
+    el.classList.add('show');
+    document.getElementById('fUsername').classList.add('has-error');
+    document.getElementById('fPassword').classList.add('has-error');
+  }
+  function hideError() {
+    document.getElementById('errorBanner').classList.remove('show');
+    document.getElementById('fUsername').classList.remove('has-error');
+    document.getElementById('fPassword').classList.remove('has-error');
+  }
+
+  function setLoginBusy(busy) {
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = busy;
+    btn.textContent = busy ? t('loggingInBtn') : t('loginBtn');
+  }
+
+  /**
+   * attemptLogin() — calls the real AuthService.login(username, password).
+   * google.script.run only exists inside a page actually served by an Apps
+   * Script web app deployment; it is undefined otherwise (plain file:// open,
+   * or any environment without that host binding), and this call would throw
+   * immediately in that case.
+   */
+  function attemptLogin() {
+    const username = document.getElementById('fUsername').value.trim();
+    const password = document.getElementById('fPassword').value;
+    if (!username || !password) { showError(t('errorEmpty')); return; }
+    hideError();
+    setLoginBusy(true);
+
+    const remember = !!(window.MASAR_CONFIG && document.getElementById('fRemember') && document.getElementById('fRemember').checked);
+    google.script.run
+      .withSuccessHandler(onLoginResult)
+      .withFailureHandler(onServerFailure)
+      .login(username, password, remember);
+  }
+
+  function onLoginResult(result) {
+    setLoginBusy(false);
+    if (!result || !result.success) {
+      showError(result && result.error ? (state.lang === 'ar' ? result.error.messageAR : result.error.messageEN) : t('errorGeneric'));
+      return;
+    }
+    state.session = result.data; // { userId, roleCode, fullName, language, token, sessionKey, homePage, needsStore }
+    // الوجهة تأتي من الخادم (RbacService.gs: roleHomePage_/roleNeedsStore_)؛ ROLE_DESTINATIONS احتياط لخادم أقدم فقط
+    const needsStore = (result.data.needsStore !== undefined) ? result.data.needsStore : (result.data.roleCode === 'CASHIER');
+    if (needsStore) {
+      openStorePicker();
+    } else {
+      const dest = homeUrl(result.data) || ROLE_DESTINATIONS[result.data.roleCode];
+      if (dest) {
+        showContinuePanel(dest);
+      } else {
+        showError(t('roleNotConnected'));
+      }
+    }
+  }
+
+  /**
+   * showContinuePanel(destinationUrl) — SPEC v1.4. Browsers only allow a
+   * cross-origin iframe to navigate window.top within a fresh, direct user
+   * gesture (sandbox="allow-top-navigation-by-user-activation"). Redirecting
+   * automatically right after an async google.script.run callback silently
+   * fails -- the activation window has already expired by the time the
+   * server responds. Showing a button the person taps themselves creates a
+   * brand-new, valid user gesture instead.
+   */
+  function showContinuePanel(destinationUrl) {
+    // استعادة جلسة "تذكّرني" في الواجهة الثابتة: لا إطار معزول ولا قيد لمسة، فننتقل مباشرة بلا زر
+    if (state.resume) { window.top.location.href = destinationUrl + '&uid=' + encodeURIComponent(state.session.sessionKey); return; }
+    document.getElementById('loginFormPanel').style.display = 'none';
+    document.getElementById('successPanel').style.display = 'block';
+    document.getElementById('successTitle').textContent = t('loginSuccessTitle');
+    const btn = document.getElementById('continueBtn');
+    btn.textContent = t('continueBtn');
+    // SPEC v1.4 -- uid threads identity into the next page (see WebApp.gs
+    // doGet() for the full rationale/security note); state.session.userId
+    // only exists in this page's memory and would otherwise be lost the
+    // instant a real page navigation happens.
+    btn.onclick = () => { window.top.location.href = destinationUrl + '&uid=' + encodeURIComponent(state.session.sessionKey); };
+  }
+
+  // يستدعيها masar-runtime بعد نجاح resumeSession بنفس شكل نتيجة login (الصفحة الرئيسية للدور، اختيار المحل للكاشير...)
+  window.masarResumeLogin = function (data) { state.resume = true; onLoginResult({ success: true, data: data }); };
+  if (window.MASAR_CONFIG) document.documentElement.classList.add('masar-web');
+
+  function onServerFailure(error) {
+    setLoginBusy(false);
+    showError(t('errorGeneric'));
+    console.error('google.script.run failure:', error);
+  }
+
+  /**
+   * openStorePicker() — calls the real AdminService.getActiveStoresWithOccupancy(userId).
+   */
+  function openStorePicker() {
+    document.getElementById('storePickerOverlay').classList.add('open');
+    // SPEC v1.4 (طلب صريح من صاحب المشروع) -- رسالة محايدة أثناء التحميل،
+    // لا تفترض مسبقًا أن اختيار محل مطلوب -- العنوان الفعلي ("اختر المحل"
+    // أو "نوبتك لا تزال مفتوحة") يُقرَّر فقط بعد وصول البيانات، لا قبله.
+    document.getElementById('storePickerBox').innerHTML = `<div style="padding:10px 0; font-size:12.5px; color:var(--ink-soft); text-align:center;">${t('loadingStores')}</div>`;
+    google.script.run
+      .withSuccessHandler(onStoresResult)
+      .withFailureHandler(onServerFailure)
+      .getActiveStoresWithOccupancy(state.session.sessionKey);
+  }
+
+  function onStoresResult(result) {
+    const box = document.getElementById('storePickerBox');
+    if (!result || !result.success) {
+      showError(result && result.error ? (state.lang === 'ar' ? result.error.messageAR : result.error.messageEN) : t('errorGeneric'));
+      document.getElementById('storePickerOverlay').classList.remove('open');
+      return;
+    }
+    state.stores = result.data.stores;
+
+    // SPEC v1.4 (اقتراح مباشر من صاحب المشروع) -- الكاشير الذي غادر بلا إغلاق
+    // نوبته لا يرى شاشة الاختيار إطلاقًا عند عودته -- نوبته المفتوحة أصلًا
+    // تُكتشَف تلقائيًا هنا وتُقفَز مباشرة، لا رسالة خطأ ولا اختيار مكرَّر،
+    // ولا حتى ومضة عنوان "اختر المحل" قبلها (لا عنوان يظهر أثناء التحميل إطلاقًا).
+    const ownActiveStore = state.stores.find(s => s.occupiedByUserId === state.session.userId);
+    if (ownActiveStore) {
+      const name = state.lang === 'ar' ? ownActiveStore.storeNameAR : ownActiveStore.storeNameEN;
+      box.innerHTML = `
+        <div style="text-align:center;">
+          <div style="font-size:34px; margin-bottom:10px;">✅</div>
+          <h3 style="margin-bottom:6px;">${t('resumeShiftTitle')}</h3>
+          <div class="conflict-msg" style="margin-bottom:18px;">${t('resumeShiftMsg')(name)}</div>
+          <button class="store-option try-again-btn" id="resumeShiftBtn">${t('continueBtn')}</button>
+        </div>`;
+      document.getElementById('resumeShiftBtn').addEventListener('click', () => {
+        if (homeUrl(state.session) || ROLE_DESTINATIONS.CASHIER) {
+          window.top.location.href = (homeUrl(state.session) || ROLE_DESTINATIONS.CASHIER) + '&uid=' + encodeURIComponent(state.session.sessionKey) + '&storeId=' + encodeURIComponent(ownActiveStore.storeId) + '&storeName=' + encodeURIComponent(name) + '&assignmentId=' + encodeURIComponent(ownActiveStore.assignmentId) + '&fullName=' + encodeURIComponent(state.session.fullName);
+        } else {
+          box.innerHTML = `<div class="conflict-msg" style="text-align:center; color:var(--warn);">⚠️ ${t('roleNotConnected')}</div>`;
+        }
+      });
+      return;
+    }
+
+    renderStoreOptions();
+  }
+
+  function renderStoreOptions() {
+    // العنوان "اختر المحل..." لا يُبنى إلا هنا -- فقط بعد التأكد أن اختيارًا
+    // فعليًا مطلوب (لا نوبة سابقة مفتوحة). هذا هو الفارق عن الإصدار السابق.
+    document.getElementById('storePickerBox').innerHTML = `<h3>${t('storePickerTitle')}</h3><div id="storeOptionsList"></div>`;
+    document.getElementById('storeOptionsList').innerHTML = state.stores.map(s => {
+      const occupiedName = state.lang === 'ar' ? s.occupiedByNameAR : s.occupiedByNameEN;
+      return `
+      <button class="store-option ${s.occupiedByUserId ? 'occupied' : ''}" data-store="${s.storeId}">
+        <span class="store-option-name">${state.lang === 'ar' ? s.storeNameAR : s.storeNameEN}</span>
+        <span class="store-option-tag ${s.occupiedByUserId ? 'occupied' : 'free'}">${s.occupiedByUserId ? t('storeOccupiedTag')(occupiedName) : t('storeFreeTag')}</span>
+      </button>`;
+    }).join('');
+    document.querySelectorAll('[data-store]').forEach(btn => {
+      btn.addEventListener('click', () => attemptOpenStore(btn.getAttribute('data-store')));
+    });
+  }
+
+  /**
+   * attemptOpenStore(storeId) — calls the real AdminService.openShift(userId,
+   * userId, storeId), self-service path (actingUserId=targetUserId). The
+   * occupant name shown on conflict comes from the store list already
+   * fetched above, not from openShift's error itself (that error is
+   * intentionally generic server-side — see AdminService.gs).
+   */
+  function attemptOpenStore(storeId) {
+    google.script.run
+      .withSuccessHandler(result => onOpenShiftResult(result, storeId))
+      .withFailureHandler(onServerFailure)
+      .openShift(state.session.sessionKey, state.session.userId, storeId);
+  }
+
+  function onOpenShiftResult(result, storeId) {
+    if (!result || !result.success) {
+      if (result && result.error && result.error.code === 'CASHIER_ALREADY_HAS_ACTIVE_SHIFT') {
+        renderOwnShiftConflict(result.error);
+        return;
+      }
+      const store = state.stores.find(s => s.storeId === storeId);
+      renderConflict(store);
+      return;
+    }
+    const store = state.stores.find(s => s.storeId === storeId);
+    showToast(t('toastShiftOpened')(state.lang === 'ar' ? store.storeNameAR : store.storeNameEN));
+    const box = document.getElementById('storePickerBox');
+    if (homeUrl(state.session) || ROLE_DESTINATIONS.CASHIER) {
+      box.innerHTML = `
+        <div style="text-align:center;">
+          <div style="font-size:34px; margin-bottom:10px;">✅</div>
+          <h3 style="margin-bottom:18px;">${t('loginSuccessTitle')}</h3>
+          <button class="store-option try-again-btn" id="continueBtnCashier">${t('continueBtn')}</button>
+        </div>`;
+      document.getElementById('continueBtnCashier').addEventListener('click', () => {
+        window.top.location.href = (homeUrl(state.session) || ROLE_DESTINATIONS.CASHIER) + '&uid=' + encodeURIComponent(state.session.sessionKey) + '&storeId=' + encodeURIComponent(storeId) + '&storeName=' + encodeURIComponent(store.storeNameAR) + '&assignmentId=' + encodeURIComponent(result.data.assignmentId) + '&fullName=' + encodeURIComponent(state.session.fullName);
+      });
+    } else {
+      box.innerHTML = `<div class="conflict-msg" style="text-align:center; color:var(--warn);">⚠️ ${t('roleNotConnected')}</div>`;
+    }
+  }
+
+  function renderConflict(store) {
+    const occupiedName = state.lang === 'ar' ? store.occupiedByNameAR : store.occupiedByNameEN;
+    const storeName = state.lang === 'ar' ? store.storeNameAR : store.storeNameEN;
+    const box = document.getElementById('storePickerBox');
+    box.innerHTML = `
+      <h3 style="color:var(--warn);">⚠️ ${t('conflictTitle')}</h3>
+      <div class="conflict-msg">${t('conflictMsg')(storeName, occupiedName)}</div>
+      <div class="notif-list"><div class="notif-item">📩 ${t('conflictNote')}</div></div>
+      <button class="store-option try-again-btn" id="tryAgainBtn">${t('tryAnotherBtn')}</button>
+    `;
+    document.getElementById('tryAgainBtn').addEventListener('click', renderStoreOptions);
+  }
+
+  /**
+   * renderOwnShiftConflict(error) -- SPEC v1.4: distinct from renderConflict
+   * above. That one means "someone else holds this store"; this one means
+   * the cashier already holds a DIFFERENT active shift elsewhere and must
+   * close it first (AdminService.gs openShift() -- CASHIER_ALREADY_HAS_ACTIVE_SHIFT).
+   */
+  function renderOwnShiftConflict(error) {
+    const box = document.getElementById('storePickerBox');
+    box.innerHTML = `
+      <h3 style="color:var(--warn);">⚠️ ${t('ownShiftConflictTitle')}</h3>
+      <div class="conflict-msg">${state.lang === 'ar' ? error.messageAR : error.messageEN}</div>
+      <button class="store-option try-again-btn" id="ownShiftBackBtn">${t('backToLoginBtn')}</button>
+    `;
+    document.getElementById('ownShiftBackBtn').addEventListener('click', () => {
+      document.getElementById('storePickerOverlay').classList.remove('open');
+      document.getElementById('loginFormPanel').style.display = 'block';
+      document.getElementById('fUsername').value = '';
+      document.getElementById('fPassword').value = '';
+    });
+  }
+
+  function showToast(msg) {
+    let el = document.getElementById('loginToast');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'loginToast';
+      el.className = 'login-toast';
+      document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => el.classList.remove('show'), 2400);
+  }
+
+  document.getElementById('loginBtn').addEventListener('click', attemptLogin);
+  document.getElementById('fPassword').addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
+  document.getElementById('langToggle').addEventListener('click', () => { state.lang = state.lang === 'ar' ? 'en' : 'ar'; applyI18n(); });
+
+  applyI18n();
+</script>
+
+</body>
+</html>
