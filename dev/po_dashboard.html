@@ -240,6 +240,20 @@
   .recv-name, [class*="-main"] { flex: 1 1 150px; min-width: 0; }
   .recv-name .n { overflow-wrap: anywhere; }
   .dept-card { padding-left: 12px !important; padding-right: 12px !important; }
+  /* لوحة الكاشير: صف الطلبية يتّسع لمعرّف + نوع + وقت في سطر واحد بدل ثلاثة */
+  #view-dashboard .order-id { min-width: 0; }
+  #view-dashboard .order-time { min-width: 0; font-size: 11.5px; }
+  #view-dashboard .order-row { gap: 10px; padding-left: 12px; padding-right: 12px; }
+  #view-dashboard .order-status { order: 5; }  /* السطر الأول: المعرّف + النوع + الوقت؛ الحالة تحتها */
+  #view-dashboard .change-line { order: 6; }
+  /* رأس الصفحة الفرعي (عنوان + شارات): يلتف ولا يُسحق العنوان */
+  .subheader { flex-wrap: wrap; row-gap: 8px; }
+  .subheader h1 { flex: 1 1 140px; min-width: 0; }
+  .subheader .meta-badge { white-space: normal; }
+  /* استلام الكاشير: الاسم بعرض مقروء والكمية بجانبه، والوحدة والحالة في السطر التالي */
+  #view-receive .recv-name { flex: 1 1 140px; min-width: 0; }
+  #view-receive .recv-item-top { row-gap: 8px; }
+  #view-receive .recv-qty-input { width: 84px; }
   /* حقول الكمية */
   input[type="number"] { max-width: 100%; }
 }
