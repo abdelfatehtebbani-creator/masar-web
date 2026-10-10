@@ -81,16 +81,6 @@
   .test-banner { display: none; background: #B23B2E; color: #fff; border-radius: 12px; padding: 9px 12px; font-size: 12.5px; font-weight: 700; line-height: 1.6; text-align: center; margin-bottom: 12px; }
   .test-panel { display: none; }
   .test-panel select { width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--card, #fff); color: var(--ink); font: inherit; font-size: 14.5px; }
-  .test-profile { display: none; border: 1px dashed #B23B2E; border-radius: 12px; padding: 10px 12px; margin: 4px 0 12px; font-size: 13px; line-height: 1.7; background: rgba(178,59,46,.05); }
-  .test-profile .tp-name { font-weight: 800; font-size: 14.5px; }
-  .test-profile .tp-meta { color: var(--ink-soft); }
-  .test-profile details { margin-top: 6px; }
-  .test-profile summary { cursor: pointer; font-weight: 700; color: #B23B2E; }
-  .test-profile .tp-cat { margin: 8px 0 2px; font-weight: 700; font-size: 12.5px; }
-  .test-profile ul { margin: 0; padding-inline-start: 18px; }
-  .test-profile li { font-size: 12.5px; }
-  .test-profile code { font-size: 11px; color: var(--ink-soft); direction: ltr; unicode-bidi: embed; }
-  .test-profile .tp-cond { font-size: 11px; background: rgba(238,113,38,.15); color: var(--primary); border-radius: 6px; padding: 0 5px; margin-inline-start: 4px; }
   .test-toggle { display: none; text-align: center; margin-top: 10px; font-size: 12.5px; }
   .test-toggle a { color: var(--ink-soft); }
   .login-btn {
@@ -193,6 +183,9 @@
   #view-receive .recv-name { flex: 1 1 140px; min-width: 0; }
   #view-receive .recv-item-top { row-gap: 8px; }
   #view-receive .recv-qty-input { width: 84px; }
+  /* قائمة المستخدم (⋮): على الهاتف قد يهبط زر القائمة على حافة الشاشة فتخرج القائمة منها ولا يظهر إلا إطارها. تُفرَد بعرض الشاشة تحت زرها بهوامش ١٢px */
+  .user-menu { position: static !important; }
+  .user-dropdown { position: absolute !important; top: auto !important; inset-inline-end: auto !important; inset-inline-start: auto !important; left: 12px !important; right: 12px !important; min-width: 0 !important; margin-top: 8px; }
   /* حقول الكمية */
   input[type="number"] { max-width: 100%; }
 }
@@ -217,7 +210,6 @@
       <div class="test-panel" id="testPanel">
         <div class="field"><label data-i18n="testAccountLbl"></label>
           <select id="fTestAccount"></select></div>
-        <div class="test-profile" id="testProfile"></div>
       </div>
       <div id="normalFields">
       <div class="field">
@@ -719,20 +711,6 @@
     document.getElementById('testToggleLink').textContent = t(on ? 'testToNormal' : 'testToTest');
     hideError();
   }
-  function renderTestProfile() {
-    const box = document.getElementById('testProfile');
-    const a = testAccounts.find((x) => x.username === document.getElementById('fTestAccount').value);
-    if (!a) { box.style.display = 'none'; box.innerHTML = ''; return; }
-    const isAr = state.lang === 'ar';
-    const byCat = {};
-    (a.permissions || []).forEach((p) => { (byCat[p.category] = byCat[p.category] || []).push(p); });
-    const cats = Object.keys(byCat).map((c) => `<div class="tp-cat">${escHtml(TASK_CAT_AR[c] || c)}</div><ul>${byCat[c].map((p) => `<li>${escHtml(p.descriptionAR || p.key)} <code>${escHtml(p.key)}</code>${p.condition ? `<span class="tp-cond">${escHtml(p.condition)}</span>` : ''}</li>`).join('')}</ul>`).join('');
-    box.innerHTML = `<div class="tp-name">${escHtml(isAr ? a.fullNameAR : a.fullNameEN)}</div>
-      <div class="tp-meta">${escHtml(t('tpUser'))}: <b>${escHtml(a.username)}</b> · ${escHtml(t('tpRole'))}: <b>${escHtml(isAr ? a.roleNameAR : a.roleNameEN)}</b>${a.departmentNameAR ? ' · ' + escHtml(t('tpDept')) + ': <b>' + escHtml(a.departmentNameAR) + '</b>' : ''}</div>
-      <div class="tp-meta">${escHtml(t('tpNote'))}</div>
-      <details><summary>${escHtml(t('tpPerms')((a.permissions || []).length))}</summary>${cats || ''}</details>`;
-    box.style.display = 'block';
-  }
   function attemptTestLogin() {
     const username = document.getElementById('fTestAccount').value;
     if (!username) { showError(t('testNeedPick')); return; }
@@ -750,7 +728,6 @@
         // تسمية قصيرة: "الكاشير 1 - Cashier 1" (الرقم يظهر فقط للدور المتعدد الحسابات؛ يُستخرج من اسم الحساب، والحساب بلا لاحقة = ١)
         const shortLabel = (a) => { const m = /_(\d+)$/.exec(a.username); const n = roleCount[a.roleCode] > 1 ? ' ' + (m ? m[1] : '1') : ''; return a.roleNameAR + n + ' - ' + a.roleNameEN + n; };
         sel.innerHTML = `<option value="">${escHtml(t('testPick'))}</option>` + testAccounts.map((a) => `<option value="${escHtml(a.username)}">${escHtml(shortLabel(a))}</option>`).join('');
-        sel.addEventListener('change', renderTestProfile);
         document.getElementById('testBanner').style.display = 'block';
         document.getElementById('testToggle').style.display = 'block';
         document.getElementById('testToggleLink').addEventListener('click', (e) => { e.preventDefault(); setTestMode(!testMode); });

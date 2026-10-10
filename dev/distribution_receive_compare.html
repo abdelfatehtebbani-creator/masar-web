@@ -285,6 +285,9 @@
   #view-receive .recv-name { flex: 1 1 140px; min-width: 0; }
   #view-receive .recv-item-top { row-gap: 8px; }
   #view-receive .recv-qty-input { width: 84px; }
+  /* قائمة المستخدم (⋮): على الهاتف قد يهبط زر القائمة على حافة الشاشة فتخرج القائمة منها ولا يظهر إلا إطارها. تُفرَد بعرض الشاشة تحت زرها بهوامش ١٢px */
+  .user-menu { position: static !important; }
+  .user-dropdown { position: absolute !important; top: auto !important; inset-inline-end: auto !important; inset-inline-start: auto !important; left: 12px !important; right: 12px !important; min-width: 0 !important; margin-top: 8px; }
   /* حقول الكمية */
   input[type="number"] { max-width: 100%; }
 }
