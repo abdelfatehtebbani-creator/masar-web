@@ -19,6 +19,7 @@
     currentStoreId: p('storeId'), currentStoreName: p('storeName'), currentAssignmentId: p('assignmentId'), currentFullName: p('fullName'),
     currentOrderId: p('id'), currentTab: p('tab'), attImgId: p('img'), attAudioId: p('audio'), invoiceKind: p('kind'),
     userLang: lang(), timeoutScale: 3, pageParams: pageParams,
+    testLoginEnabled: !!(CFG.env && CFG.env !== 'PROD'), // تلميح للواجهة فقط (بناء DIV)؛ الخادم هو من يسمح فعليًا
     reloadQuery: page === 'login' ? 'page=login' : location.search.slice(1).replace(/'/g, '%27')
   };
 
@@ -51,26 +52,94 @@
 
   // ----- google.script.run عبر fetch (كل مرجع غير قابل للتعديل: with* تُرجع مُشغِّلًا جديدًا فلا تتشارك النداءات المعالجات) -----
   var expiring = false;
+  // ----- تجديد الجلسة بصمت للأجهزة المتذكَّرة -----
+  // الجلسة العادية تنتهي بعد ٦ ساعات كحدٍّ أقصى. إن انتهت أثناء الاستعمال وكان للجهاز رمز "تذكّرني" سارٍ: تستعيد الواجهة جلسة جديدة (resumeSession) وتُعيد النداء الفاشل مرة واحدة،
+  // وتحوّل كل نداء لاحق بالمفتاح القديم إلى الجديد (الصفحات تحمل المفتاح القديم ثابتًا في CURRENT_USER_ID)؛ لا إعادة تحميل فلا يضيع عمل غير محفوظ. بلا رمز تذكّر: الدخول من جديد كما كان.
+  var SK_KEY = 'masar_sk_' + NS;
+  var SESSION_KEY_RE = /^[A-Za-z0-9_-]{3,40}\.[0-9a-f]{32,64}$/;
+  var keyMap = {}; try { keyMap = JSON.parse((S && S.getItem(SK_KEY)) || '{}') || {}; } catch (e) { keyMap = {}; }
+  function saveKeyMap() { try { if (S) S.setItem(SK_KEY, JSON.stringify(keyMap)); } catch (e) { /* تجاهل */ } }
+  var renewing = null;
+  function renewSession(expiredKey) {
+    if (renewing) return renewing;
+    var rt = readRt(); if (!rt) return Promise.resolve(null);
+    renewing = rawCall('resumeSession', [rt.u, rt.t]).then(function (r) {
+      renewing = null;
+      if (r && r.success && r.data && r.data.sessionKey) {
+        Object.keys(keyMap).forEach(function (k) { if (keyMap[k] === expiredKey) keyMap[k] = r.data.sessionKey; });
+        keyMap[expiredKey] = r.data.sessionKey; saveKeyMap();
+        return r.data.sessionKey;
+      }
+      return null;
+    }, function () { renewing = null; return null; });
+    return renewing;
+  }
+  function handleExpired(action, r) {
+    if (r && r.success === false && r.error && r.error.code === 'SESSION_EXPIRED' && action !== 'login' && action !== 'logout' && page !== 'login' && !expiring) {
+      expiring = true; setTimeout(toLogin, 50);
+    }
+    return r;
+  }
   function callApi(action, args) {
+    var a = args.slice();
+    if (typeof a[0] === 'string' && keyMap[a[0]] && action !== 'login' && action !== 'resumeSession' && action !== 'testLogin') a[0] = keyMap[a[0]];
+    return rawCall(action, a).then(function (r) {
+      var expired = r && r.success === false && r.error && r.error.code === 'SESSION_EXPIRED';
+      var renewable = expired && page !== 'login' && ['login', 'logout', 'resumeSession', 'testLogin'].indexOf(action) === -1 && typeof a[0] === 'string' && SESSION_KEY_RE.test(a[0]) && !!readRt();
+      if (!renewable) return handleExpired(action, r);
+      return renewSession(a[0]).then(function (newKey) {
+        if (!newKey) return handleExpired(action, r);
+        var b = a.slice(); b[0] = newKey;
+        return rawCall(action, b).then(function (r2) { return handleExpired(action, r2); });
+      });
+    });
+  }
+  // ----- نقل النداءات: دُفعات القراءة في التحديث الخلفي (٢٠٢٦-١٠-١٠) -----
+  // كل نداء إلى Apps Script يدفع كلفة ثابتة (~٣ث: بدء تنفيذ + تحويل Google). القراءات الصرفة (قائمة pureReads المولَّدة من الخادم عند البناء) التي تُصدرها الصفحة في اللحظة نفسها
+  // (مثل ٨ عدّادات للشاشة الرئيسية) تُجمَع في نداء واحد `batch` (حتى ١٢)، فيُنفَّذ في تنفيذ واحد يتشارك قراءة الجداول داخله. كل عنصر يمرّ بالتحقق نفسه على الخادم وتصل نتيجته لصاحبه
+  // بنفس الشكل؛ الحفظ لا يُجمَع أبدًا. إن لم يعرف الخادم `batch` (نشر أقدم) يُعطَّل التجميع ويُعاد النداء فرديًا بلا خسارة.
+  var PURE = {}; (CFG.pureReads || []).forEach(function (n) { PURE[n] = 1; }); delete PURE.getChangeTokens; delete PURE.getTestLoginAccounts;
+  var BATCH_KEY = 'masar_nobatch_' + NS, BATCH_WINDOW_MS = 30, BATCH_MAX = 12;
+  var batchOff = false; try { batchOff = !!(S && S.getItem(BATCH_KEY)); } catch (e) { batchOff = false; }
+  var queue = [], timer = null;
+  function doFetch(action, body, keepalive) {
+    return fetch(CFG.apiUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: body, redirect: 'follow', keepalive: !!keepalive })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP_' + r.status); return r.text(); })
+      .then(function (t) { var j; try { j = JSON.parse(t); } catch (e) { throw new Error('BAD_RESPONSE'); } return j; });
+  }
+  function sendChunk(chunk) {
+    if (chunk.length === 1) { doFetch(chunk[0].action, chunk[0].body).then(chunk[0].res, chunk[0].rej); return; }
+    var payload = JSON.stringify({ action: 'batch', args: [chunk.map(function (c) { return { action: c.action, args: c.args }; })] });
+    doFetch('batch', payload).then(function (r) {
+      if (r && r.success && r.data && Array.isArray(r.data.results) && r.data.results.length === chunk.length) { chunk.forEach(function (c, i) { c.res(r.data.results[i]); }); return; }
+      if (r && r.success === false && r.error && r.error.code === 'UNKNOWN_ACTION') { batchOff = true; try { if (S) S.setItem(BATCH_KEY, '1'); } catch (e) { /* تجاهل */ } }
+      chunk.forEach(function (c) { doFetch(c.action, c.body).then(c.res, c.rej); }); // رجوع آمن: فرديًا
+    }, function (err) { chunk.forEach(function (c) { c.rej(err); }); });
+  }
+  function flushQueue() { timer = null; var items = queue; queue = []; while (items.length) sendChunk(items.splice(0, BATCH_MAX)); }
+  function transport(action, args, body) {
+    if (action === 'logout') return doFetch(action, body, true);
+    // الدُفعات للتحديث الخلفي فقط (masarRunSilently يرفع __masarBg): قياس DIV أظهر أن تجميع ٨ قراءات في تنفيذ واحد لا يقلّل زمن الاستجابة (تُنفَّذ تتابعًا داخله) بل قد يزيده قليلًا،
+    // لكنه يخفض عدد التنفيذات المتزامنة على الخادم ثمانية أضعاف -- ما يهمّ في استطلاع الخلفية لا في نداءات المستخدم المباشرة.
+    if (batchOff || !PURE[action] || window.__masarBg !== true) return doFetch(action, body);
+    return new Promise(function (res, rej) { queue.push({ action: action, args: args, body: body, res: res, rej: rej }); if (!timer) timer = setTimeout(flushQueue, BATCH_WINDOW_MS); });
+  }
+  function rawCall(action, args) {
     // الخروج: يُرفَق رمز الجهاز ليُنسيه الخادم، ويُمسح محليًا فورًا (لا ننتظر الردّ؛ الصفحة قد تنتقل قبله) ويُرسَل بـkeepalive كي لا يُلغى الطلب عند الانتقال
     if (action === 'logout') { var rtOut = readRt(); if (rtOut) args = [args[0], rtOut.t]; clearRt(); }
     var body = JSON.stringify({ action: action, args: args.map(function (a) { return a === undefined ? null : a; }) });
-    return fetch(CFG.apiUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: body, redirect: 'follow', keepalive: action === 'logout' })
-      .then(function (r) { if (!r.ok) throw new Error('HTTP_' + r.status); return r.text(); })
-      .then(function (t) { var j; try { j = JSON.parse(t); } catch (e) { throw new Error('BAD_RESPONSE'); } return j; })
+    return transport(action, args, body)
       .then(function (r) {
         if (action === 'login' && r && r.success && r.data) {
           if (args[2] === true && r.data.rememberToken) saveRt(r.data.userId, r.data.rememberToken); else clearRt();
         }
+        if (action === 'testLogin') clearRt(); // جلسة الاختبار لا تُحفَظ للاستعادة إطلاقًا
         if (action === 'resumeSession' && r) {
           if (r.success && r.data && r.data.rememberToken) saveRt(r.data.userId, r.data.rememberToken);
           else if (r.error && r.error.code === 'REMEMBER_INVALID') clearRt();
         }
         if ((action === 'login' || action === 'resumeSession') && r && r.success && r.data) { try { if (r.data.language && L) L.setItem('masar_lang_' + NS, String(r.data.language).toLowerCase() === 'en' ? 'en' : 'ar'); } catch (e) { /* تجاهل */ } }
         if (action === 'setUserLanguage' && args[1] && L) { try { L.setItem('masar_lang_' + NS, String(args[1]).toLowerCase() === 'en' ? 'en' : 'ar'); } catch (e) { /* تجاهل */ } }
-        if (r && r.success === false && r.error && r.error.code === 'SESSION_EXPIRED' && action !== 'login' && action !== 'logout' && page !== 'login' && !expiring) {
-          expiring = true; setTimeout(toLogin, 50);
-        }
         return r;
       });
   }
@@ -123,6 +192,27 @@
       document.body.appendChild(h);
     });
   }
+
+  // ----- ضغط الصور قبل الرفع (الواجهة الثابتة فقط) -----
+  // صور كاميرا الهاتف ٥–١٢ ميغابايت؛ كل نداء رفع يمرّ بتحويل Google (~٣ث) فيطول الرفع على شبكة الجوال. تُصغَّر الصورة إلى ضلع أقصى ١٦٠٠px وجودة JPEG ٠٫٨٢ (تكفي لقراءتها ولطباعة صغيرة)،
+  // ولا تُكبَّر الصور الأصغر، ولا يُمسّ SVG/GIF. تُرجع Promise بـ{base64, type, name}؛ عند أي فشل/عدم دعم: الملف الأصلي كما هو (لا ضرر).
+  window.masarPrepareImage = function (file, opts) {
+    opts = opts || {}; var maxDim = opts.maxDim || 1600, quality = opts.quality || 0.82;
+    function plain() { return new Promise(function (res, rej) { var fr = new FileReader(); fr.onload = function () { res({ base64: String(fr.result).split(',')[1], type: file.type, name: file.name }); }; fr.onerror = rej; fr.readAsDataURL(file); }); }
+    if (!file || !/^image\/(jpeg|png|webp|heic|heif)$/i.test(file.type || '') || typeof createImageBitmap !== 'function' || typeof document === 'undefined') return plain();
+    return createImageBitmap(file).then(function (bmp) {
+      var scale = Math.min(1, maxDim / Math.max(bmp.width, bmp.height));
+      if (scale === 1 && file.size < 600 * 1024) { bmp.close && bmp.close(); return plain(); }
+      var c = document.createElement('canvas'); c.width = Math.round(bmp.width * scale); c.height = Math.round(bmp.height * scale);
+      var g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(bmp, 0, 0, c.width, c.height); bmp.close && bmp.close();
+      return new Promise(function (res) {
+        c.toBlob(function (blob) {
+          if (!blob || blob.size >= file.size) { res(null); return; }
+          var fr = new FileReader(); fr.onload = function () { res({ base64: String(fr.result).split(',')[1], type: 'image/jpeg', name: String(file.name || 'photo').replace(/\.[A-Za-z0-9]+$/, '') + '.jpg' }); }; fr.onerror = function () { res(null); }; fr.readAsDataURL(blob);
+        }, 'image/jpeg', quality);
+      }).then(function (r) { return r || plain(); });
+    }).catch(function () { return plain(); });
+  };
 
   // شريط البيئة (غير الإنتاج)
   if (CFG.env && CFG.env !== 'PROD') {
