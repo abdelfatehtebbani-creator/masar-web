@@ -98,6 +98,9 @@
   .order-sub { font-size: 12.5px; color: var(--ink-soft); }
   .change-note { margin-top: 6px; padding: 5px 10px; border-radius: 8px; background: #FFF0D6; color: #8A5A00; font-size: 12.5px; font-weight: 600; display: inline-block; }
   .change-note.cancel { background: #F6D5CE; color: #9A2F20; }
+  .empty-section-label { font-size: 13px; font-weight: 700; color: var(--ink-soft); margin: 18px 4px 8px; }
+  .order-card.empty-order { align-items: center; background: var(--surface); border-style: dashed; }
+  .ack-btn { flex-shrink: 0; border: 1.5px solid var(--success, #3f8f5f); background: transparent; color: var(--success, #3f8f5f); border-radius: 999px; padding: 7px 14px; font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; }
   .waiting-badge { font-size: 11px; font-weight: 600; color: var(--pending); background: var(--pending-tint); border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
   .badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
   .badge.normal { color: var(--primary-dark); background: var(--primary-tint); border: 1px solid rgba(193,121,31,0.35); }
@@ -443,6 +446,7 @@
       changeEditNote: '⚠ يوجد طلب تعديل من الكاشير — راجعه من «مراجعة إلغاء/تعديل»', changeCancelNote: '⚠ يوجد طلب إلغاء من الكاشير — راجعه من «مراجعة إلغاء/تعديل»',
       itemsCount: (n) => `${n} صنف`, typeNormal: 'عادي', typeSpecial: 'خاص',
       emptyList: 'لا توجد طلبيات بانتظار الاعتماد حاليًا — كل شيء مُعتمَد ✅',
+      emptySection: (n) => `🕊️ طلبيات فارغة للاطّلاع (${n})`, emptyOrderNote: 'طلبية فارغة — المحل لا يحتاج شيئًا (أُرسلت لإغلاق النوبة)', byDistribution: 'أرسلها مسؤول التوزيع نيابةً', byCashier: 'الكاشير', ackBtn: 'اطّلعت',
       loadingText: 'جارٍ التحميل...', loadErrorText: 'تعذّر تنفيذ العملية — أعد المحاولة',
       toastNotReady: 'هذه الميزة ستُبنى في خطوة قادمة', savingText: 'جارٍ الحفظ...', continueBtn: 'اضغط هنا للمتابعة',
     },
@@ -453,6 +457,7 @@
       changeEditNote: '⚠ The cashier has an edit request — review it in "Review cancellation/edit"', changeCancelNote: '⚠ The cashier has a cancellation request — review it in "Review cancellation/edit"',
       itemsCount: (n) => `${n} item${n === 1 ? '' : 's'}`, typeNormal: 'Normal', typeSpecial: 'Special',
       emptyList: 'No orders awaiting approval right now — everything is approved ✅',
+      emptySection: (n) => `🕊️ Empty orders to acknowledge (${n})`, emptyOrderNote: 'Empty order — the store needs nothing (sent to close the shift)', byDistribution: 'Sent on behalf by distribution', byCashier: 'Cashier', ackBtn: 'Seen',
       loadingText: 'Loading...', loadErrorText: 'Could not complete the operation — please try again',
       toastNotReady: 'This feature is coming up next', savingText: 'Saving...', continueBtn: 'Tap here to continue',
     }
@@ -521,7 +526,8 @@
         orders = result.data.orders.map(o => ({
           orderId: o.orderId, storeName: state.lang === 'ar' ? o.storeNameAR : o.storeNameEN,
           orderType: o.orderType, submittedAt: formatClockTime(o.createdAt), itemCount: o.itemCount, approved: false,
-          pendingChange: o.pendingChange ? o.pendingChange.type : ''
+          pendingChange: o.pendingChange ? o.pendingChange.type : '',
+          isEmpty: o.isEmpty === true, onBehalf: o.onBehalf === true, createdBy: state.lang === 'ar' ? (o.createdByNameAR || '') : (o.createdByNameEN || '')
         }));
         renderOrders();
       }, 8000))
@@ -551,9 +557,19 @@
 
   function renderOrders() {
     const list = document.getElementById('ordersList');
-    const pending = orders.filter(o => !o.approved);
-    if (!pending.length) { list.innerHTML = `<div class="order-card" style="cursor:default;"><div class="empty-state" style="padding:20px;"><div class="big">✅</div>${t('emptyList')}</div></div>`; return; }
-    list.innerHTML = pending.map(o => `
+    const emptyOrders = orders.filter(o => o.isEmpty);
+    const pending = orders.filter(o => !o.approved && !o.isEmpty);
+    const emptyHtml = emptyOrders.length ? `<div class="empty-section-label">${t('emptySection')(emptyOrders.length)}</div>` + emptyOrders.map(o => `
+      <div class="order-card empty-order" style="cursor:default;" data-empty="${o.orderId}">
+        <div class="order-icon">🕊️</div>
+        <div class="order-main">
+          <div class="order-top"><span class="order-store">${o.storeName}</span><span class="order-id-tag">${o.orderId}</span></div>
+          <div class="order-sub">${t('emptyOrderNote')} · ${o.submittedAt}${o.createdBy ? ' · ' + (o.onBehalf ? t('byDistribution') : t('byCashier')) + ': ' + o.createdBy : ''}</div>
+        </div>
+        <button class="ack-btn" type="button" data-ack="${o.orderId}">${t('ackBtn')}</button>
+      </div>`).join('') : '';
+    const none = `<div class="order-card" style="cursor:default;"><div class="empty-state" style="padding:20px;"><div class="big">✅</div>${t('emptyList')}</div></div>`;
+    list.innerHTML = (pending.length ? pending.map(o => `
       <button class="order-card" type="button" data-order="${o.orderId}">
         <div class="order-icon">⏳</div>
         <div class="order-main">
@@ -567,7 +583,20 @@
         </div>
         <span class="waiting-badge">🔒</span>
         <span class="chevron">›</span>
-      </button>`).join('');
+      </button>`).join('') : none) + emptyHtml;
+    list.querySelectorAll('[data-ack]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const orderId = btn.getAttribute('data-ack');
+        btn.disabled = true; const original = btn.textContent; btn.textContent = t('savingText');
+        google.script.run
+          .withSuccessHandler(onceWithTimeout(result => {
+            if (result && !result.success) { btn.disabled = false; btn.textContent = original; showToast(t('loadErrorText')); return; }
+            orders = orders.filter(o => o.orderId !== orderId); renderOrders();
+          }, 8000))
+          .withFailureHandler(() => { btn.disabled = false; btn.textContent = original; showToast(t('loadErrorText')); })
+          .acknowledgeEmptyOrder(CURRENT_USER_ID, orderId);
+      });
+    });
     list.querySelectorAll('[data-order]').forEach(el => {
       el.addEventListener('click', () => {
         window.top.location.href = APP_BASE_URL + '?page=distribution_approve_order&id=' + encodeURIComponent(el.getAttribute('data-order')) + '&uid=' + encodeURIComponent(CURRENT_USER_ID);

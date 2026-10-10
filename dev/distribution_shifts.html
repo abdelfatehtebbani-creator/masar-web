@@ -438,7 +438,7 @@
       screenTitle: 'إدارة النوبات',
       closeBtn: 'إغلاق النوبة',
       blockingText: '⚠️ لم تُرسَل طلبية عادية لهذا المحل اليوم بعد — لا يمكن إغلاق النوبة قبل ذلك، حتى لو كانت فارغة.',
-      sendEmptyBtn: 'إرسال طلبية عادية فارغة نيابة عن المحل',
+      sendEmptyBtn: 'إرسال طلبية عادية فارغة نيابة عن المحل', toastNoShift: 'لا توجد نوبة مفتوحة لهذا المحل (ربما أُغلقت)',
       toastEmptySent: (store) => `أُرسلت طلبية عادية فارغة لـ${store} — يمكن الآن إغلاق النوبة`,
       toastClosed: (store) => `أُغلقت نوبة ${store} بنجاح`,
       emptyList: 'لا توجد نوبات نشطة حاليًا',
@@ -451,7 +451,7 @@
       screenTitle: 'Shift management',
       closeBtn: 'Close shift',
       blockingText: "⚠️ No normal order has been sent for this store today yet — the shift can't be closed before that, even if the order would be empty.",
-      sendEmptyBtn: 'Send an empty normal order on behalf of the store',
+      sendEmptyBtn: 'Send an empty normal order on behalf of the store', toastNoShift: 'This store has no open shift (it may have been closed)',
       toastEmptySent: (store) => `Empty normal order sent for ${store} — the shift can now be closed`,
       toastClosed: (store) => `${store}'s shift closed successfully`,
       emptyList: 'No active shifts right now',
@@ -643,18 +643,18 @@
           showToast(t('toastEmptySent')(storeName(s)));
           list.querySelector(`[data-blocking="${idx}"]`).classList.remove('show');
         }
+        // (١٠ أكتوبر ٢٠٢٦) دالة مخصَّصة لمسؤول التوزيع (sendEmptyOrderForStore): النداءان القديمان createOrder/submitOrder للكاشير حصرًا فكان الزر يفشل دائمًا
         google.script.run
-          .withSuccessHandler(onceWithTimeout(createResult => {
-            if (createResult && !createResult.success) { finish(false); return; }
-            const newOrderId = createResult ? createResult.data.orderId : null;
-            if (!newOrderId) { finish(true); return; } // انتهت المهلة قبل رد حقيقي -- نفترض النجاح الأرجح، مطابقًا لبقية الأدوار
-            google.script.run
-              .withSuccessHandler(onceWithTimeout(submitResult => { finish(!(submitResult && !submitResult.success)); }, 8000))
-              .withFailureHandler(() => finish(false))
-              .submitOrder(CURRENT_USER_ID, newOrderId);
+          .withSuccessHandler(onceWithTimeout(result => {
+            if (result && !result.success) {
+              const code = result.error && result.error.code;
+              if (code === 'NO_ACTIVE_SHIFT') { showToast(t('toastNoShift')); loadShifts(); return; }
+              finish(false); return;
+            }
+            finish(true);
           }, 8000))
           .withFailureHandler(() => finish(false))
-          .createOrder(CURRENT_USER_ID, s.storeId, 'NORMAL', [], null, null, null, null, null, null);
+          .sendEmptyOrderForStore(CURRENT_USER_ID, s.storeId);
       });
     });
   }

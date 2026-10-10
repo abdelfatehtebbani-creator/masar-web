@@ -841,7 +841,7 @@ const DistributionHubView = (function () {
     } catch (e) { /* تجاهل */ }
   }
   function loadBadges() {
-    loadBadge('getOrdersAwaitingProductionApproval', 'pendingOrders', d => d.orders.filter(o => !o.approved).length);
+    loadBadge('getOrdersAwaitingProductionApproval', 'pendingOrders', d => d.orders.filter(o => !o.approved && !o.isEmpty).length);
     loadBadge('getOrdersReadyToReceive', 'receiveCompare', d => d.orders.filter(o => !o.resolved).length);
     // "تجهيز شحنة" شاشتان في واحدة: (١) توزيعات معتمَدة تنتظر التجهيز، (٢) طلبيات جاهزة لإنشاء رحلة. العدّاد مجموعهما (كان يحسب الثانية فقط
     // فيبقى صفرًا بعد اعتماد المقارنة وإلى أن يُجهَّز التوزيع)
