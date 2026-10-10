@@ -8,15 +8,17 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="مسار">
 <link rel="apple-touch-icon" href="icon-180.png">
-<script src="masar-config.js?v=8d72c8ed"></script>
-<script src="masar-runtime.js?v=8d72c8ed"></script>
+<link rel="preload" href="fonts/cairo-arabic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="fonts.css?v=b70c2c0e">
+<script src="masar-config.js?v=b70c2c0e"></script>
+<script src="masar-runtime.js?v=b70c2c0e"></script>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MASAR — تتبّع الطلبيات</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Markazi+Text:wght@600;700&family=Fraunces:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Markazi+Text:wght@600;700&family=Fraunces:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
 <style>
   :root {
     --primary: #EE7126; --primary-dark: #C85A18; --primary-tint: #FCE8D8;
@@ -27,7 +29,7 @@
     --pending: #B4802A; --pending-tint: #F5EAD9;
     --radius-lg: 16px; --radius-md: 12px; --radius-sm: 8px;
     --shadow-card: 0 1px 2px rgba(43,33,27,0.06), 0 4px 16px rgba(43,33,27,0.05);
-    --font-ar: 'IBM Plex Sans Arabic', sans-serif; --font-en: 'IBM Plex Sans', sans-serif;
+    --font-ar: 'Cairo', sans-serif; --font-en: 'IBM Plex Sans', sans-serif;
     --font-mono: 'IBM Plex Mono', monospace;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -245,6 +247,40 @@
   .refresh-btn.armed { background: #fff; color: var(--secondary); }
   .refresh-btn.spin .ico { animation: masar-spin 0.8s linear infinite; }
   @keyframes masar-spin { to { transform: rotate(360deg); } }
+</style>
+<style id="masar-mobile">
+/* MASAR — تحسينات شاشة الهاتف المشتركة (١٠ أكتوبر ٢٠٢٦). تُحقَن في <head> كل صفحة بواسطة tools/build_client_snippets.js (كتلة style بالمعرّف masar-mobile)؛ لا تعدّلها داخل الصفحات.
+   السبب: صفوف flex كثيرة (أيقونة + اسم + كمية + أزرار) كانت تنضغط على ٣٦٠px فتتراكب النصوص وتنقطع الأزرار عند الحافة. المبدأ: الصف يلتف بدل أن ينضغط، والاسم يحجز عرضًا أدنى، والنص الطويل يلتف. */
+@media (max-width: 480px) {
+  html { -webkit-text-size-adjust: 100%; }
+  body { overflow-wrap: anywhere; }
+  img, canvas, video { max-width: 100%; height: auto; }
+  main { padding-left: 12px !important; padding-right: 12px !important; }
+
+  /* صفوف القوائم: تلتف */
+  .shift-top, .item-row, .compare-row, .order-top, .order-card .order-main, .row-action, .item-actions, .confirm-bar, .qty-compare, .stop-head, .trip-head, .meta-row {
+    flex-wrap: wrap;
+  }
+  /* الاسم/النص الرئيسي: لا ينكمش لما دون عرض مقروء (وإلا ينزل بقية الصف تحته) */
+  .shift-main, .item-main, .item-name, .order-main, .stop-main {
+    flex: 1 1 150px; min-width: 0;
+  }
+  .item-name, .shift-store, .order-store { overflow-wrap: anywhere; }
+  /* العناصر الثابتة (مدة، كمية، أزرار): بعرض محتواها، وتنزل لسطر خاص عند الضيق */
+  .shift-duration, .qty-compare, .item-qty { flex: 0 1 auto; }
+  .close-btn, .row-action, .item-actions { margin-inline-start: auto; }
+  .row-action, .item-actions { flex: 1 1 100%; justify-content: flex-end; }
+  /* أزرار نصها طويل: تلتف داخلها بدل أن تخرج من الشاشة */
+  button, .btn { max-width: 100%; }
+  .item-discrepancy-btn, .item-load-btn, .receive-item-btn, .close-btn { white-space: normal; text-align: center; line-height: 1.35; }
+  /* استلام الكاشير + أي صف باسم *-row/*-top/*-head: يلتف */
+  .recv-item-top, .decision-row, [class*="-row"]:not(tr):not(.shift-row):not(.order-row), [class*="-top"], [class*="-head"]:not(header):not(thead) { flex-wrap: wrap; }
+  .recv-name, [class*="-main"] { flex: 1 1 150px; min-width: 0; }
+  .recv-name .n { overflow-wrap: anywhere; }
+  .dept-card { padding-left: 12px !important; padding-right: 12px !important; }
+  /* حقول الكمية */
+  input[type="number"] { max-width: 100%; }
+}
 </style>
 </head>
 <body>
