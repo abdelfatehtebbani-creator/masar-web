@@ -644,6 +644,7 @@
         shipmentOrderId: stop.shipmentOrderId, // SPEC v1.4 -- confirmLoaded/confirmDelivery الحقيقيتان تحتاجان هذا المعرِّف تحديدًا، لا orderId
         store: state.lang === 'ar' ? stop.storeNameAR : stop.storeNameEN,
         locationType: stop.deliveryLocationType,
+        orderType: stop.orderType,
         state: stop.deliveryConfirmedAt ? 'DELIVERED' : (stop.loadedConfirmedAt ? 'LOADED' : 'PENDING'),
         addressAr: stop.deliveryAddressText,
         mapsLink: stop.deliveryLocationLink, // SPEC v1.4 -- رابط حقيقي مخزَّن، لا استعلام بحث عام مبني من اسم المحل
@@ -739,9 +740,30 @@
     return out;
   }
 
+  // ===== مكان تسليم الطلبية الخاصة (١٢ أكتوبر ٢٠٢٦) =====
+  // عنوان نصي + رابط خريطة آمن (http/https فقط؛ يُضاف https إن غاب المخطط)، ويُهرَّب كل نص قبل إدخاله في HTML.
+  function escLoc_(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+  function safeMapsUrl_(link) {
+    let u = String(link == null ? '' : link).trim();
+    if (!u) return '';
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(u)) u = 'https:' + String.fromCharCode(47, 47) + u.replace(/^\/+/, '');
+    return /^https?:/i.test(u) ? u : '';
+  }
+  /** سطر موضع التسليم: خارج المحل => العنوان (+ زر الموقع ما لم تُطلب noLink)؛ في المحل => وسم المحل فقط عند showStore */
+  function locHtml(type, addr, link, showStore, noLink) {
+    const ar = state.lang === 'ar';
+    const base = 'font-size:12.5px; margin-top:6px; line-height:1.5; color:var(--ink-soft);';
+    if (type !== 'CUSTOM_LOCATION') return showStore ? '<div class="loc-line" style="' + base + '">🏪 ' + (ar ? 'التسليم في المحل' : 'Delivery at the store') + '</div>' : '';
+    const url = noLink ? '' : safeMapsUrl_(link);
+    return '<div class="loc-line" style="' + base + '">📍 <b style="color:var(--ink);">' + (ar ? 'التسليم خارج المحل' : 'Delivery away from the store') + '</b>' + (addr ? ' — ' + escLoc_(addr) : '') +
+      (url ? ' <a href="' + escLoc_(url) + '" target="_blank" rel="noopener" style="color:var(--secondary); font-weight:700; text-decoration:underline;">' + (ar ? 'فتح الموقع ↗' : 'Open location ↗') + '</a>' : '') + '</div>';
+  }
+  // ===== نهاية مكان التسليم =====
+
   function stopCardHtml(entry, mode) {
     const stop = entry.stop, idx = entry.idx;
-    const showAddress = mode === 'deliver' && stop.locationType === 'CUSTOM_LOCATION';
+    const showAddress = stop.locationType === 'CUSTOM_LOCATION'; // يظهر في تبويبي الاستلام والتسليم: السائق يعرف الوجهة من لحظة التحميل
+    const mapsUrl = showAddress ? safeMapsUrl_(stop.mapsLink) : '';
     const items = mode === 'deliver' ? stop.items.filter(it => it.shippable) : stop.items;
     return `
       <div class="stop-card ${stop.state === 'DELIVERED' ? 'delivered' : ''}" data-stop="${stop.orderId}">
@@ -756,9 +778,9 @@
         ${showAddress ? `
           <div class="custom-location-box">
             <div class="addr-label">📍 ${t('addressLabel')}</div>
-            <div class="addr-text">${stop.addressAr}</div>
-            <a class="maps-btn" href="${stop.mapsLink}" target="_blank" rel="noopener">${t('openMaps')}</a>
-          </div>` : ''}
+            <div class="addr-text">${escLoc_(stop.addressAr)}</div>
+            ${mapsUrl ? `<a class="maps-btn" href="${escLoc_(mapsUrl)}" target="_blank" rel="noopener">${t('openMaps')}</a>` : ''}
+          </div>` : (stop.orderType === 'SPECIAL' ? locHtml('STORE', '', '', true) : '')}
         <div class="items-list ${mode === 'deliver' ? 'deliver-items' : ''}">
           ${items.map(it => {
             const canAct = mode === 'receive' && it.shippable && !it.loaded && stop.state === 'PENDING' && !it.pendingDiscrepancy;

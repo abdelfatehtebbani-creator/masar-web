@@ -743,7 +743,8 @@
         ORDERS = result.data.orders.map(o => ({
           orderId: o.orderId, store: state.lang === 'ar' ? o.storeNameAR : o.storeNameEN,
           itemCount: o.itemCount, fromProductionManager: o.fromProductionManager, distributionId: o.distributionId, prepared: false,
-          orderType: o.orderType, createdAt: o.createdAt || ''
+          orderType: o.orderType, createdAt: o.createdAt || '',
+          locType: o.deliveryLocationType || 'STORE', locAddr: o.deliveryAddressText || '', locLink: o.deliveryLocationLink || ''
         }));
         renderList();
         // عدّاد تبويب "إنشاء رحلة جديدة": نداء صامت لا يعطّل القائمة
@@ -780,7 +781,7 @@
       }
       DRIVERS = driversResult.data.drivers;
       TRIP_READY_COUNT = readyResult.data.orders.length;
-      READY_FOR_SHIPMENT_ORDERS = readyResult.data.orders.map(o => ({ orderId: o.orderId, store: state.lang === 'ar' ? o.storeNameAR : o.storeNameEN, itemCount: o.itemCount }));
+      READY_FOR_SHIPMENT_ORDERS = readyResult.data.orders.map(o => ({ orderId: o.orderId, store: state.lang === 'ar' ? o.storeNameAR : o.storeNameEN, itemCount: o.itemCount, orderType: o.orderType, locType: o.deliveryLocationType || 'STORE', locAddr: o.deliveryAddressText || '', locLink: o.deliveryLocationLink || '' }));
       onReady();
     }
     google.script.run
@@ -842,6 +843,7 @@
           <div class="main">
             <div class="store">${o.store}</div>
             <div class="meta"><span class="oid">${o.orderId}</span><span class="chip">${t('itemsCount')(o.itemCount)}</span></div>
+            ${o.orderType === 'SPECIAL' ? locHtml(o.locType, o.locAddr, o.locLink, true) : ''}
           </div>
         </label>`).join('');
     }
@@ -1004,6 +1006,26 @@
     });
   }
 
+  // ===== مكان تسليم الطلبية الخاصة (١٢ أكتوبر ٢٠٢٦) =====
+  // عنوان نصي + رابط خريطة آمن (http/https فقط؛ يُضاف https إن غاب المخطط)، ويُهرَّب كل نص قبل إدخاله في HTML.
+  function escLoc_(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+  function safeMapsUrl_(link) {
+    let u = String(link == null ? '' : link).trim();
+    if (!u) return '';
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(u)) u = 'https:' + String.fromCharCode(47, 47) + u.replace(/^\/+/, '');
+    return /^https?:/i.test(u) ? u : '';
+  }
+  /** سطر موضع التسليم: خارج المحل => العنوان (+ زر الموقع ما لم تُطلب noLink)؛ في المحل => وسم المحل فقط عند showStore */
+  function locHtml(type, addr, link, showStore, noLink) {
+    const ar = state.lang === 'ar';
+    const base = 'font-size:12.5px; margin-top:6px; line-height:1.5; color:var(--ink-soft);';
+    if (type !== 'CUSTOM_LOCATION') return showStore ? '<div class="loc-line" style="' + base + '">🏪 ' + (ar ? 'التسليم في المحل' : 'Delivery at the store') + '</div>' : '';
+    const url = noLink ? '' : safeMapsUrl_(link);
+    return '<div class="loc-line" style="' + base + '">📍 <b style="color:var(--ink);">' + (ar ? 'التسليم خارج المحل' : 'Delivery away from the store') + '</b>' + (addr ? ' — ' + escLoc_(addr) : '') +
+      (url ? ' <a href="' + escLoc_(url) + '" target="_blank" rel="noopener" style="color:var(--secondary); font-weight:700; text-decoration:underline;">' + (ar ? 'فتح الموقع ↗' : 'Open location ↗') + '</a>' : '') + '</div>';
+  }
+  // ===== نهاية مكان التسليم =====
+
   function renderList() {
     const now = new Date();
     const locale = state.lang === 'ar' ? 'ar-QA-u-nu-latn' : 'en-US';
@@ -1032,6 +1054,7 @@
             ${o.fromProductionManager ? `<span class="prod-mgr-tag">${t('fromProdMgr')}</span>` : ''}
           </div>
           <div class="order-sub">${o.orderType === 'SPECIAL' ? t('typeSpecial') : t('typeNormal')} · ${t('itemsCount')(o.itemCount)}${o.createdAt ? ' · ' + fmtOrderDate(o.createdAt) : ''}</div>
+          ${o.orderType === 'SPECIAL' ? locHtml(o.locType, o.locAddr, o.locLink, true, true) : ''}
         </div>
         <span class="chevron">›</span>
       </button>`).join('');

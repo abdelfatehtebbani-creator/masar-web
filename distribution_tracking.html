@@ -603,6 +603,26 @@
     document.getElementById('filterStatus').addEventListener('change', (e) => { activeFilters.status = e.target.value; loadList(); });
   }
 
+  // ===== مكان تسليم الطلبية الخاصة (١٢ أكتوبر ٢٠٢٦) =====
+  // عنوان نصي + رابط خريطة آمن (http/https فقط؛ يُضاف https إن غاب المخطط)، ويُهرَّب كل نص قبل إدخاله في HTML.
+  function escLoc_(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+  function safeMapsUrl_(link) {
+    let u = String(link == null ? '' : link).trim();
+    if (!u) return '';
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(u)) u = 'https:' + String.fromCharCode(47, 47) + u.replace(/^\/+/, '');
+    return /^https?:/i.test(u) ? u : '';
+  }
+  /** سطر موضع التسليم: خارج المحل => العنوان (+ زر الموقع ما لم تُطلب noLink)؛ في المحل => وسم المحل فقط عند showStore */
+  function locHtml(type, addr, link, showStore, noLink) {
+    const ar = state.lang === 'ar';
+    const base = 'font-size:12.5px; margin-top:6px; line-height:1.5; color:var(--ink-soft);';
+    if (type !== 'CUSTOM_LOCATION') return showStore ? '<div class="loc-line" style="' + base + '">🏪 ' + (ar ? 'التسليم في المحل' : 'Delivery at the store') + '</div>' : '';
+    const url = noLink ? '' : safeMapsUrl_(link);
+    return '<div class="loc-line" style="' + base + '">📍 <b style="color:var(--ink);">' + (ar ? 'التسليم خارج المحل' : 'Delivery away from the store') + '</b>' + (addr ? ' — ' + escLoc_(addr) : '') +
+      (url ? ' <a href="' + escLoc_(url) + '" target="_blank" rel="noopener" style="color:var(--secondary); font-weight:700; text-decoration:underline;">' + (ar ? 'فتح الموقع ↗' : 'Open location ↗') + '</a>' : '') + '</div>';
+  }
+  // ===== نهاية مكان التسليم =====
+
   function renderList() {
     if (!ORDERS.length) {
       document.getElementById('mainArea').innerHTML = `<div class="greeting-card" style="margin-top:16px;"><h1>${t('screenTitle')}</h1></div><div id="filterBar" class="filter-bar"></div><div class="card empty-state" style="margin-top:16px;"><div class="big">📋</div>${t('emptyList')}</div>`;
@@ -621,6 +641,7 @@
             <button class="order-list-row" type="button" data-order="${o.OrderID}">
               <span class="oid">${o.OrderID}</span>
               <span class="badge ${o.OrderType === 'NORMAL' ? 'normal' : 'special'}">${badgeText}</span>
+              ${o.OrderType === 'SPECIAL' && o.DeliveryLocationType === 'CUSTOM_LOCATION' ? '<span title="' + (state.lang === 'ar' ? 'التسليم خارج المحل' : 'Delivery away from the store') + '">📍</span>' : ''}
               <span class="spacer"></span>
               <span class="status st-${bucket}">${statusIcon} ${t('st' + bucket.charAt(0).toUpperCase() + bucket.slice(1))}</span>
               <span class="chevron">›</span>
@@ -691,6 +712,7 @@
         <span class="badge ${order.OrderType === 'NORMAL' ? 'normal' : 'special'}">${badgeText}</span>
         <span class="spacer"></span>
         <span class="status st-${bucket}">${statusIcon} ${t('st' + bucket.charAt(0).toUpperCase() + bucket.slice(1))}</span>
+        ${order.OrderType === 'SPECIAL' ? `<div style="flex-basis:100%;">${locHtml(order.DeliveryLocationType, order.DeliveryAddressText, order.DeliveryLocationLink, true)}</div>` : ''}
       </div>
       <div class="card form-card">
         <h2>🧾 ${t('itemsSection')}</h2>

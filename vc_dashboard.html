@@ -705,6 +705,26 @@
       .getVehicleCoordinatorSpecialOrders(CURRENT_USER_ID);
   }
 
+  // ===== مكان تسليم الطلبية الخاصة (١٢ أكتوبر ٢٠٢٦) =====
+  // عنوان نصي + رابط خريطة آمن (http/https فقط؛ يُضاف https إن غاب المخطط)، ويُهرَّب كل نص قبل إدخاله في HTML.
+  function escLoc_(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+  function safeMapsUrl_(link) {
+    let u = String(link == null ? '' : link).trim();
+    if (!u) return '';
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(u)) u = 'https:' + String.fromCharCode(47, 47) + u.replace(/^\/+/, '');
+    return /^https?:/i.test(u) ? u : '';
+  }
+  /** سطر موضع التسليم: خارج المحل => العنوان (+ زر الموقع ما لم تُطلب noLink)؛ في المحل => وسم المحل فقط عند showStore */
+  function locHtml(type, addr, link, showStore, noLink) {
+    const ar = state.lang === 'ar';
+    const base = 'font-size:12.5px; margin-top:6px; line-height:1.5; color:var(--ink-soft);';
+    if (type !== 'CUSTOM_LOCATION') return showStore ? '<div class="loc-line" style="' + base + '">🏪 ' + (ar ? 'التسليم في المحل' : 'Delivery at the store') + '</div>' : '';
+    const url = noLink ? '' : safeMapsUrl_(link);
+    return '<div class="loc-line" style="' + base + '">📍 <b style="color:var(--ink);">' + (ar ? 'التسليم خارج المحل' : 'Delivery away from the store') + '</b>' + (addr ? ' — ' + escLoc_(addr) : '') +
+      (url ? ' <a href="' + escLoc_(url) + '" target="_blank" rel="noopener" style="color:var(--secondary); font-weight:700; text-decoration:underline;">' + (ar ? 'فتح الموقع ↗' : 'Open location ↗') + '</a>' : '') + '</div>';
+  }
+  // ===== نهاية مكان التسليم =====
+
   function renderSpecialOrders() {
     if (!SPECIAL_ORDERS.length) {
       document.getElementById('mainArea').innerHTML = `<div class="card empty-state"><div class="big">📋</div>${t('emptySpecial')}</div>`;
@@ -714,7 +734,6 @@
       <div class="card">
         ${SPECIAL_ORDERS.map(o => {
           const dateStr = o.deliveryDate ? new Date(o.deliveryDate.slice(0, 10) + 'T00:00:00').toLocaleDateString(state.lang === 'ar' ? 'ar-QA-u-nu-latn' : 'en-US', { day: 'numeric', month: 'long' }) : '—';
-          const isCustom = o.deliveryLocationType === 'CUSTOM_LOCATION';
           const isApproved = o.stage === 'APPROVED';
           const stageBadge = `<span style="display:inline-block; font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:999px; margin-bottom:6px; background:${isApproved ? 'var(--success-tint)' : 'var(--pending-tint)'}; color:${isApproved ? 'var(--success)' : 'var(--pending)'};">${isApproved ? t('stageApproved') : t('stagePendingInfo')}</span>`;
           return `
@@ -722,8 +741,7 @@
               <div class="stock-item-name">${state.lang === 'ar' ? o.storeNameAR : o.storeNameEN} · ${o.orderId}</div>
               ${stageBadge}
               <div style="font-size:12.5px; color:var(--ink-soft); margin-bottom:6px;">${t('deliveryLbl')}: ${dateStr}${o.deliveryTime ? ' · ' + o.deliveryTime : ''}</div>
-              ${isCustom ? `<div style="font-size:12.5px; margin-bottom:8px;">${o.deliveryAddressText}</div>` : ''}
-              ${isCustom && o.deliveryLocationLink ? `<a href="${o.deliveryLocationLink}" target="_blank" style="font-size:12.5px; color:var(--secondary); font-weight:700; text-decoration:none;">${t('locationBtn')}</a>` : ''}
+              ${locHtml(o.deliveryLocationType, o.deliveryAddressText, o.deliveryLocationLink, true)}
             </div>`;
         }).join('')}
       </div>
