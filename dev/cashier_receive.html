@@ -786,9 +786,14 @@ const Core = (() => {
   function wireConfirmableClick(btn, onConfirm, confirmLabel) {
     let armed = false;
     let timer = null;
+    let busy = false;
     const original = btn.innerHTML;
+    // حارس الضغط المتكرر (١٢ أكتوبر ٢٠٢٦، بلاغ ميداني: ضغط الكاشير الحفظ أكثر من مرة فتكرّر الطلب): بعد التأكيد يبقى الزر معطَّلًا بنص "جارٍ الحفظ…"
+    // ولا يقبل أي ضغطة حتى تنتهي العملية (المعالج يعيد btn.disabled=false عند الردّ فيُلتقَط هنا ويرجع النص الأصلي).
+    const release = () => { if (!busy) return; busy = false; btn.classList.remove('is-saving'); btn.innerHTML = original; };
+    if (typeof MutationObserver !== 'undefined') new MutationObserver(() => { if (busy && !btn.disabled) release(); }).observe(btn, { attributes: true, attributeFilter: ['disabled'] });
     btn.addEventListener('click', () => {
-      if (btn.disabled) return;
+      if (btn.disabled || busy) return;
       if (!armed) {
         armed = true;
         btn.classList.add('confirm-armed');
@@ -802,7 +807,9 @@ const Core = (() => {
         clearTimeout(timer);
         armed = false;
         btn.classList.remove('confirm-armed');
-        btn.innerHTML = original; // SPEC v1.4 (بلاغ مستخدم مباشر) -- كان يبقى عالقًا على "اضغط مرة أخرى" حتى بعد نجاح العملية؛ يُعاد فورًا هنا قبل أي استدعاء فعلي
+        busy = true;
+        btn.classList.add('is-saving');
+        btn.innerHTML = state.lang === 'ar' ? '⏳ جارٍ الحفظ… لا تضغط مرة أخرى' : '⏳ Saving… do not tap again';
         btn.disabled = true;
         onConfirm();
       }

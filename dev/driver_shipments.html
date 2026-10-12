@@ -530,9 +530,9 @@
       tabReceive: '📥 الاستلام', tabDeliver: '🚚 التسليم', deliveredSection: 'تم تسليمها',
       emptyReceive: 'لا شيء بانتظار استلامك حاليًا', receiveAllDone: 'استلمتَ كل ما عليك — انتقل إلى التسليم', goDeliver: 'اذهب إلى التسليم 🚚',
       emptyDeliver: 'لا توقفات جاهزة للتسليم — أكِّد استلامك أولًا من تبويب الاستلام', goReceive: 'اذهب إلى الاستلام 📥',
-      stPending: 'بانتظار استلامك من التوزيع', stLoaded: 'معك — بانتظار التسليم للمحل', stDelivered: 'تم التسليم ✓',
+      stPending: 'بانتظار استلامك من التوزيع', stLoaded: 'معك — بانتظار التسليم للمحل', stLoadedCustom: 'معك — بانتظار التسليم في الموقع المحدد', stDelivered: 'تم التسليم ✓',
       addressLabel: 'عنوان التسليم', openMaps: '📍 فتح في خرائط',
-      loadBtn: '📦 استلمت البضاعة', deliverBtn: (store) => `✅ تم التسليم لكاشير محل ${store}`,
+      loadBtn: '📦 استلمت البضاعة', deliverBtn: (store) => `✅ تم التسليم لكاشير محل ${store}`, deliverCustomBtn: (store) => `✅ تم التسليم في الموقع المحدد (${store})`,
       itemLoadBtn: '✔ استلمت', itemLoadedTag: '✔ استلمته', notShippedTag: 'لا يُشحن',
       reportDiscrepancyBtn: '⚠️ الكمية مختلفة', discrepancyPendingTag: (q) => `⏳ بانتظار اعتماد التوزيع (أبلغتَ: ${q})`,
       discrepancyQtyLabel: 'الكمية الفعلية', discrepancyNotePlaceholder: 'سبب الفرق (اختياري)',
@@ -558,9 +558,9 @@
       tabReceive: '📥 Pickup', tabDeliver: '🚚 Delivery', deliveredSection: 'Delivered',
       emptyReceive: 'Nothing waiting for you to pick up', receiveAllDone: 'Everything is picked up — go to Delivery', goDeliver: 'Go to Delivery 🚚',
       emptyDeliver: 'No stops ready to deliver — confirm your pickup in the Pickup tab first', goReceive: 'Go to Pickup 📥',
-      stPending: 'Awaiting your pickup from distribution', stLoaded: "With you — awaiting delivery to store", stDelivered: 'Delivered ✓',
+      stPending: 'Awaiting your pickup from distribution', stLoaded: "With you — awaiting delivery to store", stLoadedCustom: "With you — awaiting delivery at the specified location", stDelivered: 'Delivered ✓',
       addressLabel: 'Delivery address', openMaps: '📍 Open in maps',
-      loadBtn: '📦 Picked up', deliverBtn: (store) => `✅ Delivered to the cashier of ${store}`,
+      loadBtn: '📦 Picked up', deliverBtn: (store) => `✅ Delivered to the cashier of ${store}`, deliverCustomBtn: (store) => `✅ Delivered at the specified location (${store})`,
       itemLoadBtn: '✔ Got it', itemLoadedTag: '✔ Received', notShippedTag: 'Not shipped',
       reportDiscrepancyBtn: '⚠️ Quantity differs', discrepancyPendingTag: (q) => `⏳ Awaiting distribution's decision (you reported: ${q})`,
       discrepancyQtyLabel: 'Actual quantity', discrepancyNotePlaceholder: 'Reason for the difference (optional)',
@@ -719,7 +719,7 @@
     }
     // زر التسليم يظهر في تبويب التسليم فقط، ولا يظهر في تبويب الاستلام أبدًا (طلب مباشر ٨ أكتوبر ٢٠٢٦)
     if (stop.state === 'LOADED') {
-      return mode === 'deliver' ? `<button class="big-action-btn deliver" data-deliver="${stop.shipmentOrderId}">${t('deliverBtn')(stop.store)}</button>` : '';
+      return mode === 'deliver' ? `<button class="big-action-btn deliver" data-deliver="${stop.shipmentOrderId}">${stop.locationType === 'CUSTOM_LOCATION' ? t('deliverCustomBtn')(stop.store) : t('deliverBtn')(stop.store)}</button>` : '';
     }
     const need = stop.items.filter(it => it.shippable);
     if (!need.length) return `<button class="big-action-btn load" data-load="${stop.shipmentOrderId}">${t('loadBtn')}</button>`; // لا أصناف تُشحن: قفل مباشر
@@ -728,7 +728,7 @@
 
   function stopTagHtml(stop) {
     if (stop.state === 'DELIVERED') return `<span class="stop-state-tag delivered">✅ ${t('stDelivered')}</span>`;
-    if (stop.state === 'LOADED') return `<span class="stop-state-tag loaded">🚚 ${t('stLoaded')}</span>`;
+    if (stop.state === 'LOADED') return `<span class="stop-state-tag loaded">🚚 ${stop.locationType === 'CUSTOM_LOCATION' ? t('stLoadedCustom') : t('stLoaded')}</span>`;
     return `<span class="stop-state-tag pending">⏳ ${t('stPending')}</span>`;
   }
 
