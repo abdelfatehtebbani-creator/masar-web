@@ -575,6 +575,63 @@ body { padding-bottom: 130px; }
   const MASAR_RAW_RUN_ = (typeof google !== 'undefined' && google.script) ? google.script.run : null;
   const MASAR_AR_INSTANCES_ = [];
   const MASAR_PURE_READS_ = { getActiveDriversList:1,getActiveShipments:1,getActiveStoresWithOccupancy:1,getAllDepartments:1,getAllLists:1,getAllProducts:1,getAllRoles:1,getAllSettings:1,getAllStores:1,getAllUsers:1,getChangeTokens:1,getDepartmentStoreOrders:1,getDisposalFormData:1,getDistributionComparisonDetail:1,getDistributionManagerCancelEditRequests:1,getDistributionsReadyToPrepare:1,getFinishedGoodsQuarantineHistory:1,getFinishedGoodsStockBoard:1,getIssueToDepartmentFormData:1,getManagementReports:1,getMyNotifications:1,getMyShipments:1,getMySupplyRequests:1,getOffCatalogPurchaseRequests:1,getOrderDetails:1,getOrderEditStage:1,getOrderProductionApprovalDetail:1,getOrdersAwaitingInvoice:1,getOrdersAwaitingProductionApproval:1,getOrdersReadyForShipment:1,getOrdersReadyToReceive:1,getPendingLoadDiscrepancies:1,getPendingReturnItems:1,getPendingSupplyRequestsForRMS:1,getProductionManagerApprovals:1,getProductionManagerOrderFullDetail:1,getProductionManagerOrdersOverview:1,getPurchasingRawMaterialReports:1,getRawMaterialCatalog:1,getRawMaterialCatalogForRequest:1,getRawMaterialExpiryReport:1,getRawMaterialMovementSummary:1,getRawMaterialProductHistory:1,getRawMaterialQuarantineHistory:1,getRawMaterialShortageNotices:1,getRawMaterialStockBoard:1,getReceiveSurplusFormData:1,getReceivingDetails:1,getReferenceLists:1,getReturnReasons:1,getRolePermissionsMatrix:1,getShipmentPrepareDetail:1,getShortageReasons:1,getStoreDirectRawMaterialOrders:1,getStoreOrderDetail:1,getSuppliers:1,getSuppliersList:1,getTasksCatalog:1,getUnitsAndFamiliesList:1,getVehicleCoordinatorDriverStatus:1,getVehicleCoordinatorSpecialOrders:1,listOrders:1 };
+  // (٣) حارس الحفظ العام (١٢ أكتوبر ٢٠٢٦، بلاغ ميداني: ضغط الحفظ أكثر من مرة فتكرّرت العملية): أي زر يُطلق نداء حفظ (أي نداء لا يبدأ بـ get/list) يُعطَّل فورًا بنص
+  // "جارٍ الحفظ… لا تضغط مرة أخرى" حتى يصل الردّ، ثم يرجع كما كان (بعد النجاح يبقى معطَّلًا ثوانيَ إضافية ريثما تنتقل الصفحة أو تتحدّث). يُنسَب النداء إلى الزر الذي بدأ
+  // ضغطته في اللحظة نفسها فقط (لا لزر مرّ عليه وقت: خطوات + و− يتبعها حفظ مؤجَّل لا يجب أن تُعطَّل)، وتتبع السلسلة (نداء يطلق نداءً) الزرَّ نفسه. الزر الذي عطّله معالجه
+  // بنفسه قبل النداء يُترك لمعالجه.
+  const MASAR_SAVE_GUARD_ = (function () {
+    let clickEl = null, clickReset = null, guarded = null;
+    const SKIP = { login: 1, resumeSession: 1, testLogin: 1, setUserLanguage: 1, healthCheck: 1, batch: 1, markNotificationRead: 1, exportPurchasingTable: 1 }; // لا تغيّر بيانات العمل (دخول/لغة/فحص/تصدير/قراءة إشعار)
+    const label = () => (String(document.documentElement.lang || '').toLowerCase() === 'en' ? '⏳ Saving… do not tap again' : '⏳ جارٍ الحفظ… لا تضغط مرة أخرى');
+    try {
+      document.addEventListener('click', function (e) {
+        try {
+          const t = e.target;
+          clickEl = t && t.closest ? t.closest('button, [role="button"], input[type="button"], input[type="submit"], .btn') : null;
+        } catch (x) { clickEl = null; }
+        clearTimeout(clickReset); clickReset = setTimeout(function () { clickEl = null; }, 0);
+      }, true);
+    } catch (e) { /* بيئة بلا DOM */ }
+    function finish(rec) {
+      if (rec.finished) return;
+      rec.finished = true; clearTimeout(rec.timer); clearTimeout(rec.safety);
+      if (guarded === rec) guarded = null;
+      const el = rec.el;
+      try {
+        el.classList.remove('is-saving');
+        if (rec.label !== null && el.innerHTML === rec.label) el.innerHTML = rec.origHtml;
+        el.disabled = false;
+        if (rec.nonNative) el.style.pointerEvents = rec.origPointer;
+        el.style.cursor = rec.origCursor;
+      } catch (e) { /* العنصر أُزيل من الصفحة */ }
+    }
+    function begin(name) {
+      try {
+        if (SKIP[name] || /^(get|list)/.test(name)) return null;
+        if (guarded && !guarded.finished) { guarded.count++; clearTimeout(guarded.timer); return guarded; }
+        const el = clickEl;
+        if (!el || el.isConnected === false || el.disabled || (el.classList && el.classList.contains('is-saving')) || el.getAttribute('aria-disabled') === 'true') return null;
+        const big = (el.children && el.children.length > 3) || String(el.textContent || '').length > 60; // بطاقة كبيرة: تعطيل بلا استبدال المحتوى
+        const nonNative = !/^(BUTTON|INPUT)$/.test(el.tagName || '');
+        const rec = { el: el, count: 1, finished: false, origHtml: el.innerHTML, label: null, nonNative: nonNative, origPointer: el.style.pointerEvents, origCursor: el.style.cursor, timer: null };
+        el.classList.add('is-saving');
+        if (!big) { rec.label = label(); el.innerHTML = rec.label; }
+        el.disabled = true;
+        if (nonNative) el.style.pointerEvents = 'none';
+        el.style.cursor = 'wait';
+        rec.safety = setTimeout(function () { finish(rec); }, 90000); // احتياط: ردّ لم يصل أبدًا لا يترك الزر معطَّلًا إلى الأبد
+        guarded = rec;
+        return rec;
+      } catch (e) { return null; }
+    }
+    function end(rec, ok) {
+      if (!rec) return;
+      rec.count--;
+      if (rec.count > 0) return;
+      if (ok) rec.timer = setTimeout(function () { finish(rec); }, 3500); else finish(rec);
+    }
+    return { begin: begin, end: end };
+  })();
   (function masarTrackOwnCalls() {
     try {
       if (!MASAR_RAW_RUN_) return;
@@ -616,9 +673,11 @@ body { padding-bottom: 130px; }
                   return;
                 }
                 const done = () => { if (!/^(get|list)/.test(name)) MASAR_AR_INSTANCES_.forEach(i => { try { i.ownDone(); } catch (e) { /* لا يعطّل النداء */ } }); };
+                const guard = MASAR_SAVE_GUARD_.begin(name);
+                // end بعد المعالج لا قبله: نداء يطلقه المعالج (سلسلة مزامنة ثم إرسال) يُنسَب للزر نفسه قبل أن ينتهي النداء الأول
                 return MASAR_RAW_RUN_
-                  .withSuccessHandler((...r) => { done(); if (onS) onS(...r); })
-                  .withFailureHandler((...r) => { done(); if (onF) onF(...r); else { try { console.error(r[0]); } catch (e) { /* تجاهل */ } } })
+                  .withSuccessHandler((...r) => { done(); try { if (onS) onS(...r); } finally { MASAR_SAVE_GUARD_.end(guard, !!(r[0] && r[0].success !== false)); } })
+                  .withFailureHandler((...r) => { done(); try { if (onF) onF(...r); else { try { console.error(r[0]); } catch (e) { /* تجاهل */ } } } finally { MASAR_SAVE_GUARD_.end(guard, false); } })
                   [prop](...args);
               };
             }
@@ -803,9 +862,14 @@ const Core = (() => {
   function wireConfirmableClick(btn, onConfirm, confirmLabel) {
     let armed = false;
     let timer = null;
+    let busy = false;
     const original = btn.innerHTML;
+    // حارس الضغط المتكرر (١٢ أكتوبر ٢٠٢٦، بلاغ ميداني: ضغط الكاشير الحفظ أكثر من مرة فتكرّر الطلب): بعد التأكيد يبقى الزر معطَّلًا بنص "جارٍ الحفظ…"
+    // ولا يقبل أي ضغطة حتى تنتهي العملية (المعالج يعيد btn.disabled=false عند الردّ فيُلتقَط هنا ويرجع النص الأصلي).
+    const release = () => { if (!busy) return; busy = false; btn.classList.remove('is-saving'); btn.innerHTML = original; };
+    if (typeof MutationObserver !== 'undefined') new MutationObserver(() => { if (busy && !btn.disabled) release(); }).observe(btn, { attributes: true, attributeFilter: ['disabled'] });
     btn.addEventListener('click', () => {
-      if (btn.disabled) return;
+      if (btn.disabled || busy) return;
       if (!armed) {
         armed = true;
         btn.classList.add('confirm-armed');
@@ -819,7 +883,9 @@ const Core = (() => {
         clearTimeout(timer);
         armed = false;
         btn.classList.remove('confirm-armed');
-        btn.innerHTML = original; // SPEC v1.4 (بلاغ مستخدم مباشر) -- كان يبقى عالقًا على "اضغط مرة أخرى" حتى بعد نجاح العملية؛ يُعاد فورًا هنا قبل أي استدعاء فعلي
+        busy = true;
+        btn.classList.add('is-saving');
+        btn.innerHTML = state.lang === 'ar' ? '⏳ جارٍ الحفظ… لا تضغط مرة أخرى' : '⏳ Saving… do not tap again';
         btn.disabled = true;
         onConfirm();
       }
@@ -1315,6 +1381,7 @@ const ReturnView = (function () {
    * previous version of this file -- a real pre-existing bug, not something
    * this connection pass introduced.
    */
+  let returnKey = null;
   Core.wireConfirmableClick(root.querySelector('#rt-submitBtn'), () => {
     const items = Object.keys(cart).map(pid => ({
       productId: pid, quantity: cart[pid].qty, reasonCode: cart[pid].reasonCode, notes: cart[pid].note || ''
@@ -1322,9 +1389,13 @@ const ReturnView = (function () {
     const approxDate = root.querySelector('#rt-approxDate').value || '';
     const btn = root.querySelector('#rt-submitBtn');
     btn.disabled = true;
+    // مفتاح منع التكرار: يبقى ثابتًا عبر إعادة المحاولة بعد ردّ ضائع فلا يُنشأ مرتجعان؛ يُجدَّد بعد ردّ حقيقي من الخادم
+    if (!returnKey) returnKey = 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    const sentKey = returnKey;
     google.script.run
       .withSuccessHandler(result => {
         btn.disabled = false;
+        if (result) returnKey = null; // ردّ حقيقي (نجاح أو رفض منطقي)
         if (!result || !result.success) { Core.showToast(t('loadErrorText')); return; }
         Core.showToast(t('toastSubmitted'));
         Object.keys(cart).forEach(id => delete cart[id]);
@@ -1334,7 +1405,7 @@ const ReturnView = (function () {
         renderDeptCards();
       })
       .withFailureHandler(() => { btn.disabled = false; Core.showToast(t('loadErrorText')); })
-      .createReturn(Core.currentUserId, 'STORE_RETURN', Core.currentStoreId, items, approxDate);
+      .createReturn(Core.currentUserId, 'STORE_RETURN', Core.currentStoreId, items, approxDate, sentKey);
   });
 
   return { dict, render };
