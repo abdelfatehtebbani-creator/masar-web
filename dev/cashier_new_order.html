@@ -375,6 +375,10 @@ button.order-row:last-child { border-bottom: none; }
 #view-new-order .tabs-arrow-end { left: 4px; }
 #view-new-order .tabs-arrow.hidden { display: none; }
 #view-new-order .tabs::-webkit-scrollbar { display: none; }
+#view-new-order .raw-filter { display: grid; gap: 8px; margin: 8px 0 10px; }
+#view-new-order .raw-filter.hidden { display: none; }
+#view-new-order .raw-filter input { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid var(--line, #d9d2c7); border-radius: 10px; font: inherit; }
+#view-new-order .raw-stores { display: flex; gap: 6px; flex-wrap: wrap; }
 #view-new-order .tab {
     flex-shrink: 0; font-size: 13.5px; font-weight: 600; color: var(--ink-soft);
     background: var(--surface); border: 1px solid var(--line);
@@ -561,6 +565,10 @@ body { padding-bottom: 190px; }
 </div>
 
 <main>
+  <div class="raw-filter hidden" id="no-rawFilter">
+    <input type="search" id="no-rawSearch" autocomplete="off">
+    <div class="raw-stores" id="no-rawStores"></div>
+  </div>
   <div class="product-grid" id="no-productGrid"></div>
 </main>
 
@@ -1188,6 +1196,31 @@ const NewOrderView = (function () {
 
   const cart = {}; // productId -> qty (desired local state)
   let activeDeptId = null;
+  // تبويب المواد الأولية (مواد MORO): بحث بالاسم وفلتر بالمخزن -- القائمة طويلة (طلب مستخدم ١٧ أكتوبر ٢٠٢٦)
+  let rawQuery = '', rawFamily = '';
+  const RAW_STORES_ = [['', 'كل المخازن', 'All stores'], ['COLD', 'مبرَّدة', 'Chilled'], ['DRY_FOOD', 'جافة', 'Dry'], ['PACKAGING', 'تغليف', 'Packaging']];
+  function rawFamilyMatch_(p) {
+    if (!rawFamily) return true;
+    if (rawFamily === 'COLD') return p.materialFamily === 'COLD_FOOD' || p.materialFamily === 'FROZEN_FOOD';
+    return p.materialFamily === rawFamily;
+  }
+  function renderRawFilter_() {
+    const box = root.querySelector('#no-rawFilter');
+    if (!box) return;
+    const isRaw = activeDeptId === '';
+    box.classList.toggle('hidden', !isRaw);
+    if (!isRaw) return;
+    const ar = Core.state.lang === 'ar';
+    const input = root.querySelector('#no-rawSearch');
+    input.placeholder = ar ? 'ابحث باسم المادة' : 'Search by item name';
+    if (!input.dataset.wired) {
+      input.dataset.wired = '1';
+      input.addEventListener('input', () => { rawQuery = input.value.trim().toLowerCase(); renderGrid(); });
+    }
+    const bar = root.querySelector('#no-rawStores');
+    bar.innerHTML = RAW_STORES_.map(s => `<button type="button" class="tab ${s[0] === rawFamily ? 'active' : ''}" data-family="${s[0]}">${ar ? s[1] : s[2]}</button>`).join('');
+    bar.querySelectorAll('button').forEach(b => b.addEventListener('click', () => { rawFamily = b.getAttribute('data-family'); renderRawFilter_(); renderGrid(); }));
+  }
   let cartOpen = false;
   let draftOrderId = null; // SPEC v1.4 (طلب مستخدم مباشر) -- null حتى إنشاء فعلي كسول، انظر syncCartToServer() أدناه
   // SPEC v1.4 (تصحيح جوهري ثانٍ -- بلاغ مستخدم مباشر: "المسودة تختفي"
@@ -1330,7 +1363,10 @@ const NewOrderView = (function () {
 
   function renderGrid() {
     const grid = root.querySelector('#no-productGrid');
-    const items = products.filter(p => p.departmentId === activeDeptId);
+    if (activeDeptId === '' && !root.querySelector('#no-rawFilter').dataset.shown) { root.querySelector('#no-rawFilter').dataset.shown = '1'; renderRawFilter_(); }
+    if (activeDeptId !== '') { const f = root.querySelector('#no-rawFilter'); if (f) { f.classList.add('hidden'); delete f.dataset.shown; } }
+    const items = products.filter(p => p.departmentId === activeDeptId &&
+      (activeDeptId !== '' || ((!rawQuery || String(productName(p) || '').toLowerCase().includes(rawQuery) || String(p.productCode || '').toLowerCase().includes(rawQuery)) && rawFamilyMatch_(p))));
     if (!items.length) {
       grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">${t('emptyDept')}</div>`;
       return;

@@ -393,6 +393,10 @@ button.order-row:last-child { border-bottom: none; }
 #view-new-special .tabs-arrow-end { left: 4px; }
 #view-new-special .tabs-arrow.hidden { display: none; }
 #view-new-special .tabs::-webkit-scrollbar { display: none; }
+#view-new-special .raw-filter { display: grid; gap: 8px; margin: 8px 0 10px; }
+#view-new-special .raw-filter.hidden { display: none; }
+#view-new-special .raw-filter input { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid var(--line, #d9d2c7); border-radius: 10px; font: inherit; }
+#view-new-special .raw-stores { display: flex; gap: 6px; flex-wrap: wrap; }
 #view-new-special .tab {
     flex-shrink: 0; font-size: 13.5px; font-weight: 600; color: var(--ink-soft);
     background: var(--surface); border: 1px solid var(--line); padding: 9px 16px;
@@ -648,6 +652,10 @@ body { padding-bottom: 210px; }
       <div class="tabs" id="ns-tabsBar"></div>
       <button class="tabs-arrow tabs-arrow-end" id="ns-tabsArrowEnd" type="button" aria-label="scroll">›</button>
     </div>
+  </div>
+  <div class="raw-filter hidden" id="ns-rawFilter">
+    <input type="search" id="ns-rawSearch" autocomplete="off">
+    <div class="raw-stores" id="ns-rawStores"></div>
   </div>
   <div class="product-grid" id="ns-productGrid"></div>
 
@@ -1277,6 +1285,31 @@ const NewSpecialView = (function () {
   const cart = {};            // productId -> qty (catalog items, local only)
   const offCatalogItems = []; // list of {localId, desc, qty, unitId, type} (local only)
   let activeDeptId = null;
+  // تبويب المواد الأولية (مواد MORO): بحث بالاسم وفلتر بالمخزن -- القائمة طويلة (طلب مستخدم ١٧ أكتوبر ٢٠٢٦)
+  let rawQuery = '', rawFamily = '';
+  const RAW_STORES_ = [['', 'كل المخازن', 'All stores'], ['COLD', 'مبرَّدة', 'Chilled'], ['DRY_FOOD', 'جافة', 'Dry'], ['PACKAGING', 'تغليف', 'Packaging']];
+  function rawFamilyMatch_(p) {
+    if (!rawFamily) return true;
+    if (rawFamily === 'COLD') return p.materialFamily === 'COLD_FOOD' || p.materialFamily === 'FROZEN_FOOD';
+    return p.materialFamily === rawFamily;
+  }
+  function renderRawFilter_() {
+    const box = root.querySelector('#ns-rawFilter');
+    if (!box) return;
+    const isRaw = activeDeptId === '';
+    box.classList.toggle('hidden', !isRaw);
+    if (!isRaw) return;
+    const ar = Core.state.lang === 'ar';
+    const input = root.querySelector('#ns-rawSearch');
+    input.placeholder = ar ? 'ابحث باسم المادة' : 'Search by item name';
+    if (!input.dataset.wired) {
+      input.dataset.wired = '1';
+      input.addEventListener('input', () => { rawQuery = input.value.trim().toLowerCase(); renderGrid(); });
+    }
+    const bar = root.querySelector('#ns-rawStores');
+    bar.innerHTML = RAW_STORES_.map(s => `<button type="button" class="tab ${s[0] === rawFamily ? 'active' : ''}" data-family="${s[0]}">${ar ? s[1] : s[2]}</button>`).join('');
+    bar.querySelectorAll('button').forEach(b => b.addEventListener('click', () => { rawFamily = b.getAttribute('data-family'); renderRawFilter_(); renderGrid(); }));
+  }
   let cartOpen = false;
   let deliveryLocation = 'STORE'; // STORE | CUSTOM_LOCATION
   let offFormOpen = false;
@@ -1635,7 +1668,10 @@ const NewSpecialView = (function () {
 
   function renderGrid() {
     const grid = root.querySelector('#ns-productGrid');
-    const items = products.filter(p => p.departmentId === activeDeptId);
+    if (activeDeptId === '' && !root.querySelector('#ns-rawFilter').dataset.shown) { root.querySelector('#ns-rawFilter').dataset.shown = '1'; renderRawFilter_(); }
+    if (activeDeptId !== '') { const f = root.querySelector('#ns-rawFilter'); if (f) { f.classList.add('hidden'); delete f.dataset.shown; } }
+    const items = products.filter(p => p.departmentId === activeDeptId &&
+      (activeDeptId !== '' || ((!rawQuery || String(productName(p) || '').toLowerCase().includes(rawQuery) || String(p.productCode || '').toLowerCase().includes(rawQuery)) && rawFamilyMatch_(p))));
     if (!items.length) { grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">${t('emptyDept')}</div>`; return; }
     grid.innerHTML = items.map(p => {
       const qty = cart[p.productId] || 0;
