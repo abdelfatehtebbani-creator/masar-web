@@ -308,11 +308,19 @@
   // (٣) حارس الحفظ العام (١٢ أكتوبر ٢٠٢٦، بلاغ ميداني: ضغط الحفظ أكثر من مرة فتكرّرت العملية): أي زر يُطلق نداء حفظ (أي نداء لا يبدأ بـ get/list) يُعطَّل فورًا بنص
   // "جارٍ الحفظ… لا تضغط مرة أخرى" حتى يصل الردّ، ثم يرجع كما كان (بعد النجاح يبقى معطَّلًا ثوانيَ إضافية ريثما تنتقل الصفحة أو تتحدّث). يُنسَب النداء إلى الزر الذي بدأ
   // ضغطته في اللحظة نفسها فقط (لا لزر مرّ عليه وقت: خطوات + و− يتبعها حفظ مؤجَّل لا يجب أن تُعطَّل)، وتتبع السلسلة (نداء يطلق نداءً) الزرَّ نفسه. الزر الذي عطّله معالجه
-  // بنفسه قبل النداء يُترك لمعالجه.
+  // بنفسه قبل النداء يبقى بيد معالجه (لا نمسّ نصه) لكن يُحسَب حفظًا منسوبًا.
+  // (٤) الحفظ في الخلفية (١٣ أكتوبر ٢٠٢٦): ما دام في الصفحة حفظ منسوب لزر، يُلغى الحاجز الشفاف الذي يغطي الصفحة كلها (فئة masar-bg-save على html) فيتابع المستخدم عمله
+  // في بقية الشاشة ويرى حالة الحفظ على الزر نفسه. نداءات الحفظ غير المنسوبة لزر (مؤقِّتات، تغيير قائمة) تُبقي سلوك الحاجز كما كان.
   const MASAR_SAVE_GUARD_ = (function () {
-    let clickEl = null, clickReset = null, guarded = null;
+    let clickEl = null, clickReset = null, guarded = null, current = null, bg = 0;
     const SKIP = { login: 1, resumeSession: 1, testLogin: 1, setUserLanguage: 1, healthCheck: 1, batch: 1, markNotificationRead: 1, exportPurchasingTable: 1 }; // لا تغيّر بيانات العمل (دخول/لغة/فحص/تصدير/قراءة إشعار)
     const label = () => (String(document.documentElement.lang || '').toLowerCase() === 'en' ? '⏳ Saving… do not tap again' : '⏳ جارٍ الحفظ… لا تضغط مرة أخرى');
+    const sync = () => { try { document.documentElement.classList[bg > 0 ? 'add' : 'remove']('masar-bg-save'); } catch (e) { /* بيئة بلا DOM */ } };
+    try {
+      const st = document.createElement('style');
+      st.textContent = 'html.masar-bg-save #globalBusyOverlay { display: none !important; }';
+      (document.head || document.documentElement).appendChild(st);
+    } catch (e) { /* بيئة بلا DOM */ }
     try {
       document.addEventListener('click', function (e) {
         try {
@@ -326,6 +334,8 @@
       if (rec.finished) return;
       rec.finished = true; clearTimeout(rec.timer); clearTimeout(rec.safety);
       if (guarded === rec) guarded = null;
+      bg = Math.max(0, bg - 1); sync();
+      if (rec.managed) return;
       const el = rec.el;
       try {
         el.classList.remove('is-saving');
@@ -338,19 +348,26 @@
     function begin(name) {
       try {
         if (SKIP[name] || /^(get|list)/.test(name)) return null;
-        if (guarded && !guarded.finished) { guarded.count++; clearTimeout(guarded.timer); return guarded; }
-        const el = clickEl;
-        if (!el || el.isConnected === false || el.disabled || (el.classList && el.classList.contains('is-saving')) || el.getAttribute('aria-disabled') === 'true') return null;
-        const big = (el.children && el.children.length > 3) || String(el.textContent || '').length > 60; // بطاقة كبيرة: تعطيل بلا استبدال المحتوى
-        const nonNative = !/^(BUTTON|INPUT)$/.test(el.tagName || '');
-        const rec = { el: el, count: 1, finished: false, origHtml: el.innerHTML, label: null, nonNative: nonNative, origPointer: el.style.pointerEvents, origCursor: el.style.cursor, timer: null };
-        el.classList.add('is-saving');
-        if (!big) { rec.label = label(); el.innerHTML = rec.label; }
-        el.disabled = true;
-        if (nonNative) el.style.pointerEvents = 'none';
-        el.style.cursor = 'wait';
-        rec.safety = setTimeout(function () { finish(rec); }, 90000); // احتياط: ردّ لم يصل أبدًا لا يترك الزر معطَّلًا إلى الأبد
-        guarded = rec;
+        const el = clickEl; // ضغطة جديدة في هذه اللحظة (إن وُجدت) تبدأ حفظًا جديدًا لزرها ولا تلتحق بسلسلة زر آخر
+        if (current && !current.finished && (!el || el === current.el)) { current.count++; clearTimeout(current.timer); return current; } // نداء يطلقه معالج ردّ منسوب
+        if (guarded && !guarded.finished && (!el || el === guarded.el)) { guarded.count++; clearTimeout(guarded.timer); return guarded; }
+        if (!el) return null;
+        // زر أُزيل من الصفحة قبل النداء (المعالج أعاد رسم القائمة فورًا: واجهة متفائلة) يبقى حفظًا منسوبًا بلا تعديل DOM
+        const free = el.isConnected !== false && !el.disabled && !(el.classList && el.classList.contains('is-saving')) && el.getAttribute('aria-disabled') !== 'true';
+        const rec = { el: el, count: 1, finished: false, managed: !free, timer: null };
+        bg++; sync();
+        rec.safety = setTimeout(function () { finish(rec); }, 90000); // احتياط: ردّ لم يصل أبدًا لا يترك الزر معطَّلًا (ولا الحاجز مُلغى) إلى الأبد
+        if (free) {
+          const big = (el.children && el.children.length > 3) || String(el.textContent || '').length > 60; // بطاقة كبيرة: تعطيل بلا استبدال المحتوى
+          rec.nonNative = !/^(BUTTON|INPUT)$/.test(el.tagName || '');
+          rec.origHtml = el.innerHTML; rec.label = null; rec.origPointer = el.style.pointerEvents; rec.origCursor = el.style.cursor;
+          el.classList.add('is-saving');
+          if (!big) { rec.label = label(); el.innerHTML = rec.label; }
+          el.disabled = true;
+          if (rec.nonNative) el.style.pointerEvents = 'none';
+          el.style.cursor = 'wait';
+          guarded = rec;
+        }
         return rec;
       } catch (e) { return null; }
     }
@@ -358,9 +375,11 @@
       if (!rec) return;
       rec.count--;
       if (rec.count > 0) return;
-      if (ok) rec.timer = setTimeout(function () { finish(rec); }, 3500); else finish(rec);
+      if (ok && !rec.managed) rec.timer = setTimeout(function () { finish(rec); }, 3500); else finish(rec);
     }
-    return { begin: begin, end: end };
+    function enter(rec) { const prev = current; current = rec; return prev; }
+    function leave(prev) { current = prev; }
+    return { begin: begin, end: end, enter: enter, leave: leave };
   })();
   (function masarTrackOwnCalls() {
     try {
@@ -406,8 +425,8 @@
                 const guard = MASAR_SAVE_GUARD_.begin(name);
                 // end بعد المعالج لا قبله: نداء يطلقه المعالج (سلسلة مزامنة ثم إرسال) يُنسَب للزر نفسه قبل أن ينتهي النداء الأول
                 return MASAR_RAW_RUN_
-                  .withSuccessHandler((...r) => { done(); try { if (onS) onS(...r); } finally { MASAR_SAVE_GUARD_.end(guard, !!(r[0] && r[0].success !== false)); } })
-                  .withFailureHandler((...r) => { done(); try { if (onF) onF(...r); else { try { console.error(r[0]); } catch (e) { /* تجاهل */ } } } finally { MASAR_SAVE_GUARD_.end(guard, false); } })
+                  .withSuccessHandler((...r) => { done(); const prev = MASAR_SAVE_GUARD_.enter(guard); try { if (onS) onS(...r); } finally { MASAR_SAVE_GUARD_.leave(prev); MASAR_SAVE_GUARD_.end(guard, !!(r[0] && r[0].success !== false)); } })
+                  .withFailureHandler((...r) => { done(); const prev = MASAR_SAVE_GUARD_.enter(guard); try { if (onF) onF(...r); else { try { console.error(r[0]); } catch (e) { /* تجاهل */ } } } finally { MASAR_SAVE_GUARD_.leave(prev); MASAR_SAVE_GUARD_.end(guard, false); } })
                   [prop](...args);
               };
             }
@@ -579,6 +598,9 @@
   const CURRENT_USER_ID = MASAR_TPL.currentUserId;
 
   let MY_TRIPS = [];
+  // الحفظ في الخلفية (١٣ أكتوبر ٢٠٢٦): تحميل صنف/توقّف يظهر منجَزًا فورًا ويُحفظ في الخلفية؛ إن فشل يعود كما كان مع رسالة. هذه الخرائط تحفظ ما لم يصل ردّه بعد كي لا يمحوه
+  // تحديث تلقائي يصل في الأثناء (يعيد الجلب من الخادم قبل أن يرى الحفظ).
+  const PENDING_ITEM_LOADS = {}, PENDING_STOP_LOADS = {};
 
   const dict = {
     ar: {
@@ -600,7 +622,7 @@
       toastDiscrepancyNoDiff: 'الكمية مطابقة للنظري — أكِّد الاستلام مباشرة',
       toastDiscrepancyInvalid: 'أدخل كمية صحيحة',
       loadProgress: (a, b) => `استلمتَ ${a} من ${b} — أكِّد كل صنف تستلمه من مسؤول التوزيع`,
-      toastItemLoaded: 'سُجِّل استلامك للصنف',
+      toastItemLoaded: 'سُجِّل استلامك للصنف', toastLoadFailed: (name) => `تعذّر حفظ استلام «${name}» — أعد المحاولة`,
       tapAgainConfirm: '👆 اضغط مرة أخرى للتأكيد',
       deliveredBadge: 'اكتمل هذا التوقف',
       toastLoaded: (store) => `أُكِّد استلامك من ${store}`,
@@ -628,7 +650,7 @@
       toastDiscrepancyNoDiff: 'The quantity matches the theoretical amount — confirm pickup directly',
       toastDiscrepancyInvalid: 'Enter a valid quantity',
       loadProgress: (a, b) => `You picked up ${a} of ${b} — confirm each item you take from distribution`,
-      toastItemLoaded: 'Item pickup recorded',
+      toastItemLoaded: 'Item pickup recorded', toastLoadFailed: (name) => `Could not save pickup of “${name}” — try again`,
       tapAgainConfirm: '👆 Tap again to confirm',
       deliveredBadge: 'This stop is complete',
       toastLoaded: (store) => `Pickup from ${store} confirmed`,
@@ -684,6 +706,7 @@
   })();
   function t(key) { return (dict[state.lang] && dict[state.lang][key]) || key; }
   function itemName(it) { return state.lang === 'ar' ? it.nameAr : it.nameEn; }
+  function itemName_(it) { try { return itemName(it) || ''; } catch (e) { return ''; } }
   // SPEC v1.4 -- الوحدة نصية حرة (UnitID)، لا ثنائية اللغة فعليًا -- نفس قرار
   // سابق ثابت عبر المشروع (طلب مستخدم صريح: مرونة النص الحر بدل قائمة مقفلة).
   function itemUnit(it) { return it.unit; }
@@ -704,10 +727,10 @@
         store: state.lang === 'ar' ? stop.storeNameAR : stop.storeNameEN,
         locationType: stop.deliveryLocationType,
         orderType: stop.orderType,
-        state: stop.deliveryConfirmedAt ? 'DELIVERED' : (stop.loadedConfirmedAt ? 'LOADED' : 'PENDING'),
+        state: stop.deliveryConfirmedAt ? 'DELIVERED' : ((stop.loadedConfirmedAt || PENDING_STOP_LOADS[stop.shipmentOrderId]) ? 'LOADED' : 'PENDING'),
         addressAr: stop.deliveryAddressText,
         mapsLink: stop.deliveryLocationLink, // SPEC v1.4 -- رابط حقيقي مخزَّن، لا استعلام بحث عام مبني من اسم المحل
-        items: stop.items.map(it => ({ icon: '📦', orderItemId: it.orderItemId, shippable: it.shippable, loaded: it.loaded, pendingDiscrepancy: it.pendingDiscrepancy, reportedQty: it.reportedQty, nameAr: it.nameAR, nameEn: it.nameEN, unit: it.unitId, qty: it.qty }))
+        items: stop.items.map(it => ({ icon: '📦', orderItemId: it.orderItemId, shippable: it.shippable, loaded: it.loaded || !!PENDING_ITEM_LOADS[it.orderItemId], pendingDiscrepancy: it.pendingDiscrepancy, reportedQty: it.reportedQty, nameAr: it.nameAR, nameEn: it.nameEN, unit: it.unitId, qty: it.qty }))
       }))
     }));
   }
@@ -954,28 +977,30 @@
   }
 
   function wireActions() {
+    // التحميل يُظهَر منجَزًا فورًا (الزر يختفي ويتحوّل التوقّف) ويُحفظ في الخلفية؛ الفشل يُرجع الحال السابق ويُنبّه. انقطاع الردّ بلا نتيجة: نعيد الجلب لنعرف الحقيقة.
     document.querySelectorAll('[data-load]').forEach(btn => {
       wireConfirmableClick(btn, () => {
         const shipmentOrderId = btn.getAttribute('data-load');
         const stop = findStop(shipmentOrderId);
         const storeName = stop ? stop.store : '';
-        const originalContent = btn.innerHTML;
-        btn.innerHTML = t('savingText');
+        const prevState = stop ? stop.state : null;
+        PENDING_STOP_LOADS[shipmentOrderId] = true;
+        if (stop) stop.state = 'LOADED';
+        showToast(t('toastLoaded')(storeName));
+        render();
+        const revert = () => {
+          delete PENDING_STOP_LOADS[shipmentOrderId];
+          if (stop && prevState) stop.state = prevState;
+          showToast(t('loadErrorText'));
+          render();
+        };
         google.script.run
           .withSuccessHandler(onceWithTimeout(result => {
-            // SPEC v1.4 (نفس تصحيح شاشات الكاشير بالضبط -- انظر تعليقها في
-            // new-order.module.js): عند انتهاء مهلة الأمان، result يصل بلا
-            // وسيطة (undefined) -- نجاح مفترض لا فشل. الفشل الحقيقي الوحيد
-            // نتيجة *فعلية* تحمل success:false صراحة.
-            if (result && !result.success) {
-              btn.disabled = false; btn.innerHTML = originalContent;
-              showToast(t('loadErrorText')); return;
-            }
-            if (stop) stop.state = 'LOADED';
-            showToast(t('toastLoaded')(storeName));
-            render();
+            delete PENDING_STOP_LOADS[shipmentOrderId];
+            if (result === undefined) { loadShipments(); return; } // لا ردّ في المهلة: الخادم يقرّر
+            if (!result || !result.success) { revert(); return; }
           }, 8000))
-          .withFailureHandler(() => { btn.disabled = false; btn.innerHTML = originalContent; showToast(t('loadErrorText')); })
+          .withFailureHandler(() => revert())
           .confirmLoaded(CURRENT_USER_ID, shipmentOrderId);
       });
     });
@@ -984,23 +1009,31 @@
         const shipmentOrderId = btn.getAttribute('data-load-item');
         const orderItemId = btn.getAttribute('data-item');
         const stop = findStop(shipmentOrderId);
-        const originalContent = btn.innerHTML;
-        btn.innerHTML = t('savingText');
+        const it = stop ? stop.items.find(x => x.orderItemId === orderItemId) : null;
+        const prevState = stop ? stop.state : null;
+        const itemName = it ? itemName_(it) : '';
+        PENDING_ITEM_LOADS[orderItemId] = true;
+        if (it) it.loaded = true;
+        let optimisticStopLoaded = false;
+        if (stop && stop.state === 'PENDING' && stop.items.filter(x => x.shippable).every(x => x.loaded)) { stop.state = 'LOADED'; optimisticStopLoaded = true; }
+        showToast(optimisticStopLoaded ? t('toastLoaded')(stop.store) : t('toastItemLoaded'));
+        render();
+        const revert = () => {
+          delete PENDING_ITEM_LOADS[orderItemId];
+          if (it) it.loaded = false;
+          if (optimisticStopLoaded && stop) stop.state = prevState;
+          showToast(t('toastLoadFailed')(itemName));
+          render();
+        };
         google.script.run
           .withSuccessHandler(onceWithTimeout(result => {
-            if (!result || !result.success) {
-              btn.disabled = false; btn.innerHTML = originalContent;
-              showToast(t('loadErrorText')); return;
-            }
-            if (stop) {
-              const it = stop.items.find(x => x.orderItemId === orderItemId);
-              if (it) it.loaded = true;
-              if (result.data && result.data.stopLoaded) { stop.state = 'LOADED'; showToast(t('toastLoaded')(stop.store)); }
-              else showToast(t('toastItemLoaded'));
-            }
-            render();
+            delete PENDING_ITEM_LOADS[orderItemId];
+            if (result === undefined) { loadShipments(); return; } // لا ردّ في المهلة: الخادم يقرّر
+            if (!result || !result.success) { revert(); return; }
+            // الخادم هو المرجع: إن كان قرّر أن التوقّف اكتمل ولم نتوقّع ذلك نُحدّث، وإلا لا إعادة رسم (لا وميض)
+            if (stop && result.data && result.data.stopLoaded && stop.state !== 'LOADED') { stop.state = 'LOADED'; showToast(t('toastLoaded')(stop.store)); render(); }
           }, 8000))
-          .withFailureHandler(() => { btn.disabled = false; btn.innerHTML = originalContent; showToast(t('loadErrorText')); })
+          .withFailureHandler(() => revert())
           .confirmItemLoaded(CURRENT_USER_ID, shipmentOrderId, orderItemId);
       });
     });
